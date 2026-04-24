@@ -1,0 +1,16 @@
+classDiagram
+    class User
+
+    class Client
+    class Admin
+    class Veterinarian
+    class Pet
+    class Shift
+
+    User <|-- Client
+    User <|-- Admin
+    User <|-- Veterinarian
+
+    Client "1" -- "1..*" Pet
+    Pet "1" -- "0..1" Shift
+    Veterinarian "1" -- "0..*" Shift

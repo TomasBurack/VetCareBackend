@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="VetCareBackend.Application/VetCareBackend.Application.csproj" />
+  <Project Path="VetCareBackend.Domain/VetCareBackend.Domain.csproj" />
+  <Project Path="VetCareBackend.Infrastructure/VetCareBackend.Infrastructure.csproj" />
+  <Project Path="VetCareBackend/VetCareBackend.Presentation.csproj" />
+</Solution>
