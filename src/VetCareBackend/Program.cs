@@ -18,8 +18,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-}//asdadsasdasd
-//holoaaaaaaa
+}
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
