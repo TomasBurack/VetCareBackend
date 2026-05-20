@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VetCareBackend.Application.dtos.Requests
 {
-    internal class SingIn
+    public class SingInRequest
     {
     }
 }
