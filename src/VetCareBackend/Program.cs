@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Infrastructure;
+using VetCareBackend.Infrastructure.ExternalService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +35,7 @@ builder.Services.AddSwaggerGen(opt =>
 
 builder.Services.AddDbContext<VetCareDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("VetCareConnectionStrings")));
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
