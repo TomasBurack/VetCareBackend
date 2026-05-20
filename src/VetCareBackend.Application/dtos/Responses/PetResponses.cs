@@ -4,7 +4,7 @@ using System.Text;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
 
-namespace VetCareBackend.Application.Responses
+namespace VetCareBackend.Application.dtos.Responses
 {
     public class PetResponse
     {
