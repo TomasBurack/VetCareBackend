@@ -9,7 +9,14 @@ namespace VetCareBackend.Application.Services
 {
     public class PetService : IPetService
     {
+        
+
         public PetResponse Create(PetRequest petReq)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete(PetRequest petReq, Guid id)
         {
             throw new NotImplementedException();
         }
@@ -24,7 +31,7 @@ namespace VetCareBackend.Application.Services
             throw new NotImplementedException();
         }
 
-        public bool Update(PetRequest petReq, Guid id)
+        void IPetService.Update(PetRequest petReq, Guid id)
         {
             throw new NotImplementedException();
         }
