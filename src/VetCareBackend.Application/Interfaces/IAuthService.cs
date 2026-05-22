@@ -8,7 +8,7 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IAuthService
     {
-        AuthResponse SingUp(SingUpRequest request); //registrarse
-        AuthResponse SingIn(SingInRequest request); //iniciar sesion
+        AuthResponse SignUp(SignUpRequest request); //registrarse
+        AuthResponse SignIn(SignInRequest request); //iniciar sesion
     }
 }
