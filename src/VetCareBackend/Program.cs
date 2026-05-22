@@ -6,6 +6,7 @@ using System.Text;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Infrastructure;
 using VetCareBackend.Infrastructure.ExternalService;
+using VetCareBackend.Presentation.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,13 @@ builder.Services.AddSwaggerGen(opt =>
 builder.Services.AddDbContext<VetCareDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("VetCareConnectionStrings")));
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Policies.soloClient, policy => policy.RequireClaim("Role", "Client"));
+    options.AddPolicy(Policies.soloVeterinarian, policy => policy.RequireClaim("Role", "Veterinarian"));
+    options.AddPolicy(Policies.soloAdministrator, policy => policy.RequireClaim("Role", "Administrator"));
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
