@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
+using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
@@ -25,24 +26,25 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _configuration = configuration;
         }
 
-        public AuthResponse SingUp(SingUpRequest request)
+        public AuthResponse SignUp(SignUpRequest request)
         {
             if (!Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new Exception($"The email {request.Email} is invalid"); //hacer un manejo de excepciones y cambiarlo
+                throw new ValidationException($"The email {request.Email} is invalid");
             
             bool emailUsed = _context.Clients.Any(c => c.Email == request.Email) || _context.Veterinarians.Any(v=> v.Email == request.Email) || _context.Administrators.Any(a=> a.Email == request.Email);
             
             if (emailUsed)
-                throw new Exception($"The email {request.Email} is already in use"); //tambien hacer mano de excepciones
+                throw new ConflictException($"The email {request.Email} is already in use"); 
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             Guid id = Guid.NewGuid();
-            string rol;
+            string role;
 
             if (request.Role == "Client")
             {
                 var client = new Client
                 {
+                    Id = id,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     Dni = request.Dni,
@@ -52,11 +54,12 @@ namespace VetCareBackend.Infrastructure.ExternalService
                     Role = Role.Client
                 };
                 _context.Clients.Add(client);
-                rol = "Client";
+                role = "Client";
             } else if( request.Role == "Veterinarian")
             {
                 var veterinarian = new Veterinarian
                 {
+                    Id = id,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     Dni = request.Dni,
@@ -66,11 +69,12 @@ namespace VetCareBackend.Infrastructure.ExternalService
                     Role = Role.Veterinarian
                 };
                 _context.Veterinarians.Add(veterinarian);
-                rol = "Veterinarian";
+                role = "Veterinarian";
             } else
             {
                 var administrator = new Administrator
                 {
+                    Id = id,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     Dni = request.Dni,
@@ -80,7 +84,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
                     Role = Role.Administrator
                 };
                 _context.Administrators.Add(administrator);
-                rol = "Administrator";
+                role = "Administrator";
             }
 
             try
@@ -88,15 +92,61 @@ namespace VetCareBackend.Infrastructure.ExternalService
                 _context.SaveChanges();
             }catch (DbUpdateException ex)
             {
-                throw new Exception("There was an error saving the user in the database", ex); //tambien hacer manejo de error y cambiarlo
+                throw new DatabaseException("There was an error saving the user in the database", ex); //tambien hacer manejo de error y cambiarlo
             }
 
-            return new AuthResponse { };
+            return new AuthResponse 
+            {
+                Token = GenerateToken(id,request.Email, role),
+                Role = role,
+                UserId = id,
+                Email = request.Email,
+            };
         }
 
-        public AuthResponse SingIn(SingInRequest request)
+        public AuthResponse SignIn(SignInRequest request)
         {
-            return new AuthResponse { };
+            Guid userId;
+            string role;
+
+            var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
+            var veterinarian = _context.Veterinarians.FirstOrDefault(v => v.Email == request.Email);
+            var administrator = _context.Administrators.FirstOrDefault(a => a.Email == request.Email);
+            if (client != null)
+            {
+                if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
+                    throw new UnauthorizedException("incorrect credentials"); //agregar manejador de errores
+
+                userId = client.Id;
+                role = "Client";
+            }
+            else if(veterinarian != null)
+            {
+                
+                if (!BCrypt.Net.BCrypt.Verify(request.Password, veterinarian.Password))
+                    throw new UnauthorizedException("incorrect credentials");//agregar manejador de errores
+
+                userId = veterinarian.Id;
+                role = "Veterinarian";
+            }
+            else
+            {
+                if (administrator == null)
+                    throw new UnauthorizedException("incorrect credentials");//agregar manejador de errores
+
+                if (!BCrypt.Net.BCrypt.Verify(request.Password, administrator.Password))
+                    throw new UnauthorizedException("incorrect credentials");//agregar manejador de errores
+
+                userId = administrator.Id;
+                role = "Administrator";
+            }
+            return new AuthResponse 
+            {
+                Token = GenerateToken(userId, request.Email,role),
+                Role = role,
+                UserId = userId,
+                Email = request.Email
+            };
         }
 
         private string GenerateToken(Guid UserId, string Email, string Role)

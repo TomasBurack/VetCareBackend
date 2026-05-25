@@ -24,10 +24,6 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\VetCareBackend.Application\VetCareBackend.Application.csproj" />
     <ProjectReference Include="..\VetCareBackend.Infrastructure\VetCareBackend.Infrastructure.csproj" />
   </ItemGroup>
