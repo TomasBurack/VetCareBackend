@@ -11,6 +11,7 @@ using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
+using VetCareBackend.Application.Mapper;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
 
@@ -26,7 +27,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _configuration = configuration;
         }
 
-        public AuthResponse SignUp(SignUpRequest request)
+        public AuthResponse SignUp(UserRequest request)
         {
             if (!Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
                 throw new ValidationException($"The email {request.Email} is invalid");
@@ -38,55 +39,12 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             Guid id = Guid.NewGuid();
-            string role;
 
-            if (request.Role == "Client")
-            {
-                var client = new Client
-                {
-                    Id = id,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Dni = request.Dni,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Password = hashedPassword,
-                    Role = Role.Client
-                };
-                _context.Clients.Add(client);
-                role = "Client";
-            } else if( request.Role == "Veterinarian")
-            {
-                var veterinarian = new Veterinarian
-                {
-                    Id = id,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Dni = request.Dni,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Password = hashedPassword,
-                    Role = Role.Veterinarian
-                };
-                _context.Veterinarians.Add(veterinarian);
-                role = "Veterinarian";
-            } else
-            {
-                var administrator = new Administrator
-                {
-                    Id = id,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Dni = request.Dni,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Password = hashedPassword,
-                    Role = Role.Administrator
-                };
-                _context.Administrators.Add(administrator);
-                role = "Administrator";
-            }
-
+            var client = UserMapper.ToEntity<Client>(request);
+               
+            _context.Clients.Add(client);
+            
+            
             try
             {
                 _context.SaveChanges();
@@ -97,8 +55,8 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
             return new AuthResponse 
             {
-                Token = GenerateToken(id,request.Email, role),
-                Role = role,
+                Token = GenerateToken(id,request.Email, request.Role),
+                Role = request.Role,
                 UserId = id,
                 Email = request.Email,
             };

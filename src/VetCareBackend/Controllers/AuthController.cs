@@ -20,7 +20,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         [HttpPost("signup")]
         [AllowAnonymous]
-        public ActionResult<AuthResponse> SignUp([FromBody]SignUpRequest request)
+        public ActionResult<AuthResponse> SignUp([FromBody]UserRequest request)
         {
             try
             {

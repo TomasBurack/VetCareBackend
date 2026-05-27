@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Security.Claims;
 using System.Text;
 using VetCareBackend.Application.Interfaces;
+using VetCareBackend.Domain.Enums;
 using VetCareBackend.Infrastructure;
 using VetCareBackend.Infrastructure.ExternalService;
 using VetCareBackend.Presentation.Authorization;
@@ -40,10 +42,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(Policies.soloClient, policy => policy.RequireClaim("Role", "Client"));
-    options.AddPolicy(Policies.soloVeterinarian, policy => policy.RequireClaim("Role", "Veterinarian"));
-    options.AddPolicy(Policies.soloAdministrator, policy => policy.RequireClaim("Role", "Administrator"));
+    options.AddPolicy(Policies.soloClient, policy => policy.RequireClaim(ClaimTypes.Role, nameof(Role.Client)));
+    options.AddPolicy(Policies.soloVeterinarian, policy => policy.RequireClaim(ClaimTypes.Role, nameof(Role.Veterinarian)));
+    options.AddPolicy(Policies.soloAdministrator, policy => policy.RequireClaim(ClaimTypes.Role, nameof(Role.Administrator)));
 });
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

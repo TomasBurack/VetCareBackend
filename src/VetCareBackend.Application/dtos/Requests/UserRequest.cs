@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VetCareBackend.Application.dtos.Requests
 {
-    public class SignUpRequest
+    public class UserRequest
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
