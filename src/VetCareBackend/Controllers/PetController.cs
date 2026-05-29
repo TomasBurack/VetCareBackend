@@ -35,7 +35,7 @@ namespace VetCareBackend.Presentation.Controllers
             }
         }
 
-        [HttpGet("({id")]
+        [HttpGet("{id}")]
         public ActionResult<PetResponse> GetById([FromRoute]Guid id)
         {
             try
