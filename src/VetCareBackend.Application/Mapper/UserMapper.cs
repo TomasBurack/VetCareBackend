@@ -2,20 +2,26 @@
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
+using VetCareBackend.Application.Exceptions;
 
 namespace VetCareBackend.Application.Mapper
 {
     public static class UserMapper
     {
-        public static T ToEntity<T>(this UserRequest dto) where T : User, new()
+        public static T ToEntity<T>(this UserRequest dto, string dtoRole, Guid id) where T : User, new()
         {
-            Enum.TryParse<Role>(dto.Role, out Role role);
-
+            Enum.TryParse<Role>(dtoRole, out Role role);
+            UserRequestValidator validation = new UserRequestValidator();
+            if (!validation.Validate(dto).IsValid)
+            {
+                throw new ValidationException(validation.Validate(dto).ToString("~"));
+            }
             return new T
             {
-                Id = Guid.NewGuid(),
+                Id = id,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Dni = dto.Dni,
@@ -26,5 +32,16 @@ namespace VetCareBackend.Application.Mapper
             };
         }
 
+        public static T ToDto<T>(this User Entity) where T : UserResponse, new()
+        {
+            return new T
+            {
+                FirstName = Entity.FirstName,
+                LastName = Entity.LastName,
+                Dni = Entity.Dni,
+                Email = Entity.Email,
+                PhoneNumber = Entity.PhoneNumber,
+            };
+        }
     }
 }

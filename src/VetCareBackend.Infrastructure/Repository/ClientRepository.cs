@@ -6,9 +6,9 @@ using VetCareBackend.Domain.Entities;
 
 namespace VetCareBackend.Infrastructure.Repository
 {
-    public class UserRepository : BaseRepository<User>, IUserRepository
+    public class ClientRepository : BaseRepository<Client>, IClientRepository
     {
-        public UserRepository(VetCareDbContext context) : base(context)
+        public ClientRepository(VetCareDbContext context) : base(context)
         {
         }
     }

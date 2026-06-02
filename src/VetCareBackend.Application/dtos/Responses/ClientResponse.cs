@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using VetCareBackend.Application.dtos.Requests;
 
 namespace VetCareBackend.Application.dtos.Responses
 {
-    internal class SingInResponse
+    public class ClientResponse : UserResponse
     {
     }
 }

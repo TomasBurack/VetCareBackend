@@ -29,7 +29,7 @@ namespace VetCareBackend.Presentation.Controllers
             }
             catch (ValidationException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { error = ex.Message });
             }
             catch (ConflictException ex)
             {
@@ -39,9 +39,9 @@ namespace VetCareBackend.Presentation.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Ocurrió un error inesperado.");
+                return StatusCode(500, ex);
             }
         }
 
