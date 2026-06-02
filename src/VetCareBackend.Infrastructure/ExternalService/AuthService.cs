@@ -11,6 +11,7 @@ using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
+using VetCareBackend.Application.Mapper;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
 
@@ -26,10 +27,8 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _configuration = configuration;
         }
 
-        public AuthResponse SignUp(SignUpRequest request)
+        public AuthResponse SignUp(UserRequest request)
         {
-            if (!Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new ValidationException($"The email {request.Email} is invalid");
             
             bool emailUsed = _context.Clients.Any(c => c.Email == request.Email) || _context.Veterinarians.Any(v=> v.Email == request.Email) || _context.Administrators.Any(a=> a.Email == request.Email);
             
@@ -37,68 +36,26 @@ namespace VetCareBackend.Infrastructure.ExternalService
                 throw new ConflictException($"The email {request.Email} is already in use"); 
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            request.Password = hashedPassword;
             Guid id = Guid.NewGuid();
-            string role;
+            string dtoRole = "Client";
 
-            if (request.Role == "Client")
-            {
-                var client = new Client
-                {
-                    Id = id,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Dni = request.Dni,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Password = hashedPassword,
-                    Role = Role.Client
-                };
-                _context.Clients.Add(client);
-                role = "Client";
-            } else if( request.Role == "Veterinarian")
-            {
-                var veterinarian = new Veterinarian
-                {
-                    Id = id,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Dni = request.Dni,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Password = hashedPassword,
-                    Role = Role.Veterinarian
-                };
-                _context.Veterinarians.Add(veterinarian);
-                role = "Veterinarian";
-            } else
-            {
-                var administrator = new Administrator
-                {
-                    Id = id,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Dni = request.Dni,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Password = hashedPassword,
-                    Role = Role.Administrator
-                };
-                _context.Administrators.Add(administrator);
-                role = "Administrator";
-            }
-
+            var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
+            
+            _context.Clients.Add(client);
+            
+            
             try
             {
                 _context.SaveChanges();
             }catch (DbUpdateException ex)
             {
-                throw new DatabaseException("There was an error saving the user in the database", ex); //tambien hacer manejo de error y cambiarlo
+                throw new DatabaseException("There was an error saving the user in the database", ex);
             }
-
             return new AuthResponse 
             {
-                Token = GenerateToken(id,request.Email, role),
-                Role = role,
+                Token = GenerateToken(id, request.Email, dtoRole),
+                Role = dtoRole,
                 UserId = id,
                 Email = request.Email,
             };
@@ -112,33 +69,33 @@ namespace VetCareBackend.Infrastructure.ExternalService
             var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
             var veterinarian = _context.Veterinarians.FirstOrDefault(v => v.Email == request.Email);
             var administrator = _context.Administrators.FirstOrDefault(a => a.Email == request.Email);
-            if (client != null)
+            if (client != null && !client.IsDeleted)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
-                    throw new UnauthorizedException("incorrect credentials"); //agregar manejador de errores
+                    throw new UnauthorizedException("incorrect credentials"); 
 
                 userId = client.Id;
                 role = "Client";
             }
-            else if(veterinarian != null)
+            else if(veterinarian != null && !veterinarian.IsDeleted)
             {
                 
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, veterinarian.Password))
-                    throw new UnauthorizedException("incorrect credentials");//agregar manejador de errores
+                    throw new UnauthorizedException("incorrect credentials");
 
                 userId = veterinarian.Id;
                 role = "Veterinarian";
             }
-            else
+            else if (administrator != null && !administrator.IsDeleted)
             {
-                if (administrator == null)
-                    throw new UnauthorizedException("incorrect credentials");//agregar manejador de errores
-
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, administrator.Password))
-                    throw new UnauthorizedException("incorrect credentials");//agregar manejador de errores
+                    throw new UnauthorizedException("incorrect credentials");
 
                 userId = administrator.Id;
                 role = "Administrator";
+            } else
+            {
+                throw new UnauthorizedException("incorrect credentials");
             }
             return new AuthResponse 
             {

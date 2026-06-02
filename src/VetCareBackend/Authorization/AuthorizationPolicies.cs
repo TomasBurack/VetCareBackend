@@ -4,7 +4,7 @@
     {
         SoloClient,
         SoloVeterinarian,
-        SoloAdministrator
+        SoloAdministrator,
     }
 
     public static class Policies
