@@ -3,9 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using VetCareBackend.Application.Infrastructure;
 using VetCareBackend.Application.Interfaces;
+using VetCareBackend.Application.Services;
 using VetCareBackend.Infrastructure;
 using VetCareBackend.Infrastructure.ExternalService;
+using VetCareBackend.Infrastructure.Repository;
 using VetCareBackend.Presentation.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,9 +37,15 @@ builder.Services.AddSwaggerGen(opt =>
         );
 });
 
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped<IPetRepository, PetRepository>();
+
+builder.Services.AddScoped<IPetService, PetService>();
+
 builder.Services.AddDbContext<VetCareDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("VetCareConnectionStrings")));
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 builder.Services.AddAuthorization(options =>
 {
