@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VetCareBackend.Domain.Enums
 {
-    public enum TypeConsult
+    public enum Speciality
     {
         Common = 1,
         Guard = 2,
