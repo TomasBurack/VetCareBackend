@@ -22,7 +22,7 @@ namespace VetCareBackend.Application.Validations
             RuleFor(ur => ur.Dni)
                 .NotEmpty().WithMessage("DNI is required.")
                 .Length(8).WithMessage("DNI must be exactly 8 characters long.")
-                .Must(dni => long.TryParse(dni, out _)).WithMessage("DNI must contain only numbers.");
+                .Must(dni => dni.All(char.IsDigit)).WithMessage("DNI must contain only numbers.");
             RuleFor(ur => ur.Email)
                 .NotEmpty().WithMessage("Email address is required.")
                 .EmailAddress().WithMessage("The email address format is not valid.");
@@ -33,7 +33,7 @@ namespace VetCareBackend.Application.Validations
                 .NotEmpty().WithMessage("Phone number is required.")
                 .MinimumLength(9).WithMessage("Phone number must be at least 9 characters long.")
                 .MaximumLength(11).WithMessage("Phone number cannot exceed 11 characters.")
-                .Must(pn => long.TryParse(pn, out _)).WithMessage("Phone number must contain only numbers.");
+                .Must(dni => dni.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.");
         }
     }
 }

@@ -20,7 +20,7 @@ namespace VetCareBackend.Application.Validations
                 .When(request => !string.IsNullOrWhiteSpace(request.LastName));
             RuleFor(request => request.Dni)
                 .Length(8).WithMessage("DNI must be exactly 8 characters long.")
-                .Must(dni => long.TryParse(dni, out _)).WithMessage("DNI must contain only numbers.")
+                .Must(dni => dni.All(char.IsDigit)).WithMessage("DNI must contain only numbers.")
                 .When(request => !string.IsNullOrWhiteSpace(request.Dni));
                 
             RuleFor(request => request.Email)
@@ -29,7 +29,7 @@ namespace VetCareBackend.Application.Validations
             RuleFor(request => request.PhoneNumber)
                 .MinimumLength(9).WithMessage("Phone number must be at least 9 characters long.")
                 .MaximumLength(11).WithMessage("Phone number cannot exceed 11 characters.")
-                .Must(pn => long.TryParse(pn, out _)).WithMessage("Phone number must contain only numbers.")
+                .Must(dni => dni.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.")
                 .When(request => !string.IsNullOrWhiteSpace(request.PhoneNumber));
         }
     }
