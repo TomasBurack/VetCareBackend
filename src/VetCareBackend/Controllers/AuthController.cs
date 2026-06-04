@@ -20,7 +20,7 @@ namespace VetCareBackend.Presentation.Controllers
 
         [HttpPost("signup")]
         [AllowAnonymous]
-        public ActionResult<AuthResponse> SignUp([FromBody] UserRequest request)
+        public ActionResult<AuthResponse> SignUp([FromBody] SignUpRequest request)
         {
             var response = _service.SignUp(request);
             return StatusCode(StatusCodes.Status201Created, response);

@@ -12,6 +12,6 @@ namespace VetCareBackend.Application.Interfaces
         public void Delete(string Sub);
         public ClientResponse Get(string Sub);
 
-        public void Update(string Sub);
+        public void Update(string Sub, UserRequest request);
     }
 }

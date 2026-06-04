@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Presentation.Authorization;
 using System.Security.Claims;
+using VetCareBackend.Application.dtos.Requests;
 
 namespace VetCareBackend.Presentation.Controllers
 {
@@ -38,10 +39,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         [HttpPut("/myuser/update")]
-        public IActionResult Update()
+        public IActionResult Update([FromBody] UserRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _clientService.Update(sub);
+            _clientService.Update(sub, request);
             return NoContent();
         }
     }
