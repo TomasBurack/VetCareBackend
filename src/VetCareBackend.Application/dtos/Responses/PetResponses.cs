@@ -12,6 +12,6 @@ namespace VetCareBackend.Application.dtos.Responses
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
         public TypePet TypePet { get; set; }
-        public Breed? Breed { get; set; }
+        public string Breed { get; set; } = string.Empty;
     }
 }

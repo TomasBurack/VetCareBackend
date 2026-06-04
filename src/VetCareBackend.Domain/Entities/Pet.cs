@@ -10,8 +10,7 @@ namespace VetCareBackend.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
         public TypePet TypePet { get; set; }
-        public Guid IdBreed { get; set; }
-        public Breed? Breed { get; set; }
+        public string Breed { get; set; }
         public Guid IdClient { get; set; }  
         public Client? Client { get; set; }
 

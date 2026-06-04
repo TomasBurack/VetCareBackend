@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
+using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
@@ -43,7 +44,7 @@ namespace VetCareBackend.Application.Services
             return UserMapper.ToDto<ClientResponse>(client);
         }
 
-        public void Update(string Sub)
+        public void Update(string Sub, UserRequest request)
         {
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
@@ -55,7 +56,9 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("The user was not found.");
             }
-            _repository.Update(client);
+            var UpdClient = UserMapper.ToEntityUpdate<Client>(client, request);
+
+            _repository.Update(UpdClient);
         }
     }
 }

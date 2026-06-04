@@ -23,16 +23,18 @@ namespace VetCareBackend.Application.Mapper
                 Breed = pet.Breed
             };
         }
-        public static Pet ToPet(this PetRequest petReq)
+        public static Pet ToPet(this PetRequest petReq, Client client)
         {
             PetRequestValidations validations = new PetRequestValidations();
-            if (validations.Validate(petReq).IsValid)
+            if (!validations.Validate(petReq).IsValid)
             {
                 throw new ValidationException(validations.Validate(petReq).ToString("~"));
             }
             return new Pet
             {
                 Id = Guid.NewGuid(),
+                Client = client,
+                IdClient = client.Id,
                 Name = petReq.Name,
                 Age = petReq.Age,
                 TypePet = petReq.typePet,

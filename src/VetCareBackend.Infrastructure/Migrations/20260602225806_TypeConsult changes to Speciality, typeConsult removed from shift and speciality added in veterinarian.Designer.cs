@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VetCareBackend.Infrastructure;
 
@@ -11,9 +12,11 @@ using VetCareBackend.Infrastructure;
 namespace VetCareBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(VetCareDbContext))]
-    partial class VetCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260602225806_TypeConsult changes to Speciality, typeConsult removed from shift and speciality added in veterinarian")]
+    partial class TypeConsultchangestoSpecialitytypeConsultremovedfromshiftandspecialityaddedinveterinarian
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,30 @@ namespace VetCareBackend.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("VetCareBackend.Domain.Entities.Breed", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DeleteDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameBreed")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Breeds");
+                });
 
             modelBuilder.Entity("VetCareBackend.Domain.Entities.Pet", b =>
                 {
@@ -31,15 +58,17 @@ namespace VetCareBackend.Infrastructure.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
-                    b.Property<string>("Breed")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("BreedId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DeleteDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("IdBreed")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("IdClient")
                         .HasColumnType("uniqueidentifier");
@@ -58,6 +87,8 @@ namespace VetCareBackend.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BreedId");
 
                     b.HasIndex("ClientId");
 
@@ -187,9 +218,15 @@ namespace VetCareBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("VetCareBackend.Domain.Entities.Pet", b =>
                 {
+                    b.HasOne("VetCareBackend.Domain.Entities.Breed", "Breed")
+                        .WithMany()
+                        .HasForeignKey("BreedId");
+
                     b.HasOne("VetCareBackend.Domain.Entities.Client", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId");
+
+                    b.Navigation("Breed");
 
                     b.Navigation("Client");
                 });

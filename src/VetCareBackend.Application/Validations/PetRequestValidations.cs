@@ -10,10 +10,13 @@ namespace VetCareBackend.Application.Validations
     {
         public PetRequestValidations() 
         {
-            RuleFor(pr => pr.Name).NotEmpty().MinimumLength(3).MaximumLength(20);
-            RuleFor(pr => pr.Age).NotEmpty().GreaterThanOrEqualTo(0);
-            RuleFor(pr => pr.typePet).NotEmpty();
-            RuleFor(pr => pr.Breed).NotEmpty();
+            RuleFor(pr => pr.Name).NotEmpty().WithMessage("This field is requiered.")
+                .MinimumLength(3).WithMessage("Pet name must be at least 3 characters long.")
+                .MaximumLength(20).WithMessage("Pet name cannot exceed 20 characters.");
+            RuleFor(pr => pr.Age).NotEmpty().WithMessage("This field is requiered.")
+                .GreaterThanOrEqualTo(0).WithMessage("The pet age must be greater than 0.");
+            RuleFor(pr => pr.typePet).NotEmpty().WithMessage("This field is requiered.");
+            RuleFor(pr => pr.Breed).NotEmpty().WithMessage("This field is requiered.");
         }
     }
 }
