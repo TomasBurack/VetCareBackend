@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
+using ValidationException = VetCareBackend.Application.Exceptions.ValidationException;
 
 namespace VetCareBackend.Application.Mapper
 {
@@ -22,6 +25,11 @@ namespace VetCareBackend.Application.Mapper
         }
         public static Pet ToPet(this PetRequest petReq)
         {
+            PetRequestValidations validations = new PetRequestValidations();
+            if (validations.Validate(petReq).IsValid)
+            {
+                throw new ValidationException(validations.Validate(petReq).ToString("~"));
+            }
             return new Pet
             {
                 Id = Guid.NewGuid(),
