@@ -54,7 +54,7 @@ namespace VetCareBackend.Application.Mapper
             Entity.FirstName = string.IsNullOrWhiteSpace(request.FirstName) ? Entity.FirstName : request.FirstName;
             Entity.LastName = string.IsNullOrWhiteSpace(request.LastName) ? Entity.LastName : request.LastName;
             Entity.Dni = string.IsNullOrWhiteSpace(request.Dni) ? Entity.Dni : request.Dni ;
-            Entity.Email = string.IsNullOrWhiteSpace(request.Email) ? Entity.Email : request.Dni ;
+            Entity.Email = string.IsNullOrWhiteSpace(request.Email) ? Entity.Email : request.Email ;
             Entity.PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber) ? Entity.PhoneNumber : request.PhoneNumber;
             return Entity;
         }
