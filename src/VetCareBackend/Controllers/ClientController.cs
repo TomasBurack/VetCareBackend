@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VetCareBackend.Application.Interfaces;
-using VetCareBackend.Application.Services;
 using VetCareBackend.Presentation.Authorization;
 using System.Security.Claims;
-
+using VetCareBackend.Application.dtos.Requests;
 
 namespace VetCareBackend.Presentation.Controllers
 {
@@ -16,13 +15,14 @@ namespace VetCareBackend.Presentation.Controllers
     {
         private readonly IClientService _clientService;
         private readonly IHttpContextAccessor _contextAccessor;
-        public ClientController(IHttpContextAccessor contextAccessor, IClientService clientService) {
+
+        public ClientController(IHttpContextAccessor contextAccessor, IClientService clientService)
+        {
             _contextAccessor = contextAccessor;
             _clientService = clientService;
         }
 
         [HttpGet("/myuser")]
-
         public IActionResult Get()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -36,16 +36,14 @@ namespace VetCareBackend.Presentation.Controllers
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             _clientService.Delete(sub);
             return NoContent();
-
         }
 
         [HttpPut("/myuser/update")]
-        public IActionResult Update()
+        public IActionResult Update([FromBody] UserRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _clientService.Update(sub);
+            _clientService.Update(sub, request);
             return NoContent();
-
         }
     }
 }

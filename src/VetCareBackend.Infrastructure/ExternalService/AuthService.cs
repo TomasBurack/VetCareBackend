@@ -27,7 +27,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _configuration = configuration;
         }
 
-        public AuthResponse SignUp(UserRequest request)
+        public AuthResponse SignUp(SignUpRequest request)
         {
             
             bool emailUsed = _context.Clients.Any(c => c.Email == request.Email) || _context.Veterinarians.Any(v=> v.Email == request.Email) || _context.Administrators.Any(a=> a.Email == request.Email);
