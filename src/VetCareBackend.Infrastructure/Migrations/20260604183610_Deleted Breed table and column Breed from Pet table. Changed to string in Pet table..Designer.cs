@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VetCareBackend.Infrastructure;
 
@@ -11,9 +12,11 @@ using VetCareBackend.Infrastructure;
 namespace VetCareBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(VetCareDbContext))]
-    partial class VetCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260604183610_Deleted Breed table and column Breed from Pet table. Changed to string in Pet table.")]
+    partial class DeletedBreedtableandcolumnBreedfromPettableChangedtostringinPettable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

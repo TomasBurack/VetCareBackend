@@ -1,19 +1,26 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Interfaces;
+using VetCareBackend.Domain.Entities;
+using VetCareBackend.Presentation.Authorization;
 
 namespace VetCareBackend.Presentation.Controllers
 {
+    [Authorize(policy: Policies.soloClient)]
     [Route("api/[controller]")]
     [ApiController]
     public class PetController : Controller
     {
         private readonly IPetService _petService;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public PetController(IPetService petService)
+        public PetController(IPetService petService, IHttpContextAccessor contextAccessor)
         {
             _petService = petService;
+            _contextAccessor = contextAccessor;
         }
 
         [HttpGet]
@@ -36,7 +43,8 @@ namespace VetCareBackend.Presentation.Controllers
         [HttpPost]
         public ActionResult<PetResponse> Create([FromBody] PetRequest pet)
         {
-            var createdPet = _petService.Create(pet);
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var createdPet = _petService.Create(pet, sub);
             return CreatedAtAction(nameof(GetById), new { id = createdPet.IdPet }, createdPet);
         }
 

@@ -14,15 +14,23 @@ namespace VetCareBackend.Application.Services
     public class PetService : IPetService
     {
         private readonly IPetRepository _petRepository;
+        private readonly IClientRepository _clientRepository;
 
-        public PetService(IPetRepository petRepo)
+        public PetService(IPetRepository petRepo, IClientRepository clientRepo)
         {
             _petRepository = petRepo;
+            _clientRepository = clientRepo;
         }
 
-        public PetResponse Create(PetRequest petReq)
+        public PetResponse Create(PetRequest petReq, string sub)
         {
-            var newPet = petReq.ToPet();
+            bool Parse = Guid.TryParse(sub, out Guid Id);
+            if (Parse == false)
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
+            var client = _clientRepository.Get(Id);
+            var newPet = petReq.ToPet(client);
             _petRepository.Add(newPet);
             return newPet.ToPetResponse();
         }
@@ -71,7 +79,7 @@ namespace VetCareBackend.Application.Services
             petToUpdate.Name = petReq.Name;
             petToUpdate.Age = petReq.Age;
             petToUpdate.TypePet = petReq.typePet;
-            petToUpdate.Breed = petReq.Breed;
+            //petToUpdate.Breed = petReq.Breed;
 
             _petRepository.Update(petToUpdate);
         }

@@ -10,8 +10,10 @@ namespace VetCareBackend.Application.Interfaces
     {
         List<PetResponse> GetAll();
         PetResponse GetById(Guid id);
-        PetResponse Create(PetRequest petReq);
+        PetResponse Create(PetRequest petReq, string sub);
         void Update(PetRequest petReq, Guid id);
-        void Delete( Guid id);
+
+        void Delete(Guid id);
+
     }
 }
