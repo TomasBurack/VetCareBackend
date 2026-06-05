@@ -13,5 +13,6 @@ namespace VetCareBackend.Application.dtos.Responses
         public int Age { get; set; }
         public TypePet TypePet { get; set; }
         public string Breed { get; set; } = string.Empty;
+        public DateTime UpdateDate { get; set; }
     }
 }

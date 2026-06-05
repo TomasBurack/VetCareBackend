@@ -20,7 +20,8 @@ namespace VetCareBackend.Application.Mapper
                 Name = pet.Name,
                 Age = pet.Age,
                 TypePet = pet.TypePet,
-                Breed = pet.Breed
+                Breed = pet.Breed,
+                UpdateDate = DateTime.UtcNow
             };
         }
         public static Pet ToPet(this PetRequest petReq, Client client)

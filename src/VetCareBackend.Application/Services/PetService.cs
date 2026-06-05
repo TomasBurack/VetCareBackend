@@ -79,7 +79,8 @@ namespace VetCareBackend.Application.Services
             petToUpdate.Name = petReq.Name;
             petToUpdate.Age = petReq.Age;
             petToUpdate.TypePet = petReq.typePet;
-            //petToUpdate.Breed = petReq.Breed;
+            petToUpdate.Breed = petReq.Breed;
+            petToUpdate.UpdateDate = petReq.UpdateDate;
 
             _petRepository.Update(petToUpdate);
         }

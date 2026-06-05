@@ -12,5 +12,6 @@ namespace VetCareBackend.Application.dtos.Requests
         public int Age { get; set; }
         public TypePet typePet { get; set; }
         public string Breed { get; set; } = string.Empty;
+        public DateTime UpdateDate { get; set; }
     }
 }
