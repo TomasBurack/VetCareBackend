@@ -17,6 +17,9 @@ namespace VetCareBackend.Application.Mapper
                 
                 FirstName = veterinarian.FirstName,
                 LastName = veterinarian.LastName,
+                Dni = veterinarian.Dni,
+                Email = veterinarian.Email,
+                PhoneNumber = veterinarian.PhoneNumber,
                 Enrollment = veterinarian.Enrollment,
                 Speciality = veterinarian.Speciality,
             };
@@ -25,6 +28,9 @@ namespace VetCareBackend.Application.Mapper
         {
             return new Veterinarian
             {
+                Dni = request.Dni,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
                 Enrollment = request.Enrollment,
                 FirstName = request.FirstName,
                 LastName= request.LastName,
