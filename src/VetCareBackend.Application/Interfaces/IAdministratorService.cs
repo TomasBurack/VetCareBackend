@@ -8,6 +8,12 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IAdministratorService
     {
-        public VeterinarianResponse CreateVet(VeterinarianRequest dto);
+        UserResponse Create(SignUpRequest request);
+
+        void Update(UserRequest request);
+
+        void Delete(string Sub);
+
+        UserResponse Get(string Sub);
     }
 }

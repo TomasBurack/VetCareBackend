@@ -5,6 +5,8 @@ using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Domain.Enums;
+using VetCareBackend.Application.Validations;
+using VetCareBackend.Application.Exceptions;
 
 namespace VetCareBackend.Application.Mapper
 {
@@ -26,6 +28,11 @@ namespace VetCareBackend.Application.Mapper
         }
         public static Veterinarian ToVeterinarian(this VeterinarianRequest request)
         {
+            VeterinarianRequestValidation validation = new VeterinarianRequestValidation();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
             return new Veterinarian
             {
                 Dni = request.Dni,
@@ -36,6 +43,7 @@ namespace VetCareBackend.Application.Mapper
                 LastName= request.LastName,
                 Role = Role.Veterinarian,
                 Speciality= request.Speciality,
+                Password = request.Password,
             };
         }
 
