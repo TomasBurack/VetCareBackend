@@ -20,7 +20,7 @@ namespace VetCareBackend.Presentation.Controllers
             _service = service;
         }
 
-        [HttpGet("Admin/myuser")]
+        [HttpGet("/myuser")]
         public IActionResult Get()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -28,14 +28,14 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(admin);
         }
 
-        [HttpPost("Admin/create")]
+        [HttpPost("/create")]
         public IActionResult Create([FromBody] SignUpRequest request)
         {
             var admin = _service.Create(request);
             return Ok(request);
         }
 
-        [HttpDelete("Admin/delete")]
+        [HttpDelete("/delete")]
 
         public IActionResult Delete()
         {
@@ -44,7 +44,7 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        [HttpPut("Admin/update")]
+        [HttpPut("/update")]
         public IActionResult Update([FromBody] UserRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
