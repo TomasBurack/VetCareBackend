@@ -10,7 +10,7 @@ namespace VetCareBackend.Application.Interfaces
     {
         UserResponse Create(SignUpRequest request);
 
-        void Update(UserRequest request);
+        void Update(string sub, UserRequest request);
 
         void Delete(string Sub);
 

@@ -15,7 +15,7 @@ namespace VetCareBackend.Application.Services
     {
         private readonly IAdministratorRepository _repository;
         private readonly IPasswordHash _hash;
-        public AdministratorService(IAdministratorRepository repository, IPasswordHash hash) 
+        public AdministratorService(IAdministratorRepository repository, IPasswordHash hash)
         {
             _repository = repository;
             _hash = hash;
@@ -23,12 +23,54 @@ namespace VetCareBackend.Application.Services
 
         public UserResponse Create(SignUpRequest request)
         {
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            request.Password = hashedPassword;
+            request.Password = _hash.Hash(request.Password);
             Guid id = Guid.NewGuid();
             string dtoRole = "Administrator";
             var admin = UserMapper.ToEntity<Administrator>(request, dtoRole, id);
+            _repository.Add(admin);
+            return UserMapper.ToDto<UserResponse>(admin);
         }
-        
+
+        public UserResponse Get(string id)
+        {
+            bool isGuid = Guid.TryParse(id, out Guid Id);
+            if (!isGuid)
+            {
+                throw new NotFoundException("Invalid ID format");
+            }
+            var admin = _repository.Get(Id);
+            if (admin == null)
+            {
+                throw new NotFoundException("Administrator not found");
+            }
+            return UserMapper.ToDto<UserResponse>(admin);
+        }
+
+        public void Update(string id, UserRequest request)
+        {
+            bool isGuid = Guid.TryParse(id, out Guid Id);
+            if (!isGuid)
+            {
+                throw new NotFoundException("Invalid ID format");
+            }
+            var admin = _repository.Get(Id);
+            if (admin == null)
+            {
+                throw new NotFoundException("Administrator not found");
+            }
+            admin = UserMapper.ToEntityUpdate<Administrator>(admin, request);
+            _repository.Update(admin);
+        }
+
+        public void Delete(string id)
+        {
+            bool isGuid = Guid.TryParse(id, out Guid Id);
+            if (!isGuid)
+            {
+                throw new NotFoundException("Invalid ID format");
+            }
+
+            _repository.Delete(Id);
+        }
     }
 }
