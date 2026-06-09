@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
+using VetCareBackend.Application.Infrastructure;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
 
@@ -12,13 +13,18 @@ namespace VetCareBackend.Application.Services
     {
             
         private readonly IShiftRepository _shiftRepository;
+        private readonly IPetRepository _petRepository;
+        private readonly IVeterinarianRepository _veterinarianRepository;
 
-        public ShiftService(IShiftRepository shiftRepository)
+        public ShiftService(IShiftRepository shiftRepo, IVeterinarianRepository veterinarianRepo, IPetRepository petRepo)
         {
-            _shiftRepository = shiftRepository;
+            _shiftRepository = shiftRepo;
+            _veterinarianRepository = veterinarianRepo;
+            _petRepository = petRepo;
+
         }
 
-        public ShiftResponse Create(ShiftRequest shiftReq, string sub)
+        public ShiftResponse Create(ShiftRequest shiftReq)
         {
             throw new NotImplementedException();
         }
