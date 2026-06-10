@@ -7,6 +7,8 @@ using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
+using VetCareBackend.Application.Validations;
+using VetCareBackend.Application.Exceptions;
 
 namespace VetCareBackend.Application.Mapper
 {
@@ -19,6 +21,9 @@ namespace VetCareBackend.Application.Mapper
                 
                 FirstName = veterinarian.FirstName,
                 LastName = veterinarian.LastName,
+                Dni = veterinarian.Dni,
+                Email = veterinarian.Email,
+                PhoneNumber = veterinarian.PhoneNumber,
                 Enrollment = veterinarian.Enrollment,
                 Speciality = veterinarian.Speciality,
             };
@@ -32,6 +37,9 @@ namespace VetCareBackend.Application.Mapper
             }
             return new Veterinarian
             {
+                Dni = request.Dni,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
                 Enrollment = request.Enrollment,
                 Dni=request.Dni, 
                 FirstName = request.FirstName,
@@ -41,6 +49,7 @@ namespace VetCareBackend.Application.Mapper
                 PhoneNumber= request.PhoneNumber,
                 Role = Role.Veterinarian,
                 Speciality= request.Speciality,
+                Password = request.Password,
             };
         }
 

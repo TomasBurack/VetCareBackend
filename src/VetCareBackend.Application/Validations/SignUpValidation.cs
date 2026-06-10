@@ -26,14 +26,11 @@ namespace VetCareBackend.Application.Validations
             RuleFor(ur => ur.Email)
                 .NotEmpty().WithMessage("Email address is required.")
                 .EmailAddress().WithMessage("The email address format is not valid.");
-            RuleFor(ur => ur.Password)
-                .NotEmpty().WithMessage("Password is required.")
-                .MinimumLength(10).WithMessage("Password must be at least 10 characters long.");
             RuleFor(ur => ur.PhoneNumber)
                 .NotEmpty().WithMessage("Phone number is required.")
                 .MinimumLength(9).WithMessage("Phone number must be at least 9 characters long.")
                 .MaximumLength(11).WithMessage("Phone number cannot exceed 11 characters.")
-                .Must(dni => dni.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.");
+                .Must(pn => pn.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.");
         }
     }
 }

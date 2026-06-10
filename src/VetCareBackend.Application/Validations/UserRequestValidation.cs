@@ -29,7 +29,7 @@ namespace VetCareBackend.Application.Validations
             RuleFor(request => request.PhoneNumber)
                 .MinimumLength(9).WithMessage("Phone number must be at least 9 characters long.")
                 .MaximumLength(11).WithMessage("Phone number cannot exceed 11 characters.")
-                .Must(dni => dni.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.")
+                .Must(pn => pn.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.")
                 .When(request => !string.IsNullOrWhiteSpace(request.PhoneNumber));
         }
     }

@@ -5,7 +5,7 @@ using VetCareBackend.Domain.Entities;
 
 namespace VetCareBackend.Application.Interfaces
 {
-    public interface IClientRepository : IBaseRepository<Client>
+    public interface IAdministratorRepository : IBaseRepository<Administrator>
     {
     }
 }

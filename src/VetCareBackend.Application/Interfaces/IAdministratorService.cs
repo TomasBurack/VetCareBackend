@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
-using VetCareBackend.Domain.Entities;
 
 namespace VetCareBackend.Application.Interfaces
 {
-    public interface IClientService
+    public interface IAdministratorService
     {
-        void Delete(string Sub);
-        ClientResponse Get(string Sub);
+        UserResponse Create(SignUpRequest request);
 
-        void Update(string Sub, UserRequest request);
+        void Update(string sub, UserRequest request);
+
+        void Delete(string Sub);
+
+        UserResponse Get(string Sub);
     }
 }
