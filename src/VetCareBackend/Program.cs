@@ -69,6 +69,8 @@ builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IVeterinarianRepository, VeterinarianRepository>();
+builder.Services.AddScoped<IVeterinarianService, VeterinarianService>();
 
 
 builder.Services.AddAuthorization(options =>
