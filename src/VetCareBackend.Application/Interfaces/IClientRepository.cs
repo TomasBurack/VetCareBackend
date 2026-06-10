@@ -7,5 +7,6 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IClientRepository : IBaseRepository<Client>
     {
+        bool FindEmail(string email);
     }
 }

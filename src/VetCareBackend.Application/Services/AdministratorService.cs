@@ -13,21 +13,27 @@ namespace VetCareBackend.Application.Services
 {
     public class AdministratorService : IAdministratorService
     {
-        private readonly IAdministratorRepository _repository;
+        private readonly IAdministratorRepository _AdminRep;
+        private readonly IClientRepository _ClientRep;
+        private readonly IVeterinarianRepository _VetRep;
         private readonly IPasswordHash _hash;
-        public AdministratorService(IAdministratorRepository repository, IPasswordHash hash)
+        public AdministratorService(IAdministratorRepository repository,IClientRepository ClientRep, IVeterinarianRepository VetRep, IPasswordHash hash)
         {
-            _repository = repository;
+            _AdminRep = repository;
+            _ClientRep = ClientRep;
+            _VetRep = VetRep;
             _hash = hash;
         }
 
         public UserResponse Create(SignUpRequest request)
         {
+
+            
             request.Password = _hash.Hash(request.Password);
             Guid id = Guid.NewGuid();
             string dtoRole = "Administrator";
             var admin = UserMapper.ToEntity<Administrator>(request, dtoRole, id);
-            _repository.Add(admin);
+            _AdminRep.Add(admin);
             return UserMapper.ToDto<UserResponse>(admin);
         }
 
@@ -38,7 +44,7 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            var admin = _repository.Get(Id);
+            var admin = _AdminRep.Get(Id);
             if (admin == null)
             {
                 throw new NotFoundException("Administrator not found");
@@ -53,13 +59,13 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            var admin = _repository.Get(Id);
+            var admin = _AdminRep.Get(Id);
             if (admin == null)
             {
                 throw new NotFoundException("Administrator not found");
             }
             admin = UserMapper.ToEntityUpdate<Administrator>(admin, request);
-            _repository.Update(admin);
+            _AdminRep.Update(admin);
         }
 
         public void Delete(string id)
@@ -70,7 +76,7 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException("Invalid ID format");
             }
 
-            _repository.Delete(Id);
+            _AdminRep.Delete(Id);
         }
     }
 }
