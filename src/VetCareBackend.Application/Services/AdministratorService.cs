@@ -27,8 +27,15 @@ namespace VetCareBackend.Application.Services
 
         public UserResponse Create(SignUpRequest request)
         {
+            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email)) {
+                throw new ConflictException($"The email {request.Email} is already in use");
+            } else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni)) {
+                throw new ConflictException($"The DNI {request.Dni} is already in use");
+            } else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber))
+            {
+                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
+            }
 
-            
             request.Password = _hash.Hash(request.Password);
             Guid id = Guid.NewGuid();
             string dtoRole = "Administrator";
@@ -59,6 +66,18 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("Invalid ID format");
             }
+            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email))
+            {
+                throw new ConflictException($"The email {request.Email} is already in use");
+            }
+            else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni))
+            {
+                throw new ConflictException($"The DNI {request.Dni} is already in use");
+            }
+            else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber))
+            {
+                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
+            }
             var admin = _AdminRep.Get(Id);
             if (admin == null)
             {
@@ -77,6 +96,12 @@ namespace VetCareBackend.Application.Services
             }
 
             _AdminRep.Delete(Id);
+        }
+
+        public List<UserResponse> GetAll()
+        {
+            var list = _AdminRep.GetAll();
+            return list.Select(adm => UserMapper.ToDto<UserResponse>(adm)).ToList();
         }
     }
 }
