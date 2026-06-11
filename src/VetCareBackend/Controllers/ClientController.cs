@@ -8,7 +8,7 @@ using VetCareBackend.Application.dtos.Requests;
 
 namespace VetCareBackend.Presentation.Controllers
 {
-    [Authorize(policy: Policies.soloClient)]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class ClientController : ControllerBase
@@ -22,6 +22,15 @@ namespace VetCareBackend.Presentation.Controllers
             _clientService = clientService;
         }
 
+        [Authorize(policy: Policies.soloAdministrator)]
+        [HttpPost("/client/create")]
+        public IActionResult Create([FromBody] SignUpRequest request)
+        {
+            var client = _clientService.Create(request);
+            return Ok(client);
+        }
+
+        [Authorize(policy: Policies.soloClient)]
         [HttpGet("/myuser")]
         public IActionResult Get()
         {
@@ -29,7 +38,7 @@ namespace VetCareBackend.Presentation.Controllers
             var client = _clientService.Get(sub);
             return Ok(client);
         }
-
+        [Authorize(policy: Policies.soloClient)]
         [HttpDelete("/myuser/delete")]
         public IActionResult Delete()
         {
@@ -38,6 +47,7 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
+        [Authorize(policy: Policies.soloClient)]
         [HttpPut("/myuser/update")]
         public IActionResult Update([FromBody] UserRequest request)
         {
