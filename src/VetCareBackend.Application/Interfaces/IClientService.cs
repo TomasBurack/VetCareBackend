@@ -9,9 +9,11 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IClientService
     {
+        UserResponse Create(SignUpRequest request);
         void Delete(string Sub);
         ClientResponse Get(string Sub);
 
+        List<UserResponse> GetAll();
         void Update(string Sub, UserRequest request);
     }
 }

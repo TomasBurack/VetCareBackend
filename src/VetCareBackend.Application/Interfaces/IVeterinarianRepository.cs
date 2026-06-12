@@ -9,6 +9,8 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IVeterinarianRepository : IBaseRepository<Veterinarian>
     {
-       
+        bool FindEmail(string email);
+        bool FindDni(string dni);
+        bool FindPN(string pn);
     }
 }

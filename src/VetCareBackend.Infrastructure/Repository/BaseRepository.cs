@@ -27,7 +27,6 @@ namespace VetCareBackend.Infrastructure.Repository
         }
         public virtual T Add(T entity)
         {
-            entity.UpdateDate = DateTime.UtcNow;
             _dbSet.Add(entity);
             _context.SaveChanges();
             return entity;

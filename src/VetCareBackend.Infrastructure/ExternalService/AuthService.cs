@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -29,12 +30,16 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
         public AuthResponse SignUp(SignUpRequest request)
         {
-            
-            bool emailUsed = _context.Clients.Any(c => c.Email == request.Email) || _context.Veterinarians.Any(v=> v.Email == request.Email) || _context.Administrators.Any(a=> a.Email == request.Email);
-            
-            if (emailUsed)
-                throw new ConflictException($"The email {request.Email} is already in use"); 
-
+            bool emailUsed = _context.Clients.Any(c => c.Email == request.Email && !c.IsDeleted) || _context.Veterinarians.Any(v => v.Email == request.Email && !v.IsDeleted) || _context.Administrators.Any(a => a.Email == request.Email && !a.IsDeleted);
+            bool dniUsed = _context.Clients.Any(c => c.Dni == request.Dni && !c.IsDeleted) || _context.Veterinarians.Any(v => v.Dni == request.Dni && !v.IsDeleted) || _context.Administrators.Any(a => a.Dni == request.Dni && !a.IsDeleted);
+            bool pnUsed = _context.Clients.Any(c => c.PhoneNumber == request.PhoneNumber && !c.IsDeleted) || _context.Veterinarians.Any(v => v.PhoneNumber == request.PhoneNumber && !v.IsDeleted) || _context.Administrators.Any(a => a.PhoneNumber == request.PhoneNumber && !a.IsDeleted);
+            if (emailUsed) {
+                throw new ConflictException($"The email {request.Email} is already in use");
+            } else if (dniUsed) {
+                throw new ConflictException($"The DNI {request.Dni} is already in use");
+            } else if (pnUsed){
+                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
+            }
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             request.Password = hashedPassword;
             Guid id = Guid.NewGuid();

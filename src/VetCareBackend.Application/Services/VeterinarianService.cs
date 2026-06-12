@@ -12,14 +12,17 @@ namespace VetCareBackend.Application.Services
     public class VeterinarianService : IVeterinarianService
     {
         private readonly IVeterinarianRepository _repository;
-        public VeterinarianService (IVeterinarianRepository repository)
+        private readonly IPasswordHash _hash;
+        public VeterinarianService (IVeterinarianRepository repository, IPasswordHash hash)
         { 
             _repository = repository;
-
+            _hash = hash;
         }
 
         public VeterinarianResponse Create(VeterinarianRequest request)
         {
+
+            request.Password = _hash.Hash(request.Password);
             var veterinarian = request.ToVeterinarian();
             _repository.Add(veterinarian);
             return veterinarian.ToVeterinarianResponse();

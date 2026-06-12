@@ -14,11 +14,6 @@ namespace VetCareBackend.Application.Mapper
         public static T ToEntity<T>(this SignUpRequest dto, string dtoRole, Guid id) where T : User, new()
         {
             Enum.TryParse<Role>(dtoRole, out Role role);
-            SignUpValidator validation = new SignUpValidator();
-            if (!validation.Validate(dto).IsValid)
-            {
-                throw new ValidationException(validation.Validate(dto).ToString("~"));
-            }
             return new T
             {
                 Id = id,
@@ -36,6 +31,7 @@ namespace VetCareBackend.Application.Mapper
         {
             return new T
             {
+                Id = Entity.Id,
                 FirstName = Entity.FirstName,
                 LastName = Entity.LastName,
                 Dni = Entity.Dni,
@@ -46,11 +42,6 @@ namespace VetCareBackend.Application.Mapper
 
         public static T ToEntityUpdate<T>(this T Entity, UserRequest request) where T : User
         {
-            UserRequestValidation validation = new UserRequestValidation();
-            if (!validation.Validate(request).IsValid)
-            {
-                throw new ValidationException(validation.Validate(request).ToString("~"));
-            }
             Entity.FirstName = string.IsNullOrWhiteSpace(request.FirstName) ? Entity.FirstName : request.FirstName;
             Entity.LastName = string.IsNullOrWhiteSpace(request.LastName) ? Entity.LastName : request.LastName;
             Entity.Dni = string.IsNullOrWhiteSpace(request.Dni) ? Entity.Dni : request.Dni ;

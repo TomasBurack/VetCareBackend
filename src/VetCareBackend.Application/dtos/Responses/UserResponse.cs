@@ -6,7 +6,10 @@ namespace VetCareBackend.Application.dtos.Requests
 {
     public class UserResponse
     {
+
+        public Guid Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
+
         public string LastName { get; set; } = string.Empty;
         public string Dni { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

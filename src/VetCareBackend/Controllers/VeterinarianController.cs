@@ -4,6 +4,7 @@ using VetCareBackend.Application.Interfaces;
 using System.Security.Claims;
 namespace VetCareBackend.Presentation.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
     public class VeterinarianController : ControllerBase
     {
