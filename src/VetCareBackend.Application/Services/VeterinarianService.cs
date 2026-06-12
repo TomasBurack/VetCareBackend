@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
+using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using ValidationException = VetCareBackend.Application.Exceptions.ValidationException;
 
 namespace VetCareBackend.Application.Services
 {
@@ -79,6 +81,17 @@ namespace VetCareBackend.Application.Services
             }
             _repository.Delete(id);
 
+        }
+
+        public VeterinarianResponse GetByEnrollment(string enrollment)
+        {
+            var vet = _repository.GetAll()
+                .FirstOrDefault(v => v.Enrollment == enrollment);
+
+            if (vet == null)
+                throw new NotFoundException("The veterinarian was not found");
+
+            return vet.ToVeterinarianResponse();
         }
     }
 }

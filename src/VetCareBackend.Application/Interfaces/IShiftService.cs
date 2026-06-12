@@ -9,7 +9,7 @@ namespace VetCareBackend.Application.Interfaces
     public interface IShiftService
     {
         List<ShiftResponse> GetAll();
-        ShiftResponse Create(ShiftRequest shiftReq, string sub);
+        ShiftResponse Create(ShiftRequest shiftReq);
         void Update(ShiftRequest shiftReq, Guid id);
         void Delete(Guid id);
 

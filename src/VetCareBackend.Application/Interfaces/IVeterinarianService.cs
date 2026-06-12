@@ -14,6 +14,7 @@ namespace VetCareBackend.Application.Interfaces
        public VeterinarianResponse Create(VeterinarianRequest request);
        public List<VeterinarianResponse> GetAll();
        public VeterinarianResponse GetById(string Sub);
+       public VeterinarianResponse GetByEnrollment(string enrollment);
        public void Update( string Sub, VeterinarianRequest request);
        public void Delete( string Sub );
     }
