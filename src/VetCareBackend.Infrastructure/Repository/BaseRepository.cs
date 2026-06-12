@@ -9,8 +9,8 @@ namespace VetCareBackend.Infrastructure.Repository
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
     {
-        private readonly VetCareDbContext _context;
-        private readonly DbSet<T> _dbSet;
+        protected readonly VetCareDbContext _context;
+        protected readonly DbSet<T> _dbSet;
         public BaseRepository(VetCareDbContext context)
         {
             _context = context;
@@ -38,7 +38,7 @@ namespace VetCareBackend.Infrastructure.Repository
             _dbSet.Update(entity);
             _context.SaveChanges();
         }
-        public virtual void Delete(Guid IdEntity) 
+        public virtual void Delete(Guid IdEntity)
         {
             var entity = Get(IdEntity);
             if (entity != null)

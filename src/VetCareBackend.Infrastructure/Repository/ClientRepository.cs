@@ -11,5 +11,10 @@ namespace VetCareBackend.Infrastructure.Repository
         public ClientRepository(VetCareDbContext context) : base(context)
         {
         }
+
+        public bool FindEmail(string email) 
+        {
+            _dbSet.Any(x=> x.Email == email && !x.IsDeleted);
+        }
     }
 }

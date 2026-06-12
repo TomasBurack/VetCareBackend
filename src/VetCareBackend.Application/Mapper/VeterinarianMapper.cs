@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
-using VetCareBackend.Domain.Entities;
 using VetCareBackend.Application.dtos.Responses;
+using VetCareBackend.Application.Validations;
+using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
+using VetCareBackend.Application.Validations;
+using VetCareBackend.Application.Exceptions;
 
 namespace VetCareBackend.Application.Mapper
 {
@@ -17,19 +21,35 @@ namespace VetCareBackend.Application.Mapper
                 
                 FirstName = veterinarian.FirstName,
                 LastName = veterinarian.LastName,
+                Dni = veterinarian.Dni,
+                Email = veterinarian.Email,
+                PhoneNumber = veterinarian.PhoneNumber,
                 Enrollment = veterinarian.Enrollment,
                 Speciality = veterinarian.Speciality,
             };
         }
         public static Veterinarian ToVeterinarian(this VeterinarianRequest request)
         {
+            VeterinarianRequestValidation validation = new VeterinarianRequestValidation();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
             return new Veterinarian
             {
+                Dni = request.Dni,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
                 Enrollment = request.Enrollment,
+                Dni=request.Dni, 
                 FirstName = request.FirstName,
                 LastName= request.LastName,
+                Email= request.Email,
+                Password= request.Password,
+                PhoneNumber= request.PhoneNumber,
                 Role = Role.Veterinarian,
                 Speciality= request.Speciality,
+                Password = request.Password,
             };
         }
 
