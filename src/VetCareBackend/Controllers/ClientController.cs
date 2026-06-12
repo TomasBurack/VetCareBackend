@@ -22,14 +22,7 @@ namespace VetCareBackend.Presentation.Controllers
             _clientService = clientService;
         }
 
-        [Authorize(policy: Policies.soloAdministrator)]
-        [HttpPost("/client/create")]
-        public IActionResult Create([FromBody] SignUpRequest request)
-        {
-            var client = _clientService.Create(request);
-            return Ok(client);
-        }
-
+        
         [Authorize(policy: Policies.soloClient)]
         [HttpGet("/myuser")]
         public IActionResult Get()
@@ -38,6 +31,7 @@ namespace VetCareBackend.Presentation.Controllers
             var client = _clientService.Get(sub);
             return Ok(client);
         }
+
         [Authorize(policy: Policies.soloClient)]
         [HttpDelete("/myuser/delete")]
         public IActionResult Delete()
@@ -53,6 +47,23 @@ namespace VetCareBackend.Presentation.Controllers
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             _clientService.Update(sub, request);
+            return NoContent();
+        }
+
+        [Authorize(policy: Policies.soloAdministrator)]
+        [HttpPost("/client/create")]
+        public IActionResult Create([FromBody] SignUpRequest request)
+        {
+            var client = _clientService.Create(request);
+            return Ok(client);
+        }
+
+        [Authorize(policy: Policies.soloAdministrator)]
+        [HttpPut("/myuser/update/{id}")]
+        public IActionResult Update([FromBody] UserRequest request,[FromRoute] string Id)
+        {
+ 
+            _clientService.Update(Id, request);
             return NoContent();
         }
     }
