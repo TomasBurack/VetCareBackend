@@ -13,6 +13,7 @@ using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
 
@@ -44,7 +45,11 @@ namespace VetCareBackend.Infrastructure.ExternalService
             request.Password = hashedPassword;
             Guid id = Guid.NewGuid();
             string dtoRole = "Client";
-
+            SignUpValidator validation = new SignUpValidator();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
             var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
             
             _context.Clients.Add(client);
