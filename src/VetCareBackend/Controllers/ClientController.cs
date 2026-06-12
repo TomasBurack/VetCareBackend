@@ -22,6 +22,7 @@ namespace VetCareBackend.Presentation.Controllers
             _clientService = clientService;
         }
 
+        //routes for client role
         
         [Authorize(policy: Policies.soloClient)]
         [HttpGet("/myuser")]
@@ -50,7 +51,18 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        [Authorize(policy: Policies.soloAdministrator)]
+
+        //routes for admin role
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpGet("/client/{Id}")]
+        public IActionResult Get([FromRoute] string Id)
+        {
+            var client = _clientService.Get(Id);
+            return Ok(client);
+        }
+
+        [Authorize(policy: Policies.Administrator)]
         [HttpPost("/client/create")]
         public IActionResult Create([FromBody] SignUpRequest request)
         {
@@ -58,13 +70,28 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(client);
         }
 
-        [Authorize(policy: Policies.soloAdministrator)]
-        [HttpPut("/myuser/update/{id}")]
+        [Authorize(policy: Policies.Administrator)]
+        [HttpDelete("/client/delete/{Id}")]
+        public IActionResult Delete([FromRoute] string Id)
+        {
+            _clientService.Delete(Id);
+            return NoContent();
+        }
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpPut("/client/update/{Id}")]
         public IActionResult Update([FromBody] UserRequest request,[FromRoute] string Id)
         {
- 
             _clientService.Update(Id, request);
             return NoContent();
+        }
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpGet("/client/all")]
+        public IActionResult GetAll()
+        {
+            var client = _clientService.GetAll();
+            return Ok(client);
         }
     }
 }

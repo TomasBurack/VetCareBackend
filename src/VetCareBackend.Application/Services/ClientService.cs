@@ -7,6 +7,7 @@ using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 
 
@@ -44,6 +45,11 @@ namespace VetCareBackend.Application.Services
             request.Password = _hash.Hash(request.Password);
             Guid id = Guid.NewGuid();
             string dtoRole = "Client";
+            SignUpValidator validation = new SignUpValidator();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
             var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
             _repository.Add(client);
             return UserMapper.ToDto<UserResponse>(client);
@@ -97,9 +103,22 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("The user was not found.");
             }
+
+            UserRequestValidation validation = new UserRequestValidation();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
+
             var UpdClient = UserMapper.ToEntityUpdate<Client>(client, request);
 
             _repository.Update(UpdClient);
+        }
+
+        public List<UserResponse> GetAll()
+        {
+            var list = _repository.GetAll();
+            return list.Select(client => UserMapper.ToDto<UserResponse>(client)).ToList();
         }
     }
 }

@@ -35,6 +35,7 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
+            //pasar las validaciones del mapper aca
 
             request.Password = _hash.Hash(request.Password);
             Guid id = Guid.NewGuid();
@@ -83,6 +84,8 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("Administrator not found");
             }
+
+            //pasar las validaciones del mapper aca
             admin = UserMapper.ToEntityUpdate<Administrator>(admin, request);
             _AdminRep.Update(admin);
         }
