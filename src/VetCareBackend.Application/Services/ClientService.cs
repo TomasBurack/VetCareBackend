@@ -7,6 +7,7 @@ using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 
 
@@ -15,9 +16,43 @@ namespace VetCareBackend.Application.Services
     public class ClientService : IClientService
     {
         private readonly IClientRepository _repository;
-        public ClientService(IClientRepository repository)
+        private readonly IAdministratorRepository _AdminRep;
+        private readonly IVeterinarianRepository _VetRep;
+        private readonly IPasswordHash _hash;
+        public ClientService(IAdministratorRepository AdminRep, IClientRepository repository, IVeterinarianRepository VetRep, IPasswordHash hash)
         {
+            _AdminRep = AdminRep;
             _repository = repository;
+            _VetRep = VetRep;
+            _hash = hash;
+        }
+
+        public UserResponse Create(SignUpRequest request)
+        {
+            if (_AdminRep.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _VetRep.FindEmail(request.Email))
+            {
+                throw new ConflictException($"The email {request.Email} is already in use");
+            }
+            else if (_AdminRep.FindDni(request.Dni) || _repository.FindDni(request.Dni) || _VetRep.FindDni(request.Dni))
+            {
+                throw new ConflictException($"The DNI {request.Dni} is already in use");
+            }
+            else if (_AdminRep.FindPN(request.PhoneNumber) || _repository.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber))
+            {
+                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
+            }
+
+            request.Password = _hash.Hash(request.Password);
+            Guid id = Guid.NewGuid();
+            string dtoRole = "Client";
+            SignUpValidator validation = new SignUpValidator();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
+            var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
+            _repository.Add(client);
+            return UserMapper.ToDto<UserResponse>(client);
         }
         public void Delete(string Sub)
         {
@@ -51,14 +86,39 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ValidationException("The ID sent is invalid");
             }
+            if (_AdminRep.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _VetRep.FindEmail(request.Email))
+            {
+                throw new ConflictException($"The email {request.Email} is already in use");
+            }
+            else if (_AdminRep.FindDni(request.Dni) || _repository.FindDni(request.Dni) || _VetRep.FindDni(request.Dni))
+            {
+                throw new ConflictException($"The DNI {request.Dni} is already in use");
+            }
+            else if (_AdminRep.FindPN(request.PhoneNumber) || _repository.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber))
+            {
+                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
+            }
             var client = _repository.Get(Id);
             if (client == null)
             {
                 throw new NotFoundException("The user was not found.");
             }
+
+            UserRequestValidation validation = new UserRequestValidation();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
+
             var UpdClient = UserMapper.ToEntityUpdate<Client>(client, request);
 
             _repository.Update(UpdClient);
+        }
+
+        public List<UserResponse> GetAll()
+        {
+            var list = _repository.GetAll();
+            return list.Select(client => UserMapper.ToDto<UserResponse>(client)).ToList();
         }
     }
 }

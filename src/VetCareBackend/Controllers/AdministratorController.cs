@@ -20,7 +20,7 @@ namespace VetCareBackend.Presentation.Controllers
             _service = service;
         }
 
-        [HttpGet("/myuser")]
+        [HttpGet("/admin/myuser")]
         public IActionResult Get()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

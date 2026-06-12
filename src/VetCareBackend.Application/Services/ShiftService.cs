@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
@@ -11,6 +12,7 @@ using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
+using ValidationException = VetCareBackend.Application.Exceptions.ValidationException;
 
 namespace VetCareBackend.Application.Services
 {
@@ -19,18 +21,13 @@ namespace VetCareBackend.Application.Services
         private readonly IShiftRepository _shiftRepository;
         private readonly IPetRepository _petRepository;
         private readonly IVeterinarianRepository _veterinarianRepository;
-        private readonly IValidator<ShiftRequest> _validator;
 
-        public ShiftService(
-            IShiftRepository shiftRepository,
-            IPetRepository petRepository,
-            IVeterinarianRepository veterinarianRepository,
-            IValidator<ShiftRequest> validator)
+
+        public ShiftService( IShiftRepository shiftRepository, IPetRepository petRepository, IVeterinarianRepository veterinarianRepository)
         {
             _shiftRepository = shiftRepository;
             _petRepository = petRepository;
             _veterinarianRepository = veterinarianRepository;
-            _validator = validator;
         }
 
         public List<ShiftResponse> GetAll()
@@ -43,69 +40,39 @@ namespace VetCareBackend.Application.Services
 
         public ShiftResponse Create(ShiftRequest shiftReq)
         {
-            _validator.ValidateAndThrow(shiftReq);
-
-            var veterinarian = _veterinarianRepository.GetAll()
+           var vet = _veterinarianRepository.GetAll()
                 .FirstOrDefault(v => v.Enrollment == shiftReq.Enrollment);
 
-            if (veterinarian == null)
-            {
+            if(vet == null) 
                 throw new NotFoundException($"No veterinarian was found with enrollment '{shiftReq.Enrollment}'.");
-            }
 
             var pet = _petRepository.Get(shiftReq.PetId);
-            if (pet == null)
-            {
-                throw new NotFoundException($"No pet was found with id '{shiftReq.PetId}'.");
-            }
 
-            var newShift = new Shift
-            {
-                DateShift = shiftReq.DateShift,
-                Enrollment = shiftReq.Enrollment,
-                Veterinarian = veterinarian,
-                PetId = shiftReq.PetId,
-                Pet = pet,
-                Description = shiftReq.Description,
-                Status = Status.Pending
-            };
+            if(pet == null)
+                throw new NotFoundException($"No pet was found with id: '{shiftReq.PetId}'");
 
+            bool shiftTaken = _shiftRepository.GetAll()
+                .Any(s => s.Enrollment == shiftReq.Enrollment 
+                && s.DateShift == shiftReq.DateShift);
+
+            if (shiftTaken)
+                throw new ValidationException($"The veterinarian already has a shift on '{shiftReq.DateShift}'.");
+
+            var newShift = shiftReq.ToShift(vet, pet);
             _shiftRepository.Add(newShift);
             return newShift.ToShiftResponse();
         }
 
-        public void Update(ShiftRequest shiftReq, Guid id)
+        public void Update(ShiftStatusRequest request, Guid id)
         {
-            _validator.ValidateAndThrow(shiftReq);
-
-            var shiftToUpdate = _shiftRepository.Get(id);
-            if (shiftToUpdate == null)
+            var shift = _shiftRepository.Get(id);
+            if (shift == null)
             {
                 throw new NotFoundException($"No shift was found with id '{id}'.");
             }
 
-            var veterinarian = _veterinarianRepository.GetAll()
-                .FirstOrDefault(v => v.Enrollment == shiftReq.Enrollment);
-
-            if (veterinarian == null)
-            {
-                throw new NotFoundException($"No veterinarian was found with enrollment '{shiftReq.Enrollment}'.");
-            }
-
-            var pet = _petRepository.Get(shiftReq.PetId);
-            if (pet == null)
-            {
-                throw new NotFoundException($"No pet was found with id '{shiftReq.PetId}'.");
-            }
-
-            shiftToUpdate.DateShift = shiftReq.DateShift;
-            shiftToUpdate.Enrollment = shiftReq.Enrollment;
-            shiftToUpdate.Veterinarian = veterinarian;
-            shiftToUpdate.PetId = shiftReq.PetId;
-            shiftToUpdate.Pet = pet;
-            shiftToUpdate.Description = shiftReq.Description;
-
-            _shiftRepository.Update(shiftToUpdate);
+            shift.Status = request.Status;
+            _shiftRepository.Update(shift);
         }
 
         public void Delete(Guid id)

@@ -8,7 +8,7 @@ using VetCareBackend.Application.dtos.Requests;
 
 namespace VetCareBackend.Presentation.Controllers
 {
-    [Authorize(policy: Policies.soloClient)]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class ClientController : ControllerBase
@@ -22,6 +22,9 @@ namespace VetCareBackend.Presentation.Controllers
             _clientService = clientService;
         }
 
+        //routes for client role
+        
+        [Authorize(policy: Policies.soloClient)]
         [HttpGet("/myuser")]
         public IActionResult Get()
         {
@@ -30,6 +33,7 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(client);
         }
 
+        [Authorize(policy: Policies.soloClient)]
         [HttpDelete("/myuser/delete")]
         public IActionResult Delete()
         {
@@ -38,12 +42,56 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
+        [Authorize(policy: Policies.soloClient)]
         [HttpPut("/myuser/update")]
         public IActionResult Update([FromBody] UserRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             _clientService.Update(sub, request);
             return NoContent();
+        }
+
+
+        //routes for admin role
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpGet("/client/{Id}")]
+        public IActionResult Get([FromRoute] string Id)
+        {
+            var client = _clientService.Get(Id);
+            return Ok(client);
+        }
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpPost("/client/create")]
+        public IActionResult Create([FromBody] SignUpRequest request)
+        {
+            var client = _clientService.Create(request);
+            return Ok(client);
+        }
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpDelete("/client/delete/{Id}")]
+        public IActionResult Delete([FromRoute] string Id)
+        {
+            _clientService.Delete(Id);
+            return NoContent();
+        }
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpPut("/client/update/{Id}")]
+        public IActionResult Update([FromBody] UserRequest request,[FromRoute] string Id)
+        {
+            _clientService.Update(Id, request);
+            return NoContent();
+        }
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpGet("/client/all")]
+        public IActionResult GetAll()
+        {
+            var client = _clientService.GetAll();
+            return Ok(client);
         }
     }
 }

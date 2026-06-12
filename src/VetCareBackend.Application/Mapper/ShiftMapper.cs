@@ -24,13 +24,15 @@ namespace VetCareBackend.Application.Mapper
             };
         }
 
-        public static Shift ToShift(this ShiftRequest shiftReq) 
+        public static Shift ToShift(this ShiftRequest shiftReq, Veterinarian vet, Pet pet) 
         {
             return new Shift
             {
                 Id = Guid.NewGuid(),
                 DateShift = shiftReq.DateShift,
+                Veterinarian = vet,
                 Enrollment = shiftReq.Enrollment,
+                Pet = pet,
                 PetId = shiftReq.PetId,
                 Description = shiftReq.Description,
             };

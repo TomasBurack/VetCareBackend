@@ -7,5 +7,8 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IAdministratorRepository : IBaseRepository<Administrator>
     {
+        bool FindEmail(string email);
+        bool FindDni(string dni);
+        bool FindPN(string pn);
     }
 }
