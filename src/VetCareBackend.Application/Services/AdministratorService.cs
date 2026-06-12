@@ -6,6 +6,7 @@ using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 
 
@@ -36,7 +37,11 @@ namespace VetCareBackend.Application.Services
                 throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
             //pasar las validaciones del mapper aca
-
+            SignUpValidator validation = new SignUpValidator();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
             request.Password = _hash.Hash(request.Password);
             Guid id = Guid.NewGuid();
             string dtoRole = "Administrator";
@@ -85,7 +90,11 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException("Administrator not found");
             }
 
-            //pasar las validaciones del mapper aca
+            UserRequestValidation validation = new UserRequestValidation();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
             admin = UserMapper.ToEntityUpdate<Administrator>(admin, request);
             _AdminRep.Update(admin);
         }
