@@ -78,11 +78,13 @@ builder.Services.AddScoped<IPasswordHash, PasswordHash>();
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(Policies.soloClient, policy => policy.RequireRole(nameof(Role.Client)));
-    options.AddPolicy(Policies.soloVeterinarian, policy => policy.RequireRole(nameof(Role.Veterinarian)));
-    options.AddPolicy(Policies.Administrator, policy => policy.RequireRole(nameof(Role.Administrator)));
+    options.AddPolicy(Policies.SoloClient, policy => policy.RequireRole(nameof(Role.Client)));
+    options.AddPolicy(Policies.SoloVeterinarian, policy => policy.RequireRole(nameof(Role.Veterinarian)));
+    options.AddPolicy(Policies.SoloAdministrator, policy => policy.RequireRole(nameof(Role.Administrator)));
+    options.AddPolicy(Policies.SoloSysadmin, policy => policy.RequireRole(nameof(Role.SysAdmin)));
     options.AddPolicy(Policies.VetAdm, policy => policy.RequireRole(nameof(Role.Veterinarian), nameof(Role.Administrator)));
     options.AddPolicy(Policies.ClientAdm, policy => policy.RequireRole(nameof(Role.Client), nameof(Role.Administrator)));
+    options.AddPolicy(Policies.Admins, policy => policy.RequireRole(nameof(Role.Administrator), nameof(Role.SysAdmin)));
 });
 
 

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Domain.Enums;
 
 namespace VetCareBackend.Application.dtos.Responses
 {
-    public class VeterinarianResponse
+    public class VeterinarianResponse : IListUserResponse
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
