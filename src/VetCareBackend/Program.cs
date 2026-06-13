@@ -73,6 +73,8 @@ builder.Services.AddScoped<IVeterinarianRepository, VeterinarianRepository>();
 builder.Services.AddScoped<IVeterinarianService, VeterinarianService>();
 builder.Services.AddScoped<IAdministratorRepository, AdministratorRepository>();
 builder.Services.AddScoped<IAdministratorService, AdministratorService>();
+builder.Services.AddScoped<ISysadminRepository, SysadminRepository>();
+builder.Services.AddScoped<ISysadminService, SysadminService>();
 builder.Services.AddScoped<IPasswordHash, PasswordHash>();
 
 
