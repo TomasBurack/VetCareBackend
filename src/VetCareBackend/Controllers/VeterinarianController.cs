@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using VetCareBackend.Application.dtos.Requests;
@@ -21,14 +21,14 @@ namespace VetCareBackend.Presentation.Controllers
 
         ///endopoints admin role ///
 
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.SoloAdministrator)]
         [HttpPost]
         public IActionResult Create([FromBody] VeterinarianRequest request)
         {
             var veterinarian = _veterinarianService.Create(request);
             return Ok(veterinarian);
         }
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.SoloAdministrator)]
         [HttpGet("{id}")]
         public IActionResult GetById([FromRoute] string id)
         {
@@ -37,7 +37,7 @@ namespace VetCareBackend.Presentation.Controllers
 
             return Ok(veterinarian);
         }
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.SoloAdministrator)]
         [HttpPut("{id}")]
         public IActionResult UpdateByAdmin([FromRoute] string id, [FromBody] VeterinarianRequest request)
         {
@@ -45,7 +45,7 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.SoloAdministrator)]
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] string id)
         {
@@ -65,7 +65,7 @@ namespace VetCareBackend.Presentation.Controllers
 
         /// endpoint for vet ///
 
-        [Authorize(policy: Policies.soloVeterinarian)]
+        [Authorize(policy: Policies.SoloVeterinarian)]
         [HttpGet("myuser")]
         public IActionResult Get()
         {
@@ -74,7 +74,7 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(veterinarian);
         }
 
-        [Authorize(policy: Policies.soloVeterinarian)]
+        [Authorize(policy: Policies.SoloVeterinarian)]
         [HttpPut("myuser")]
         public IActionResult Update([FromBody] VeterinarianRequest request)
         {
