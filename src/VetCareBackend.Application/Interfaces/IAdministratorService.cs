@@ -15,5 +15,7 @@ namespace VetCareBackend.Application.Interfaces
         void Delete(string Sub);
 
         UserResponse Get(string Sub);
+
+        List<UserResponse> GetAll();
     }
 }

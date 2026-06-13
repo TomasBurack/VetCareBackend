@@ -9,5 +9,6 @@ namespace VetCareBackend.Domain.Enums
         Client = 1,
         Veterinarian = 2,
         Administrator = 3,
+        SysAdmin = 4,
     }
 }

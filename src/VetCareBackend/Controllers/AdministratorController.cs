@@ -3,23 +3,32 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using VetCareBackend.Application.dtos.Requests;
+using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Interfaces;
+using VetCareBackend.Application.Services;
 using VetCareBackend.Presentation.Authorization;
 
 namespace VetCareBackend.Presentation.Controllers
 {
-    [Authorize(policy: Policies.soloClient)]
+
     [Route("api/[controller]")]
     [ApiController]
 
     public class AdministratorController : ControllerBase
     {
         private readonly IAdministratorService _service;
-        public AdministratorController(IAdministratorService service)
+        private readonly IVeterinarianService _vetService;
+        private readonly IClientService _clientService;
+        public AdministratorController(IAdministratorService service, IVeterinarianService vetService, IClientService clientService)
         {
             _service = service;
+            _vetService = vetService;
+            _clientService = clientService;
         }
 
+        //routes for administrator
+
+        [Authorize(policy: Policies.SoloAdministrator)]
         [HttpGet("/admin/myuser")]
         public IActionResult Get()
         {
@@ -28,15 +37,8 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(admin);
         }
 
-        [HttpPost("/create")]
-        public IActionResult Create([FromBody] SignUpRequest request)
-        {
-            var admin = _service.Create(request);
-            return Ok(request);
-        }
-
-        [HttpDelete("/delete")]
-
+        [Authorize(policy: Policies.SoloAdministrator)]
+        [HttpDelete("/admin/myuser/delete")]
         public IActionResult Delete()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -44,13 +46,70 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        [HttpPut("/update")]
+        [Authorize(policy: Policies.SoloAdministrator)]
+        [HttpPut("/admin/myuser/update")]
         public IActionResult Update([FromBody] UserRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             _service.Update(sub, request);
             return NoContent();
 
+        }
+
+
+        //routes for sysadmin role
+
+        [Authorize(policy: Policies.SoloSysadmin)]
+        [HttpPost("/admin/create")]
+        public IActionResult Create([FromBody] SignUpRequest request)
+        {
+            var admin = _service.Create(request);
+            return Ok(request);
+        }
+
+        [Authorize(policy: Policies.SoloSysadmin)]
+        [HttpGet("/admin/{Id}")]
+        public IActionResult Get([FromRoute] string Id)
+        {
+            var admin = _service.Get(Id);
+            return Ok(admin);
+        }
+
+
+        [Authorize(policy: Policies.SoloSysadmin)]
+        [HttpDelete("/admin/delete/{Id}")]
+        public IActionResult Delete([FromRoute] string Id)
+        {
+            _service.Delete(Id);
+            return NoContent();
+        }
+
+        [Authorize(policy: Policies.SoloSysadmin)]
+        [HttpPut("/admin/update/{Id}")]
+        public IActionResult Update([FromBody] UserRequest request, [FromRoute] string Id)
+        {
+            _service.Update(Id, request);
+            return NoContent();
+        }
+
+        [Authorize(policy: Policies.SoloSysadmin)]
+        [HttpGet("/admin/all")]
+        public IActionResult GetAll()
+        {
+            var admin = _service.GetAll();
+            return Ok(admin);
+        }
+
+        //routes for both
+        [Authorize(policy: Policies.Admins)]
+        [HttpGet("/alluser")]
+
+        public IActionResult GetAllUsers()
+        {
+            var admins = _service.GetAll();
+            var clients = _clientService.GetAll();
+            var vets = _vetService.GetAll();
+            return Ok(new { admins, clients, vets});
         }
     }
 }
