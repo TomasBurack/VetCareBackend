@@ -8,6 +8,7 @@ namespace VetCareBackend.Infrastructure
 {
     public class VetCareDbContext : DbContext
     {
+        public DbSet<Sysadmin> Sysadmins { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Administrator> Administrators { get; set; }
         public DbSet<Pet> Pets { get; set; }
