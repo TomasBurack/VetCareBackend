@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.Interfaces;
-using System.Security.Claims;
+using VetCareBackend.Domain.Entities;
+using VetCareBackend.Presentation.Authorization;
 namespace VetCareBackend.Presentation.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class VeterinarianController : ControllerBase
@@ -14,44 +18,72 @@ namespace VetCareBackend.Presentation.Controllers
         {
             _veterinarianService = veterinarianService;
         }
-        [HttpPost("/veterinarian/create")]
+
+        ///endopoints admin role ///
+
+        [Authorize(policy: Policies.Administrator)]
+        [HttpPost]
         public IActionResult Create([FromBody] VeterinarianRequest request)
         {
-            _veterinarianService.Create(request);
-            return Ok("Veterinarian created successful");
+            var veterinarian = _veterinarianService.Create(request);
+            return Ok(veterinarian);
+        }
+        [Authorize(policy: Policies.Administrator)]
+        [HttpGet("{id}")]
+        public IActionResult GetById([FromRoute] string id)
+        {
+
+            var veterinarian = _veterinarianService.GetById(id);
+
+            return Ok(veterinarian);
+        }
+        [Authorize(policy: Policies.Administrator)]
+        [HttpPut("{id}")]
+        public IActionResult UpdateByAdmin([FromRoute] string id, [FromBody] VeterinarianRequest request)
+        {
+            _veterinarianService.Update(id, request);
+            return NoContent();
         }
 
-        [HttpGet("/veterinarian")]
+        [Authorize(policy: Policies.Administrator)]
+        [HttpDelete("{id}")]
+        public IActionResult Delete([FromRoute] string id)
+        {
+            _veterinarianService.Delete(id);
+            return NoContent();
+        }
+
+        /// endpoints for admin y vet ///
+
+        [Authorize(policy: Policies.VetAdm)]
+        [HttpGet("veterinarian")]
         public IActionResult GetAll()
         {
             var veterinarians = _veterinarianService.GetAll();
             return Ok(veterinarians);
         }
 
+        /// endpoint for vet ///
 
-        [HttpGet("/veterinarian/myUser")]
-        public IActionResult GetById()
+        [Authorize(policy: Policies.soloVeterinarian)]
+        [HttpGet("myuser")]
+        public IActionResult Get()
         {
             string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             var veterinarian = _veterinarianService.GetById(id);
-
             return Ok(veterinarian);
         }
 
-        [HttpPut("/veterinarian/{id}")]
-        public IActionResult Update(string id, [FromBody] VeterinarianRequest request)
+        [Authorize(policy: Policies.soloVeterinarian)]
+        [HttpPut("myuser")]
+        public IActionResult Update([FromBody] VeterinarianRequest request)
         {
-            _veterinarianService.Update(id, request);
-            return NoContent();
+            {
+                string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                _veterinarianService.Update(id, request);
+                return NoContent();
+            }
         }
 
-        [HttpDelete("/veterinarian/{id}")]
-        public IActionResult Delete(string id)
-        {
-            _veterinarianService.Delete(id);
-            return NoContent();
-        }
-    }      
-    
+    }
 }
