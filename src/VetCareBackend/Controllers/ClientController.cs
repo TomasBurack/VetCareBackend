@@ -24,7 +24,7 @@ namespace VetCareBackend.Presentation.Controllers
 
         //routes for client role
         
-        [Authorize(policy: Policies.soloClient)]
+        [Authorize(policy: Policies.SoloClient)]
         [HttpGet("/myuser")]
         public IActionResult Get()
         {
@@ -33,7 +33,7 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(client);
         }
 
-        [Authorize(policy: Policies.soloClient)]
+        [Authorize(policy: Policies.SoloClient)]
         [HttpDelete("/myuser/delete")]
         public IActionResult Delete()
         {
@@ -42,7 +42,7 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        [Authorize(policy: Policies.soloClient)]
+        [Authorize(policy: Policies.SoloClient)]
         [HttpPut("/myuser/update")]
         public IActionResult Update([FromBody] UserRequest request)
         {
@@ -52,9 +52,9 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
 
-        //routes for admin role
+        //routes for admins role
 
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpGet("/client/{Id}")]
         public IActionResult Get([FromRoute] string Id)
         {
@@ -62,7 +62,7 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(client);
         }
 
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpPost("/client/create")]
         public IActionResult Create([FromBody] SignUpRequest request)
         {
@@ -70,7 +70,7 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(client);
         }
 
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpDelete("/client/delete/{Id}")]
         public IActionResult Delete([FromRoute] string Id)
         {
@@ -78,7 +78,7 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpPut("/client/update/{Id}")]
         public IActionResult Update([FromBody] UserRequest request,[FromRoute] string Id)
         {
@@ -86,7 +86,7 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        [Authorize(policy: Policies.Administrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpGet("/client/all")]
         public IActionResult GetAll()
         {

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using VetCareBackend.Application.Interfaces;
 
 namespace VetCareBackend.Application.dtos.Requests
 {
-    public class UserResponse
+    public class UserResponse : IListUserResponse
     {
 
         public Guid Id { get; set; }

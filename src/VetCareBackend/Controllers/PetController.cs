@@ -9,7 +9,7 @@ using VetCareBackend.Presentation.Authorization;
 
 namespace VetCareBackend.Presentation.Controllers
 {
-    [Authorize(policy: Policies.soloClient)]
+    [Authorize(policy: Policies.SoloClient)]
     [Route("api/[controller]")]
     [ApiController]
     public class PetController : Controller
