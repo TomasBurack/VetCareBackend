@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VetCareBackend.Application.Services
-{
-    public class ShiftService 
-    {
-    }
-}
-=======
 ﻿using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -75,7 +63,7 @@ namespace VetCareBackend.Application.Services
             return newShift.ToShiftResponse();
         }
 
-        public void Update(ShiftStatusRequest request, Guid id)
+        public void UpdateStatus(Guid id, ShiftStatusRequest request)
         {
             var shift = _shiftRepository.Get(id);
             if (shift == null)
@@ -97,6 +85,7 @@ namespace VetCareBackend.Application.Services
 
             _shiftRepository.Delete(id);
         }
+
+
     }
 }
->>>>>>> 69cf1a12a291acc29e55816a3e4e48495159a2b7

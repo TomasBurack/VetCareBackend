@@ -74,6 +74,8 @@ builder.Services.AddScoped<IVeterinarianService, VeterinarianService>();
 builder.Services.AddScoped<IAdministratorRepository, AdministratorRepository>();
 builder.Services.AddScoped<IAdministratorService, AdministratorService>();
 builder.Services.AddScoped<IPasswordHash, PasswordHash>();
+builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
+builder.Services.AddScoped<IShiftService, ShiftService>();
 
 
 builder.Services.AddAuthorization(options =>
