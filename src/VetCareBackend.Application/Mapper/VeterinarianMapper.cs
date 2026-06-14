@@ -41,17 +41,11 @@ namespace VetCareBackend.Application.Mapper
                 PhoneNumber = request.PhoneNumber,
                 Enrollment = request.Enrollment,
                 FirstName = request.FirstName,
-<<<<<<< HEAD
                 LastName = request.LastName,
                 Password = request.Password,
                 Role = Role.Veterinarian,
                 Speciality = request.Speciality,
-=======
-                LastName= request.LastName,
-                Password= request.Password,
-                Role = Role.Veterinarian,
-                Speciality= request.Speciality,
->>>>>>> b3a7e67cd6be22e519066ae94dc8469e7cf22809
+
             };
         }
 

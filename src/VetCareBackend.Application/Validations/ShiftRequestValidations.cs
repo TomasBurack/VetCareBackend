@@ -14,7 +14,7 @@ namespace VetCareBackend.Application.Validations
             RuleFor(request => request.DateShift)
                 .GreaterThan(DateTime.UtcNow)
                 .WithMessage(" the shift date is invalid ");
-            RuleFor(request => request.Enrrolment)
+            RuleFor(request => request.Enrollment)
                 .NotEmpty().WithMessage("The enrollment is required.")
                 .Length(4).WithMessage("Enrrolment must be exactly 4 characters long.");
             RuleFor(request => request.PetId)

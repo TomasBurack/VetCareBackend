@@ -10,7 +10,7 @@ namespace VetCareBackend.Application.Interfaces
     {
         List<ShiftResponse> GetAll();
         ShiftResponse Create(ShiftRequest shiftReq);
-        void Update(ShiftStatusRequest request, Guid id);
+        void UpdateStatus(Guid id, ShiftStatusRequest request);
         void Delete(Guid id);
 
     }
