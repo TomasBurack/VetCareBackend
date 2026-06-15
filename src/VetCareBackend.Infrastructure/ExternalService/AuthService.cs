@@ -79,6 +79,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
             var veterinarian = _context.Veterinarians.FirstOrDefault(v => v.Email == request.Email);
             var administrator = _context.Administrators.FirstOrDefault(a => a.Email == request.Email);
+            var sysadmin = _context.Sysadmins.FirstOrDefault(s => s.Email == request.Email);
             if (client != null && !client.IsDeleted)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
@@ -103,7 +104,13 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
                 userId = administrator.Id;
                 role = "Administrator";
-            } else
+            } else if (sysadmin != null && !sysadmin.IsDeleted)
+            {
+                if (!BCrypt.Net.BCrypt.Verify(request.Password, sysadmin.Password))
+                    throw new UnauthorizedException("incorrect credentials");
+                userId = sysadmin.Id;
+                role = "SysAdmin";
+            }else
             {
                 throw new UnauthorizedException("incorrect credentials");
             }

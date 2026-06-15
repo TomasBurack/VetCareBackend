@@ -18,21 +18,23 @@ namespace VetCareBackend.Application.Services
         private readonly IClientRepository _ClientRep;
         private readonly IVeterinarianRepository _VetRep;
         private readonly IPasswordHash _hash;
-        public AdministratorService(IAdministratorRepository repository,IClientRepository ClientRep, IVeterinarianRepository VetRep, IPasswordHash hash)
+        private readonly ISysadminRepository _SysadminRep;
+        public AdministratorService(IAdministratorRepository repository,IClientRepository ClientRep, IVeterinarianRepository VetRep, IPasswordHash hash, ISysadminRepository sysadmin)
         {
             _AdminRep = repository;
             _ClientRep = ClientRep;
             _VetRep = VetRep;
             _hash = hash;
+            _SysadminRep = sysadmin;
         }
 
         public UserResponse Create(SignUpRequest request)
         {
-            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email)) {
+            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email)) {
                 throw new ConflictException($"The email {request.Email} is already in use");
-            } else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni)) {
+            } else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni) || _SysadminRep.FindDni(request.Dni)) {
                 throw new ConflictException($"The DNI {request.Dni} is already in use");
-            } else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber))
+            } else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber) || _SysadminRep.FindPN(request.PhoneNumber))
             {
                 throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
@@ -72,15 +74,15 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email))
+            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni))
+            else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni) || _SysadminRep.FindDni(request.Dni))
             {
                 throw new ConflictException($"The DNI {request.Dni} is already in use");
             }
-            else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber))
+            else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber) || _SysadminRep.FindPN(request.PhoneNumber))
             {
                 throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
