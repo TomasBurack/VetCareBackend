@@ -19,11 +19,13 @@ namespace VetCareBackend.Presentation.Controllers
         private readonly IAdministratorService _service;
         private readonly IVeterinarianService _vetService;
         private readonly IClientService _clientService;
-        public AdministratorController(IAdministratorService service, IVeterinarianService vetService, IClientService clientService)
+        private readonly ISysadminService _sysadminService;
+        public AdministratorController(IAdministratorService service, IVeterinarianService vetService, IClientService clientService, ISysadminService sysadminService)
         {
             _service = service;
             _vetService = vetService;
             _clientService = clientService;
+            _sysadminService = sysadminService;
         }
 
         //routes for administrator
@@ -64,7 +66,7 @@ namespace VetCareBackend.Presentation.Controllers
         public IActionResult Create([FromBody] SignUpRequest request)
         {
             var admin = _service.Create(request);
-            return Ok(request);
+            return Ok(admin);
         }
 
         [Authorize(policy: Policies.SoloSysadmin)]
@@ -109,6 +111,7 @@ namespace VetCareBackend.Presentation.Controllers
             var admins = _service.GetAll();
             var clients = _clientService.GetAll();
             var vets = _vetService.GetAll();
+            var sysadmins = _sysadminService.GetAll();
             return Ok(new { admins, clients, vets});
         }
     }

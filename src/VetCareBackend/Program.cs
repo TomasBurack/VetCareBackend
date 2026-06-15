@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Security.Claims;
 using System.Text;
+using VetCareBackend.Application.Configuration;
 using VetCareBackend.Application.Infrastructure;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Services;
@@ -56,7 +57,7 @@ builder.Services.AddSwaggerGen(opt =>
     });
 });
 
-
+builder.Services.Configure<MailOptions>(builder.Configuration.GetSection("MailSettings"));
 
 builder.Services.AddDbContext<VetCareDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("VetCareConnectionStrings")));
@@ -73,9 +74,12 @@ builder.Services.AddScoped<IVeterinarianRepository, VeterinarianRepository>();
 builder.Services.AddScoped<IVeterinarianService, VeterinarianService>();
 builder.Services.AddScoped<IAdministratorRepository, AdministratorRepository>();
 builder.Services.AddScoped<IAdministratorService, AdministratorService>();
+builder.Services.AddScoped<ISysadminRepository, SysadminRepository>();
+builder.Services.AddScoped<ISysadminService, SysadminService>();
 builder.Services.AddScoped<IPasswordHash, PasswordHash>();
 builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
+builder.Services.AddScoped<IMailService, MailService>();
 
 
 builder.Services.AddAuthorization(options =>
