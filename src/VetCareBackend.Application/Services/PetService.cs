@@ -41,7 +41,7 @@ namespace VetCareBackend.Application.Services
 
             if (pet == null) 
             {
-                throw new NotFoundException($"No se encontro ninguna mascota con id '{id}'.");
+                throw new NotFoundException($"No pet was found with id '{id}'.");
             }
 
             _petRepository.Delete(id);
@@ -61,7 +61,7 @@ namespace VetCareBackend.Application.Services
 
             if (pet == null)
             {
-                throw new NotFoundException($"No se encontro ninguna mascota con id '{id}'.");
+                throw new NotFoundException($"No pet was found with id '{id}'.");
             }
 
             return pet.ToPetResponse();
@@ -73,7 +73,7 @@ namespace VetCareBackend.Application.Services
 
             if (petToUpdate == null)
             {
-                throw new NotFoundException($"No se encontro ninguna mascota con id '{id}'.");
+                throw new NotFoundException($"No pet was found with id '{id}'.");
             }
 
             petToUpdate.Name = petReq.Name;

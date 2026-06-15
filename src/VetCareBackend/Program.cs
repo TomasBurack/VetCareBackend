@@ -76,6 +76,8 @@ builder.Services.AddScoped<IAdministratorService, AdministratorService>();
 builder.Services.AddScoped<ISysadminRepository, SysadminRepository>();
 builder.Services.AddScoped<ISysadminService, SysadminService>();
 builder.Services.AddScoped<IPasswordHash, PasswordHash>();
+builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
+builder.Services.AddScoped<IShiftService, ShiftService>();
 
 
 builder.Services.AddAuthorization(options =>
