@@ -58,6 +58,13 @@ namespace VetCareBackend.Presentation.Controllers
 
         }
 
+        [Authorize(policy: Policies.SoloAdministrator)]
+        [HttpPost("/addrole")]
+        public IActionResult AddRoleToUser([FromBody] AddRoleRequest request)
+        {
+            _service.AddRoleToUser(request.Email, request.RoleName, request.enrollment);
+            return NoContent();
+        }
 
         //routes for sysadmin role
 
@@ -114,5 +121,7 @@ namespace VetCareBackend.Presentation.Controllers
             var sysadmins = _sysadminService.GetAll();
             return Ok(new { admins, clients, vets});
         }
+
+        
     }
 }

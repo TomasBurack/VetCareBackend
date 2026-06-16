@@ -5,7 +5,7 @@ using VetCareBackend.Application.Interfaces;
 
 namespace VetCareBackend.Application.dtos.Requests
 {
-    public class UserResponse : IListUserResponse
+    public class UserResponse
     {
 
         public Guid Id { get; set; }

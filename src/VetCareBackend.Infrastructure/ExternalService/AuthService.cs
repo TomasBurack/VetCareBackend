@@ -44,7 +44,9 @@ namespace VetCareBackend.Infrastructure.ExternalService
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             request.Password = hashedPassword;
             Guid id = Guid.NewGuid();
+            List<string> roles = new List<string>();
             string dtoRole = "Client";
+            roles.Add(dtoRole);
             SignUpValidator validation = new SignUpValidator();
             if (!validation.Validate(request).IsValid)
             {
@@ -64,8 +66,8 @@ namespace VetCareBackend.Infrastructure.ExternalService
             }
             return new AuthResponse 
             {
-                Token = GenerateToken(id, request.Email, dtoRole),
-                Role = dtoRole,
+                Token = GenerateToken(id, request.Email, roles),
+                Roles = roles,
                 UserId = id,
                 Email = request.Email,
             };
@@ -73,57 +75,56 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
         public AuthResponse SignIn(SignInRequest request)
         {
-            Guid userId;
-            string role;
 
-            var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
-            var veterinarian = _context.Veterinarians.FirstOrDefault(v => v.Email == request.Email);
-            var administrator = _context.Administrators.FirstOrDefault(a => a.Email == request.Email);
-            var sysadmin = _context.Sysadmins.FirstOrDefault(s => s.Email == request.Email);
-            if (client != null && !client.IsDeleted)
-            {
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
-                    throw new UnauthorizedException("incorrect credentials"); 
+            var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email && !c.IsDeleted);
+            var veterinarian = _context.Veterinarians.FirstOrDefault(v => v.Email == request.Email && !v.IsDeleted);
+            var administrator = _context.Administrators.FirstOrDefault(a => a.Email == request.Email && !a.IsDeleted);
+            var sysadmin = _context.Sysadmins.FirstOrDefault(s => s.Email == request.Email && !s.IsDeleted);
 
-                userId = client.Id;
-                role = "Client";
-            }
-            else if(veterinarian != null && !veterinarian.IsDeleted)
-            {
-                
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, veterinarian.Password))
-                    throw new UnauthorizedException("incorrect credentials");
-
-                userId = veterinarian.Id;
-                role = "Veterinarian";
-            }
-            else if (administrator != null && !administrator.IsDeleted)
-            {
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, administrator.Password))
-                    throw new UnauthorizedException("incorrect credentials");
-
-                userId = administrator.Id;
-                role = "Administrator";
-            } else if (sysadmin != null && !sysadmin.IsDeleted)
-            {
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, sysadmin.Password))
-                    throw new UnauthorizedException("incorrect credentials");
-                userId = sysadmin.Id;
-                role = "SysAdmin";
-            }else
+            if (client == null && veterinarian == null && administrator == null && sysadmin == null)
             {
                 throw new UnauthorizedException("incorrect credentials");
             }
+
+            
+            string hashedPassword = client?.Password ?? veterinarian?.Password ?? administrator?.Password ?? sysadmin?.Password!;
+
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, hashedPassword))
+            {
+                throw new UnauthorizedException("incorrect credentials");
+            }
+            List<string> roles = new List<string>();
+            Guid userId = Guid.Empty;
+            if (client != null)
+            {
+                userId = client.Id;
+                roles.Add("Client");
+            }
+            if(veterinarian != null)
+            {
+                userId = veterinarian.Id;
+                roles.Add("Veterinarian");
+            }
+            if (administrator != null)
+            {
+                userId = administrator.Id;
+                roles.Add("Administrator");
+            }
+            if (sysadmin != null)
+            {
+                userId = sysadmin.Id;
+                roles.Add("SysAdmin");
+            }
             return new AuthResponse 
             {
-                Token = GenerateToken(userId, request.Email,role),
-                Role = role,
+                Token = GenerateToken(userId, request.Email,roles),
+                Roles = roles,
                 UserId = userId,
                 Email = request.Email
             };
         }
 
-        private string GenerateToken(Guid UserId, string Email, string Role)
+        private string GenerateToken(Guid UserId, string Email, List<string> roles)
         {
             string key = _configuration["Jwt:Key"]!;
             string issuer = _configuration["Jwt:Issuer"]!;
@@ -133,16 +134,20 @@ namespace VetCareBackend.Infrastructure.ExternalService
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, UserId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, Email),
-                new Claim(ClaimTypes.Role, Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat,
                     DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
                     ClaimValueTypes.Integer64)
             };
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: issuer,

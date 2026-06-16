@@ -7,7 +7,7 @@ namespace VetCareBackend.Application.dtos.Responses
     public class AuthResponse
     {
         public string Token { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        public List<string> Roles { get; set; } = new List<string>();
 
         public Guid UserId { get; set; }
         

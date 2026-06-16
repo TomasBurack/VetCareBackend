@@ -12,5 +12,9 @@ namespace VetCareBackend.Application.Interfaces
         bool FindEmail(string email);
         bool FindDni(string dni);
         bool FindPN(string pn);
+
+        bool FindEnrollment(string enrollment);
+
+        Veterinarian? GetByEmail(string email);
     }
 }

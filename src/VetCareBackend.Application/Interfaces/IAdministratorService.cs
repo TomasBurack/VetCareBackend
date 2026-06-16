@@ -17,5 +17,7 @@ namespace VetCareBackend.Application.Interfaces
         UserResponse Get(string Sub);
 
         List<UserResponse> GetAll();
+
+        void AddRoleToUser(string id, string RoleName, string enrollment);
     }
 }
