@@ -10,7 +10,5 @@ namespace VetCareBackend.Application.Interfaces
         bool FindEmail(string email);
         bool FindDni(string dni);
         bool FindPN(string pn);
-
-        Client? GetByEmail(string email);
     }
 }

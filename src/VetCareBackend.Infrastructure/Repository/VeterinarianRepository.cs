@@ -28,16 +28,5 @@ namespace VetCareBackend.Infrastructure.Repository
             bool value = _dbSet.Any(x => x.PhoneNumber == pn && !x.IsDeleted);
             return value;
         }
-
-        public bool FindEnrollment(string enrollment)
-        {
-            bool value = _dbSet.Any(x => x.Enrollment == enrollment && !x.IsDeleted);
-            return value;
-        }
-
-        public Veterinarian? GetByEmail(string email)
-        {
-            return _dbSet.FirstOrDefault(a => a.Email == email && !a.IsDeleted);
-        }
     }
 }

@@ -29,10 +29,5 @@ namespace VetCareBackend.Infrastructure.Repository
             bool value = _dbSet.Any(x => x.PhoneNumber == pn && !x.IsDeleted);
             return value;
         }
-
-        public Client? GetByEmail(string email)
-        {
-            return _dbSet.FirstOrDefault(a => a.Email == email && !a.IsDeleted);
-        }
     }
 }
