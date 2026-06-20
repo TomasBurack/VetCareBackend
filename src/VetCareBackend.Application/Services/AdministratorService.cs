@@ -32,11 +32,6 @@ namespace VetCareBackend.Application.Services
         {
             if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email)) {
                 throw new ConflictException($"The email {request.Email} is already in use");
-            } else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni) || _SysadminRep.FindDni(request.Dni)) {
-                throw new ConflictException($"The DNI {request.Dni} is already in use");
-            } else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber) || _SysadminRep.FindPN(request.PhoneNumber))
-            {
-                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
             //pasar las validaciones del mapper aca
             SignUpValidator validation = new SignUpValidator();
@@ -78,14 +73,7 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni) || _SysadminRep.FindDni(request.Dni))
-            {
-                throw new ConflictException($"The DNI {request.Dni} is already in use");
-            }
-            else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber) || _SysadminRep.FindPN(request.PhoneNumber))
-            {
-                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
-            }
+            
             var admin = _AdminRep.Get(Id);
             if (admin == null)
             {

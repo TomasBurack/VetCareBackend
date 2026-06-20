@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Domain.Enums;
 
-namespace VetCareBackend.Application.dtos.Responses
+namespace VetCareBackend.Application.dtos.Requests
 {
-    public class VeterinarianResponse
+    public class VeterinarianUpdateRequest
     {
-        public Guid Id { get; set; }
+        public string Dni { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string Dni { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string Enrollment { get; set; } = string.Empty;
-        public string Speciality { get; set; } = string.Empty;
+        public Speciality Speciality { get; set; }
     }
 }

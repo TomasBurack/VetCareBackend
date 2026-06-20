@@ -80,14 +80,6 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            else if (_repository.FindDni(request.Dni) || _AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni))
-            {
-                throw new ConflictException($"The DNI {request.Dni} is already in use");
-            }
-            else if (_repository.FindPN(request.PhoneNumber) || _AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber))
-            {
-                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
-            }
             var Sysadmin = _repository.Get(Id);
             if (Sysadmin == null)
             {
