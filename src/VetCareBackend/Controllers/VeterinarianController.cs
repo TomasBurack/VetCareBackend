@@ -21,14 +21,14 @@ namespace VetCareBackend.Presentation.Controllers
 
         ///endopoints admin role ///
 
-        [Authorize(policy: Policies.SoloAdministrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpPost]
         public IActionResult Create([FromBody] VeterinarianRequest request)
         {
             var veterinarian = _veterinarianService.Create(request);
             return Ok(veterinarian);
         }
-        [Authorize(policy: Policies.SoloAdministrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpGet("{id}")]
         public IActionResult GetById([FromRoute] string id)
         {
@@ -37,9 +37,9 @@ namespace VetCareBackend.Presentation.Controllers
 
             return Ok(veterinarian);
         }
-        [Authorize(policy: Policies.SoloAdministrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpPut("{id}")]
-        public IActionResult UpdateByAdmin([FromRoute] string id, [FromBody] VeterinarianRequest request)
+        public IActionResult UpdateByAdmin([FromRoute] string id, [FromBody] VeterinarianUpdateRequest request)
         {
             _veterinarianService.Update(id, request);
             return NoContent();
@@ -47,7 +47,7 @@ namespace VetCareBackend.Presentation.Controllers
 
         [Authorize(policy: Policies.SoloAdministrator)]
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromRoute] string id)
+        public IActionResult AdminDelete([FromRoute] string id)
         {
             _veterinarianService.Delete(id);
             return NoContent();
@@ -55,7 +55,7 @@ namespace VetCareBackend.Presentation.Controllers
 
         /// endpoints for admin y vet ///
 
-        [Authorize(policy: Policies.VetAdm)]
+        [Authorize(policy: Policies.Admins)]
         [HttpGet("veterinarian")]
         public IActionResult GetAll()
         {
@@ -76,13 +76,22 @@ namespace VetCareBackend.Presentation.Controllers
 
         [Authorize(policy: Policies.SoloVeterinarian)]
         [HttpPut("myuser")]
-        public IActionResult Update([FromBody] VeterinarianRequest request)
+        public IActionResult Update([FromBody] VeterinarianUpdateRequest request)
         {
             {
                 string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 _veterinarianService.Update(id, request);
                 return NoContent();
             }
+        }
+
+        [Authorize(policy: Policies.SoloVeterinarian)]
+        [HttpDelete("myuser")]
+        public IActionResult Delete()
+        {
+            string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _veterinarianService.Delete(id);
+            return NoContent();
         }
 
     }

@@ -35,15 +35,6 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            else if (_AdminRep.FindDni(request.Dni) || _repository.FindDni(request.Dni) || _VetRep.FindDni(request.Dni) || _SysadminRep.FindDni(request.Dni))
-            {
-                throw new ConflictException($"The DNI {request.Dni} is already in use");
-            }
-            else if (_AdminRep.FindPN(request.PhoneNumber) || _repository.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber) || _SysadminRep.FindPN(request.PhoneNumber))
-            {
-                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
-            }
-
             request.Password = _hash.Hash(request.Password);
             Guid id = Guid.NewGuid();
             string dtoRole = "Client";
@@ -92,14 +83,7 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            else if (_AdminRep.FindDni(request.Dni) || _repository.FindDni(request.Dni) || _VetRep.FindDni(request.Dni) || _SysadminRep.FindDni(request.Dni))
-            {
-                throw new ConflictException($"The DNI {request.Dni} is already in use");
-            }
-            else if (_AdminRep.FindPN(request.PhoneNumber) || _repository.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber) || _SysadminRep.FindPN(request.PhoneNumber))
-            {
-                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
-            }
+            
             var client = _repository.Get(Id);
             if (client == null)
             {

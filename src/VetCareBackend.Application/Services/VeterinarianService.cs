@@ -7,6 +7,9 @@ using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using VetCareBackend.Application.Validations;
+using VetCareBackend.Domain.Entities;
+using VetCareBackend.Domain.Enums;
 using ValidationException = VetCareBackend.Application.Exceptions.ValidationException;
 
 namespace VetCareBackend.Application.Services
@@ -15,14 +18,29 @@ namespace VetCareBackend.Application.Services
     {
         private readonly IVeterinarianRepository _repository;
         private readonly IPasswordHash _hash;
-        public VeterinarianService (IVeterinarianRepository repository, IPasswordHash hash)
-        { 
+        private readonly IClientRepository _ClientRep;
+        private readonly IAdministratorRepository _AdminRep;
+        private readonly ISysadminRepository _SysadminRep;
+        public VeterinarianService (IVeterinarianRepository repository, IPasswordHash hash, IClientRepository ClientRep, IAdministratorRepository AdminRep, ISysadminRepository SysadminRep)
+        {
+            _ClientRep = ClientRep;
+            _AdminRep = AdminRep;
+            _SysadminRep = SysadminRep;
             _repository = repository;
             _hash = hash;
         }
 
         public VeterinarianResponse Create(VeterinarianRequest request)
         {
+            if (_AdminRep.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email))
+            {
+                throw new ConflictException($"The email {request.Email} is already in use");
+            }
+            VeterinarianRequestValidation validation = new VeterinarianRequestValidation();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
 
             request.Password = _hash.Hash(request.Password);
             var veterinarian = request.ToVeterinarian();
@@ -48,7 +66,7 @@ namespace VetCareBackend.Application.Services
                
             return veterinarian.ToVeterinarianResponse();
         }
-        public void Update(string Sub, VeterinarianRequest request)
+        public void Update(string Sub, VeterinarianUpdateRequest request)
         {
             bool parse = Guid.TryParse(Sub, out Guid id);
             if (!parse)
@@ -61,14 +79,15 @@ namespace VetCareBackend.Application.Services
                 throw new Exception("The veterinarian was not found");
             }
 
-            veterinarian.FirstName = request.FirstName;
-            veterinarian.LastName = request.LastName;
-            veterinarian.PhoneNumber = request.PhoneNumber;
-            veterinarian.Email = request.Email;
-            veterinarian.Enrollment = request.Enrollment;
-            veterinarian.Speciality = request.Speciality;
+            VeterinarianUpdateRequestValidation validation = new VeterinarianUpdateRequestValidation();
+            if (!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
+            var UpdVet = VeterinarianMapper.ToEntityUpdate(veterinarian, request);
 
-            _repository.Update(veterinarian);
+            _repository.Update(UpdVet);
+
         }
         public void Delete(string Sub)
         {
