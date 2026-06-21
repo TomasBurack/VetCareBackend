@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -12,9 +13,11 @@ using VetCareBackend.Application.Services;
 using VetCareBackend.Domain.Enums;
 using VetCareBackend.Infrastructure;
 using VetCareBackend.Infrastructure.ExternalService;
+using VetCareBackend.Infrastructure.HttpResliliencePolicies;
 using VetCareBackend.Infrastructure.Repository;
 using VetCareBackend.Presentation.Authorization;
 using VetCareBackend.Presentation.Middlewares;
+using static VetCareBackend.Infrastructure.HttpResliliencePolicies.HttpPollyPolicies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +84,44 @@ builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
 builder.Services.AddScoped<IMailService, MailService>();
 
+#region HttpClientsFactories
+
+ApiClientConfigurationDTO dogApiResilienceConfiguration = new ApiClientConfigurationDTO()
+{
+    RetryCount = 2,
+    RetryAttemptInSeconds = 3,
+    DurationOfBreakInSeconds = 120,
+    HandledEventsAllowedBeforeBreaking = 10
+};
+
+builder.Services.AddHttpClient("dogHttpClient", client =>
+    {
+        client.BaseAddress = new Uri("https://api.thedogapi.com/");
+        client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ExternalApis: DogsApiKey"]);
+    }
+);
+
+ApiClientConfigurationDTO catApiResilienceConfiguration = new ApiClientConfigurationDTO()
+{
+    RetryCount = 2,
+    RetryAttemptInSeconds = 3,
+    DurationOfBreakInSeconds = 120,
+    HandledEventsAllowedBeforeBreaking = 10
+};
+
+builder.Services.AddHttpClient("catHttpClient", client =>
+{
+    client.BaseAddress = new Uri("https://api.thecatapi.com/");
+    client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ExternalApis:CatsApiKey"]);
+})
+.AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy(catApiResilienceConfiguration))
+.AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(catApiResilienceConfiguration));
+
+
+#endregion
+
+builder.Services.AddScoped<IDogApiService, DogApiService>();
+builder.Services.AddScoped<ICatApiService, CatApiService>();
 
 builder.Services.AddAuthorization(options =>
 {
