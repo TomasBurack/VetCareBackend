@@ -97,9 +97,11 @@ ApiClientConfigurationDTO dogApiResilienceConfiguration = new ApiClientConfigura
 builder.Services.AddHttpClient("dogHttpClient", client =>
     {
         client.BaseAddress = new Uri("https://api.thedogapi.com/");
-        client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ExternalApis: DogsApiKey"]);
+        client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ExternalApis:DogsApiKey"]);
     }
-);
+)
+.AddPolicyHandler(PollyResiliencePolicies.GetRetryPolicy(dogApiResilienceConfiguration))
+.AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(dogApiResilienceConfiguration));
 
 ApiClientConfigurationDTO catApiResilienceConfiguration = new ApiClientConfigurationDTO()
 {
