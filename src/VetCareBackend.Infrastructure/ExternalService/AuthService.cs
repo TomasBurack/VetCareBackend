@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -23,24 +23,37 @@ namespace VetCareBackend.Infrastructure.ExternalService
     {
         private readonly VetCareDbContext _context;
         private readonly IConfiguration _configuration;
-        public AuthService (VetCareDbContext context, IConfiguration configuration)
+        public AuthService(VetCareDbContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
         }
 
-        public AuthResponse SignUp(SignUpRequest request)
+        public async Task<AuthResponse> SignUp(SignUpRequest request)
         {
-            bool emailUsed = _context.Clients.Any(c => c.Email == request.Email && !c.IsDeleted) || _context.Veterinarians.Any(v => v.Email == request.Email && !v.IsDeleted) || _context.Administrators.Any(a => a.Email == request.Email && !a.IsDeleted);
-            bool dniUsed = _context.Clients.Any(c => c.Dni == request.Dni && !c.IsDeleted) || _context.Veterinarians.Any(v => v.Dni == request.Dni && !v.IsDeleted) || _context.Administrators.Any(a => a.Dni == request.Dni && !a.IsDeleted);
-            bool pnUsed = _context.Clients.Any(c => c.PhoneNumber == request.PhoneNumber && !c.IsDeleted) || _context.Veterinarians.Any(v => v.PhoneNumber == request.PhoneNumber && !v.IsDeleted) || _context.Administrators.Any(a => a.PhoneNumber == request.PhoneNumber && !a.IsDeleted);
-            if (emailUsed) {
+            bool emailUsed = await _context.Clients.AnyAsync(c => c.Email == request.Email && !c.IsDeleted)
+                || await _context.Veterinarians.AnyAsync(v => v.Email == request.Email && !v.IsDeleted)
+                || await _context.Administrators.AnyAsync(a => a.Email == request.Email && !a.IsDeleted);
+            bool dniUsed = await _context.Clients.AnyAsync(c => c.Dni == request.Dni && !c.IsDeleted)
+                || await _context.Veterinarians.AnyAsync(v => v.Dni == request.Dni && !v.IsDeleted)
+                || await _context.Administrators.AnyAsync(a => a.Dni == request.Dni && !a.IsDeleted);
+            bool pnUsed = await _context.Clients.AnyAsync(c => c.PhoneNumber == request.PhoneNumber && !c.IsDeleted)
+                || await _context.Veterinarians.AnyAsync(v => v.PhoneNumber == request.PhoneNumber && !v.IsDeleted)
+                || await _context.Administrators.AnyAsync(a => a.PhoneNumber == request.PhoneNumber && !a.IsDeleted);
+
+            if (emailUsed)
+            {
                 throw new ConflictException($"The email {request.Email} is already in use");
-            } else if (dniUsed) {
+            }
+            else if (dniUsed)
+            {
                 throw new ConflictException($"The DNI {request.Dni} is already in use");
-            } else if (pnUsed){
+            }
+            else if (pnUsed)
+            {
                 throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
+
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             request.Password = hashedPassword;
             Guid id = Guid.NewGuid();
@@ -51,18 +64,19 @@ namespace VetCareBackend.Infrastructure.ExternalService
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
             var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
-            
+
             _context.Clients.Add(client);
-            
-            
+
             try
             {
-                _context.SaveChanges();
-            }catch (DbUpdateException ex)
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
             {
                 throw new DatabaseException("There was an error saving the user in the database", ex);
             }
-            return new AuthResponse 
+
+            return new AuthResponse
             {
                 Token = GenerateToken(id, request.Email, dtoRole),
                 Role = dtoRole,
@@ -71,26 +85,26 @@ namespace VetCareBackend.Infrastructure.ExternalService
             };
         }
 
-        public AuthResponse SignIn(SignInRequest request)
+        public async Task<AuthResponse> SignIn(SignInRequest request)
         {
             Guid userId;
             string role;
 
-            var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
-            var veterinarian = _context.Veterinarians.FirstOrDefault(v => v.Email == request.Email);
-            var administrator = _context.Administrators.FirstOrDefault(a => a.Email == request.Email);
-            var sysadmin = _context.Sysadmins.FirstOrDefault(s => s.Email == request.Email);
+            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == request.Email);
+            var veterinarian = await _context.Veterinarians.FirstOrDefaultAsync(v => v.Email == request.Email);
+            var administrator = await _context.Administrators.FirstOrDefaultAsync(a => a.Email == request.Email);
+            var sysadmin = await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == request.Email);
+
             if (client != null && !client.IsDeleted)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
-                    throw new UnauthorizedException("incorrect credentials"); 
+                    throw new UnauthorizedException("incorrect credentials");
 
                 userId = client.Id;
                 role = "Client";
             }
-            else if(veterinarian != null && !veterinarian.IsDeleted)
+            else if (veterinarian != null && !veterinarian.IsDeleted)
             {
-                
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, veterinarian.Password))
                     throw new UnauthorizedException("incorrect credentials");
 
@@ -104,19 +118,22 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
                 userId = administrator.Id;
                 role = "Administrator";
-            } else if (sysadmin != null && !sysadmin.IsDeleted)
+            }
+            else if (sysadmin != null && !sysadmin.IsDeleted)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, sysadmin.Password))
                     throw new UnauthorizedException("incorrect credentials");
                 userId = sysadmin.Id;
                 role = "SysAdmin";
-            }else
+            }
+            else
             {
                 throw new UnauthorizedException("incorrect credentials");
             }
-            return new AuthResponse 
+
+            return new AuthResponse
             {
-                Token = GenerateToken(userId, request.Email,role),
+                Token = GenerateToken(userId, request.Email, role),
                 Role = role,
                 UserId = userId,
                 Email = request.Email

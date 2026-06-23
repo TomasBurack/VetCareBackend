@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
@@ -19,7 +19,7 @@ namespace VetCareBackend.Application.Services
         private readonly IVeterinarianRepository _VetRep;
         private readonly IPasswordHash _hash;
         private readonly ISysadminRepository _SysadminRep;
-        public AdministratorService(IAdministratorRepository repository,IClientRepository ClientRep, IVeterinarianRepository VetRep, IPasswordHash hash, ISysadminRepository sysadmin)
+        public AdministratorService(IAdministratorRepository repository, IClientRepository ClientRep, IVeterinarianRepository VetRep, IPasswordHash hash, ISysadminRepository sysadmin)
         {
             _AdminRep = repository;
             _ClientRep = ClientRep;
@@ -28,12 +28,12 @@ namespace VetCareBackend.Application.Services
             _SysadminRep = sysadmin;
         }
 
-        public UserResponse Create(SignUpRequest request)
+        public async Task<UserResponse> Create(SignUpRequest request)
         {
-            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email)) {
+            if (await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
+            {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            //pasar las validaciones del mapper aca
             SignUpValidator validation = new SignUpValidator();
             if (!validation.Validate(request).IsValid)
             {
@@ -43,18 +43,18 @@ namespace VetCareBackend.Application.Services
             Guid id = Guid.NewGuid();
             string dtoRole = "Administrator";
             var admin = UserMapper.ToEntity<Administrator>(request, dtoRole, id);
-            _AdminRep.Add(admin);
+            await _AdminRep.Add(admin);
             return UserMapper.ToDto<UserResponse>(admin);
         }
 
-        public UserResponse Get(string id)
+        public async Task<UserResponse> Get(string id)
         {
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            var admin = _AdminRep.Get(Id);
+            var admin = await _AdminRep.Get(Id);
             if (admin == null)
             {
                 throw new NotFoundException("Administrator not found");
@@ -62,19 +62,19 @@ namespace VetCareBackend.Application.Services
             return UserMapper.ToDto<UserResponse>(admin);
         }
 
-        public void Update(string id, UserRequest request)
+        public async Task Update(string id, UserRequest request)
         {
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email))
+            if (await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            
-            var admin = _AdminRep.Get(Id);
+
+            var admin = await _AdminRep.Get(Id);
             if (admin == null)
             {
                 throw new NotFoundException("Administrator not found");
@@ -86,10 +86,10 @@ namespace VetCareBackend.Application.Services
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
             admin = UserMapper.ToEntityUpdate<Administrator>(admin, request);
-            _AdminRep.Update(admin);
+            await _AdminRep.Update(admin);
         }
 
-        public void Delete(string id)
+        public async Task Delete(string id)
         {
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
@@ -97,12 +97,12 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException("Invalid ID format");
             }
 
-            _AdminRep.Delete(Id);
+            await _AdminRep.Delete(Id);
         }
 
-        public List<UserResponse> GetAll()
+        public async Task<List<UserResponse>> GetAll()
         {
-            var list = _AdminRep.GetAll();
+            var list = await _AdminRep.GetAll();
             return list.Select(adm => UserMapper.ToDto<UserResponse>(adm)).ToList();
         }
     }

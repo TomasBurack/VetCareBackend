@@ -20,17 +20,17 @@ namespace VetCareBackend.Presentation.Controllers
 
         [HttpPost("signup")]
         [AllowAnonymous]
-        public ActionResult<AuthResponse> SignUp([FromBody] SignUpRequest request)
+        public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
         {
-            var response = _service.SignUp(request);
+            var response = await _service.SignUp(request);
             return StatusCode(StatusCodes.Status201Created, response);
         }
 
         [HttpPost("signin")]
         [AllowAnonymous]
-        public ActionResult<AuthResponse> SignIn([FromBody] SignInRequest request)
+        public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)
         {
-            return Ok(_service.SignIn(request));
+            return Ok(await _service.SignIn(request));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
@@ -9,11 +9,10 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IClientService
     {
-        UserResponse Create(SignUpRequest request);
-        void Delete(string Sub);
-        ClientResponse Get(string Sub);
-
-        List<UserResponse> GetAll();
-        void Update(string Sub, UserRequest request);
+        Task<UserResponse> Create(SignUpRequest request);
+        Task Delete(string Sub);
+        Task<ClientResponse> Get(string Sub);
+        Task<List<UserResponse>> GetAll();
+        Task Update(string Sub, UserRequest request);
     }
 }

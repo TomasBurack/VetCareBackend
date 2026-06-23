@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
+using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
@@ -17,7 +18,7 @@ namespace VetCareBackend.Application.Services
         private readonly IClientRepository _ClientRep;
         private readonly IVeterinarianRepository _VetRep;
         private readonly IPasswordHash _hash;
-        public SysadminService(ISysadminRepository repository ,IAdministratorRepository AdminRep, IClientRepository ClientRep, IVeterinarianRepository VetRep, IPasswordHash hash)
+        public SysadminService(ISysadminRepository repository, IAdministratorRepository AdminRep, IClientRepository ClientRep, IVeterinarianRepository VetRep, IPasswordHash hash)
         {
             _AdminRep = AdminRep;
             _ClientRep = ClientRep;
@@ -27,21 +28,21 @@ namespace VetCareBackend.Application.Services
         }
 
         /*
-        public UserResponse Create(SignUpRequest request)
+        public async Task<UserResponse> Create(SignUpRequest request)
         {
-            if (_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _repository.FindEmail(request.Email))
+            if (await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            else if (_AdminRep.FindDni(request.Dni) || _ClientRep.FindDni(request.Dni) || _VetRep.FindDni(request.Dni) || _repository.FindDni(request.Dni))
+            else if (await _AdminRep.FindDni(request.Dni) || await _ClientRep.FindDni(request.Dni) || await _VetRep.FindDni(request.Dni) || await _repository.FindDni(request.Dni))
             {
                 throw new ConflictException($"The DNI {request.Dni} is already in use");
             }
-            else if (_AdminRep.FindPN(request.PhoneNumber) || _ClientRep.FindPN(request.PhoneNumber) || _VetRep.FindPN(request.PhoneNumber) || _repository.FindPN(request.PhoneNumber))
+            else if (await _AdminRep.FindPN(request.PhoneNumber) || await _ClientRep.FindPN(request.PhoneNumber) || await _VetRep.FindPN(request.PhoneNumber) || await _repository.FindPN(request.PhoneNumber))
             {
                 throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
-            
+
             SignUpValidator validation = new SignUpValidator();
             if (!validation.Validate(request).IsValid)
             {
@@ -51,17 +52,18 @@ namespace VetCareBackend.Application.Services
             Guid id = Guid.NewGuid();
             string dtoRole = "SysAdmin";
             var sysadmin = UserMapper.ToEntity<Sysadmin>(request, dtoRole, id);
-            _repository.Add(sysadmin);
+            await _repository.Add(sysadmin);
             return UserMapper.ToDto<UserResponse>(sysadmin);
         }*/
-        public UserResponse Get(string id)
+
+        public async Task<UserResponse> Get(string id)
         {
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            var Sysadmin = _repository.Get(Id);
+            var Sysadmin = await _repository.Get(Id);
             if (Sysadmin == null)
             {
                 throw new NotFoundException("Sysadmin not found");
@@ -69,18 +71,18 @@ namespace VetCareBackend.Application.Services
             return UserMapper.ToDto<UserResponse>(Sysadmin);
         }
 
-        public void Update(string id, UserRequest request)
+        public async Task Update(string id, UserRequest request)
         {
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            if ( _repository.FindEmail(request.Email) ||_AdminRep.FindEmail(request.Email) || _ClientRep.FindEmail(request.Email) || _VetRep.FindEmail(request.Email))
+            if (await _repository.FindEmail(request.Email) || await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            var Sysadmin = _repository.Get(Id);
+            var Sysadmin = await _repository.Get(Id);
             if (Sysadmin == null)
             {
                 throw new NotFoundException("Sysadmin not found");
@@ -92,10 +94,10 @@ namespace VetCareBackend.Application.Services
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
             Sysadmin = UserMapper.ToEntityUpdate<Sysadmin>(Sysadmin, request);
-            _repository.Update(Sysadmin);
+            await _repository.Update(Sysadmin);
         }
 
-        public void Delete(string id)
+        public async Task Delete(string id)
         {
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
@@ -103,14 +105,13 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException("Invalid ID format");
             }
 
-            _repository.Delete(Id);
+            await _repository.Delete(Id);
         }
 
-        public List<UserResponse> GetAll()
+        public async Task<List<UserResponse>> GetAll()
         {
-            var list = _repository.GetAll();
+            var list = await _repository.GetAll();
             return list.Select(sysadm => UserMapper.ToDto<UserResponse>(sysadm)).ToList();
         }
-
     }
 }
