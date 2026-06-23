@@ -17,27 +17,16 @@ namespace VetCareBackend.Infrastructure.ExternalService
         {
             _mailOptions = mailOptions.Value;
         }
-        public void SendEmail()
+        public void SendEmail(string ToEmail, string ToName, string subjet, string body)
         {
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("tomas", "tomasburack33@gmail.com"));
-            message.To.Add(new MailboxAddress("tomas", "tomasburack22@gmail.com"));
-            message.Subject = "How you doin?";
+            message.From.Add(new MailboxAddress(_mailOptions.UserName, _mailOptions.UserName);
+            message.To.Add(new MailboxAddress(ToName, ToEmail));
+            message.Subject = subjet;
 
-            message.Body = new TextPart("plain")
-            {
-                Text = @"Hey Alice,
+            message.Body = new TextPart("plain") { Text = body };
 
-                        What are you up to this weekend? Monica is throwing one of her parties on
-                        Saturday and I was hoping you could make it.
-
-                        Will you be my +1?
-
-                        -- Joey
-                        "
-            };
-
-            SmtpClient smtp = new SmtpClient();
+            using SmtpClient smtp = new SmtpClient();
             smtp.Connect(_mailOptions.Host, _mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
             smtp.Authenticate(_mailOptions.UserName, _mailOptions.Password);
             smtp.Send(message);

@@ -6,6 +6,6 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IMailService
     {
-        void SendEmail( string ToEmail, string ToName, string subjet, string body);
+        void SendEmail(string ToEmail, string ToName, string subjet, string body);
     }
 }
