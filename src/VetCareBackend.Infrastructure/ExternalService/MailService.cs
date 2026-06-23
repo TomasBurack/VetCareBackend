@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using System;
@@ -17,7 +17,8 @@ namespace VetCareBackend.Infrastructure.ExternalService
         {
             _mailOptions = mailOptions.Value;
         }
-        public void SendEmail()
+
+        public async Task SendEmail()
         {
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress("tomas", "tomasburack33@gmail.com"));
@@ -38,11 +39,10 @@ namespace VetCareBackend.Infrastructure.ExternalService
             };
 
             SmtpClient smtp = new SmtpClient();
-            smtp.Connect(_mailOptions.Host, _mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
-            smtp.Authenticate(_mailOptions.UserName, _mailOptions.Password);
-            smtp.Send(message);
-            smtp.Disconnect(true);
-
+            await smtp.ConnectAsync(_mailOptions.Host, _mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(_mailOptions.UserName, _mailOptions.Password);
+            await smtp.SendAsync(message);
+            await smtp.DisconnectAsync(true);
         }
     }
 }

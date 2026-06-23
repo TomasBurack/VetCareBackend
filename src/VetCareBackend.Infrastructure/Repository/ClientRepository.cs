@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace VetCareBackend.Infrastructure.Repository
 {
@@ -12,22 +13,19 @@ namespace VetCareBackend.Infrastructure.Repository
         {
         }
 
-        public bool FindEmail(string email) 
+        public async Task<bool> FindEmail(string email)
         {
-            bool value = _dbSet.Any(x=> x.Email == email && !x.IsDeleted);
-            return value;
+            return await _dbSet.AnyAsync(x => x.Email == email && !x.IsDeleted);
         }
 
-        public bool FindDni(string dni)
+        public async Task<bool> FindDni(string dni)
         {
-            bool value = _dbSet.Any(x => x.Dni == dni && !x.IsDeleted);
-            return value;
+            return await _dbSet.AnyAsync(x => x.Dni == dni && !x.IsDeleted);
         }
 
-        public bool FindPN(string pn)
+        public async Task<bool> FindPN(string pn)
         {
-            bool value = _dbSet.Any(x => x.PhoneNumber == pn && !x.IsDeleted);
-            return value;
+            return await _dbSet.AnyAsync(x => x.PhoneNumber == pn && !x.IsDeleted);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualBasic.FileIO;
+using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -11,11 +11,11 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IVeterinarianService
     {
-       public VeterinarianResponse Create(VeterinarianRequest request);
-       public List<VeterinarianResponse> GetAll();
-       public VeterinarianResponse GetById(string Sub);
-       public VeterinarianResponse GetByEnrollment(string enrollment);
-       public void Update( string Sub, VeterinarianUpdateRequest request);
-       public void Delete( string Sub );
+       Task<VeterinarianResponse> Create(VeterinarianRequest request);
+       Task<List<VeterinarianResponse>> GetAll();
+       Task<VeterinarianResponse> GetById(string Sub);
+       Task<VeterinarianResponse> GetByEnrollment(string enrollment);
+       Task Update(string Sub, VeterinarianUpdateRequest request);
+       Task Delete(string Sub);
     }
 }

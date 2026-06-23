@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -18,47 +18,38 @@ namespace VetCareBackend.Presentation.Controllers
             _service = service;
         }
 
-        /*[Authorize(policy: Policies.Admins)]
-        [HttpPost("/sysadmin/create")]
-        public IActionResult Create([FromBody] SignUpRequest request)
-        {
-            var sysadmin = _service.Create(request);
-            return Ok(sysadmin);
-        }*/
-
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpGet("/sysadmin/myuser")]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var sysadmin = _service.Get(sub);
+            var sysadmin = await _service.Get(sub);
             return Ok(sysadmin);
         }
 
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpDelete("/sysadmin/myuser/delete")]
-        public IActionResult Delete()
+        public async Task<IActionResult> Delete()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _service.Delete(sub);
+            await _service.Delete(sub);
             return NoContent();
         }
 
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpPut("/sysadmin/myuser/update")]
-        public IActionResult Update([FromBody] UserRequest request)
+        public async Task<IActionResult> Update([FromBody] UserRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _service.Update(sub, request);
+            await _service.Update(sub, request);
             return NoContent();
-
         }
 
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpGet("/sysadmin/all")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var sysadmin = _service.GetAll();
+            var sysadmin = await _service.GetAll();
             return Ok(sysadmin);
         }
     }

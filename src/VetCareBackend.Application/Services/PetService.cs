@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
@@ -22,42 +22,40 @@ namespace VetCareBackend.Application.Services
             _clientRepository = clientRepo;
         }
 
-        public PetResponse Create(PetRequest petReq, string sub)
+        public async Task<PetResponse> Create(PetRequest petReq, string sub)
         {
             bool Parse = Guid.TryParse(sub, out Guid Id);
             if (Parse == false)
             {
                 throw new ValidationException("The ID sent is invalid");
             }
-            var client = _clientRepository.Get(Id);
+            var client = await _clientRepository.Get(Id);
             var newPet = petReq.ToPet(client);
-            _petRepository.Add(newPet);
+            await _petRepository.Add(newPet);
             return newPet.ToPetResponse();
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
-            var pet = _petRepository.Get(id);
+            var pet = await _petRepository.Get(id);
 
-            if (pet == null) 
+            if (pet == null)
             {
                 throw new NotFoundException($"No pet was found with id '{id}'.");
             }
 
-            _petRepository.Delete(id);
+            await _petRepository.Delete(id);
         }
 
-        public List<PetResponse> GetAll()
+        public async Task<List<PetResponse>> GetAll()
         {
-            return _petRepository
-                .GetAll()
-                .Select(p => p.ToPetResponse())
-                .ToList();
+            var pets = await _petRepository.GetAll();
+            return pets.Select(p => p.ToPetResponse()).ToList();
         }
 
-        public PetResponse GetById(Guid id)
+        public async Task<PetResponse> GetById(Guid id)
         {
-            var pet = _petRepository.Get(id);
+            var pet = await _petRepository.Get(id);
 
             if (pet == null)
             {
@@ -67,9 +65,9 @@ namespace VetCareBackend.Application.Services
             return pet.ToPetResponse();
         }
 
-        public void Update(PetRequest petReq, Guid id)
+        public async Task Update(PetRequest petReq, Guid id)
         {
-            var petToUpdate = _petRepository.Get(id);
+            var petToUpdate = await _petRepository.Get(id);
 
             if (petToUpdate == null)
             {
@@ -79,9 +77,8 @@ namespace VetCareBackend.Application.Services
             petToUpdate.Name = petReq.Name;
             petToUpdate.Age = petReq.Age;
             petToUpdate.TypePet = petReq.typePet;
-            //petToUpdate.Breed = petReq.Breed;
 
-            _petRepository.Update(petToUpdate);
+            await _petRepository.Update(petToUpdate);
         }
     }
 }
