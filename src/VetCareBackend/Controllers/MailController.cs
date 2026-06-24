@@ -16,10 +16,17 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         [HttpPost("sendemail")]
-        public async Task<IActionResult> SendEmail()
+        public async Task<IActionResult> SendEmail([FromBody] TestMailRequest request)
         {
-            await _mailService.SendEmail();
-            return Ok();
+            await _mailService.SendEmail(request.ToEmail, request.ToName, request.Subject, request.Body);
+            return Ok("Email enviado correctamente.");
         }
+    }
+    public class TestMailRequest
+    {
+        public string ToEmail { get; set; } = string.Empty;
+        public string ToName { get; set; } = string.Empty;
+        public string Subject { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
     }
 }
