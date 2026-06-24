@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Infrastructure.ExternalService;
@@ -16,9 +16,9 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         [HttpPost("sendemail")]
-        public IActionResult SendEmail()
+        public async Task<IActionResult> SendEmail()
         {
-            _mailService.SendEmail();
+            await _mailService.SendEmail();
             return Ok();
         }
     }

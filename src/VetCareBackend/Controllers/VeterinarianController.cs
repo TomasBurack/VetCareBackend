@@ -5,9 +5,9 @@ using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Presentation.Authorization;
+
 namespace VetCareBackend.Presentation.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class VeterinarianController : ControllerBase
@@ -19,80 +19,71 @@ namespace VetCareBackend.Presentation.Controllers
             _veterinarianService = veterinarianService;
         }
 
-        ///endopoints admin role ///
-
         [Authorize(policy: Policies.Admins)]
         [HttpPost]
-        public IActionResult Create([FromBody] VeterinarianRequest request)
+        public async Task<IActionResult> Create([FromBody] VeterinarianRequest request)
         {
-            var veterinarian = _veterinarianService.Create(request);
+            var veterinarian = await _veterinarianService.Create(request);
             return Ok(veterinarian);
         }
+
         [Authorize(policy: Policies.Admins)]
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] string id)
+        public async Task<IActionResult> GetById([FromRoute] string id)
         {
-
-            var veterinarian = _veterinarianService.GetById(id);
-
+            var veterinarian = await _veterinarianService.GetById(id);
             return Ok(veterinarian);
         }
+
         [Authorize(policy: Policies.Admins)]
         [HttpPut("{id}")]
-        public IActionResult UpdateByAdmin([FromRoute] string id, [FromBody] VeterinarianUpdateRequest request)
+        public async Task<IActionResult> UpdateByAdmin([FromRoute] string id, [FromBody] VeterinarianUpdateRequest request)
         {
-            _veterinarianService.Update(id, request);
+            await _veterinarianService.Update(id, request);
             return NoContent();
         }
 
         [Authorize(policy: Policies.SoloAdministrator)]
         [HttpDelete("{id}")]
-        public IActionResult AdminDelete([FromRoute] string id)
+        public async Task<IActionResult> AdminDelete([FromRoute] string id)
         {
-            _veterinarianService.Delete(id);
+            await _veterinarianService.Delete(id);
             return NoContent();
         }
 
-        /// endpoints for admin y vet ///
-
         [Authorize(policy: Policies.Admins)]
         [HttpGet("veterinarian")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var veterinarians = _veterinarianService.GetAll();
+            var veterinarians = await _veterinarianService.GetAll();
             return Ok(veterinarians);
         }
 
-        /// endpoint for vet ///
-
         [Authorize(policy: Policies.SoloVeterinarian)]
         [HttpGet("myuser")]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var veterinarian = _veterinarianService.GetById(id);
+            var veterinarian = await _veterinarianService.GetById(id);
             return Ok(veterinarian);
         }
 
         [Authorize(policy: Policies.SoloVeterinarian)]
         [HttpPut("myuser")]
-        public IActionResult Update([FromBody] VeterinarianUpdateRequest request)
+        public async Task<IActionResult> Update([FromBody] VeterinarianUpdateRequest request)
         {
-            {
-                string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                _veterinarianService.Update(id, request);
-                return NoContent();
-            }
+            string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _veterinarianService.Update(id, request);
+            return NoContent();
         }
 
         [Authorize(policy: Policies.SoloVeterinarian)]
         [HttpDelete("myuser")]
-        public IActionResult Delete()
+        public async Task<IActionResult> Delete()
         {
             string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _veterinarianService.Delete(id);
+            await _veterinarianService.Delete(id);
             return NoContent();
         }
-
     }
 }

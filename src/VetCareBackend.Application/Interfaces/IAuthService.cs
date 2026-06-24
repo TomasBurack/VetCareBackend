@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
@@ -8,7 +8,9 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IAuthService
     {
-        AuthResponse SignUp(SignUpRequest request); //registrarse
-        AuthResponse SignIn(SignInRequest request); //iniciar sesion
+        Task<AuthResponse> SignUp(SignUpRequest request);
+        Task<AuthResponse> SignIn(SignInRequest request);
+        Task ForgotPassword(ForgotPasswordRequest request);
+        Task ResetPassword(ResetPasswordRequest request);
     }
 }

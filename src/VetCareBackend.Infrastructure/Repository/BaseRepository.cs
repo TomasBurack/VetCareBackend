@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,37 +16,41 @@ namespace VetCareBackend.Infrastructure.Repository
             _context = context;
             _dbSet = context.Set<T>();
         }
-        public virtual List<T> GetAll()
+
+        public virtual async Task<List<T>> GetAll()
         {
-            return _dbSet.Where(a => !a.IsDeleted).ToList();
+            return await _dbSet.Where(a => !a.IsDeleted).ToListAsync();
         }
 
-        public virtual T? Get(Guid IdEntity)
+        public virtual async Task<T?> Get(Guid IdEntity)
         {
-            return _dbSet.FirstOrDefault(a => a.Id == IdEntity && !a.IsDeleted);
+            return await _dbSet.FirstOrDefaultAsync(a => a.Id == IdEntity && !a.IsDeleted);
         }
-        public virtual T Add(T entity)
+
+        public virtual async Task<T> Add(T entity)
         {
             _dbSet.Add(entity);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return entity;
         }
-        public virtual void Update(T entity)
+
+        public virtual async Task Update(T entity)
         {
             entity.UpdateDate = DateTime.UtcNow;
             _dbSet.Update(entity);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
-        public virtual void Delete(Guid IdEntity)
+
+        public virtual async Task Delete(Guid IdEntity)
         {
-            var entity = Get(IdEntity);
+            var entity = await Get(IdEntity);
             if (entity != null)
             {
                 entity.DeleteDate = DateTime.UtcNow;
                 entity.IsDeleted = true;
 
                 _dbSet.Update(entity);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }

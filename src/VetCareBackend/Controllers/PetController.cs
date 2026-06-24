@@ -24,9 +24,9 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<PetResponse>> GetAll()
+        public async Task<ActionResult<List<PetResponse>>> GetAll()
         {
-            var pets = _petService.GetAll();
+            var pets = await _petService.GetAll();
 
             if (!pets.Any())
                 return NotFound("No ha mascotas registradas.");
@@ -35,30 +35,30 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<PetResponse> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<PetResponse>> GetById([FromRoute] Guid id)
         {
-            return Ok(_petService.GetById(id));
+            return Ok(await _petService.GetById(id));
         }
 
         [HttpPost]
-        public ActionResult<PetResponse> Create([FromBody] PetRequest pet)
+        public async Task<ActionResult<PetResponse>> Create([FromBody] PetRequest pet)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var createdPet = _petService.Create(pet, sub);
+            var createdPet = await _petService.Create(pet, sub);
             return CreatedAtAction(nameof(GetById), new { id = createdPet.IdPet }, createdPet);
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] Guid id)
+        public async Task<ActionResult> Delete([FromRoute] Guid id)
         {
-            _petService.Delete(id);
+            await _petService.Delete(id);
             return NoContent();
         }
 
         [HttpPut("{id}")]
-        public ActionResult Update([FromBody] PetRequest pet, [FromRoute] Guid id)
+        public async Task<ActionResult> Update([FromBody] PetRequest pet, [FromRoute] Guid id)
         {
-            _petService.Update(pet, id);
+            await _petService.Update(pet, id);
             return NoContent();
         }
     }

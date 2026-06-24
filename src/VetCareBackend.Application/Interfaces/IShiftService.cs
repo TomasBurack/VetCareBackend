@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Application.dtos.Requests;
@@ -8,10 +8,9 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IShiftService
     {
-        List<ShiftResponse> GetAll();
-        ShiftResponse Create(ShiftRequest shiftReq);
-        void UpdateStatus(Guid id, ShiftStatusRequest request);
-        void Delete(Guid id);
-
+        Task<List<ShiftResponse>> GetAll();
+        Task<ShiftResponse> Create(ShiftRequest shiftReq);
+        Task UpdateStatus(Guid id, ShiftStatusRequest request);
+        Task Delete(Guid id);
     }
 }

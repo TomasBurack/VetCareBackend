@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
@@ -29,9 +29,9 @@ namespace VetCareBackend.Application.Services
             _hash = hash;
         }
 
-        public UserResponse Create(SignUpRequest request)
+        public async Task<UserResponse> Create(SignUpRequest request)
         {
-            if (_AdminRep.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email))
+            if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
@@ -44,27 +44,28 @@ namespace VetCareBackend.Application.Services
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
             var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
-            _repository.Add(client);
+            await _repository.Add(client);
             return UserMapper.ToDto<UserResponse>(client);
         }
-        public void Delete(string Sub)
+
+        public async Task Delete(string Sub)
         {
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
             {
                 throw new ValidationException("The ID sent is invalid");
             }
-            _repository.Delete(Id);
+            await _repository.Delete(Id);
         }
 
-        public ClientResponse Get(string Sub)
+        public async Task<ClientResponse> Get(string Sub)
         {
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
             {
                 throw new ValidationException("The ID sent is invalid");
             }
-            var client = _repository.Get(Id);
+            var client = await _repository.Get(Id);
             if (client == null)
             {
                 throw new NotFoundException("The user was not found.");
@@ -72,19 +73,19 @@ namespace VetCareBackend.Application.Services
             return UserMapper.ToDto<ClientResponse>(client);
         }
 
-        public void Update(string Sub, UserRequest request)
+        public async Task Update(string Sub, UserRequest request)
         {
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
             {
                 throw new ValidationException("The ID sent is invalid");
             }
-            if (_AdminRep.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _VetRep.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email))
+            if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            
-            var client = _repository.Get(Id);
+
+            var client = await _repository.Get(Id);
             if (client == null)
             {
                 throw new NotFoundException("The user was not found.");
@@ -98,12 +99,12 @@ namespace VetCareBackend.Application.Services
 
             var UpdClient = UserMapper.ToEntityUpdate<Client>(client, request);
 
-            _repository.Update(UpdClient);
+            await _repository.Update(UpdClient);
         }
 
-        public List<UserResponse> GetAll()
+        public async Task<List<UserResponse>> GetAll()
         {
-            var list = _repository.GetAll();
+            var list = await _repository.GetAll();
             return list.Select(client => UserMapper.ToDto<UserResponse>(client)).ToList();
         }
     }

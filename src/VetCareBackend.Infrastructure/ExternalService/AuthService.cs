@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
@@ -23,24 +24,96 @@ namespace VetCareBackend.Infrastructure.ExternalService
     {
         private readonly VetCareDbContext _context;
         private readonly IConfiguration _configuration;
-        public AuthService (VetCareDbContext context, IConfiguration configuration)
+        private readonly IMailService _mailService;
+        public AuthService(VetCareDbContext context, IConfiguration configuration, IMailService mailService)
         {
             _context = context;
             _configuration = configuration;
+            _mailService = mailService;
+        }
+        public async Task ForgotPassword(ForgotPasswordRequest request)
+        {
+            bool emailExists =
+                await _context.Clients.AnyAsync(c => c.Email == request.Email && !c.IsDeleted) ||
+                await _context.Veterinarians.AnyAsync(v => v.Email == request.Email && !v.IsDeleted) ||
+                await _context.Administrators.AnyAsync(a => a.Email == request.Email && !a.IsDeleted) ||
+                await _context.Sysadmins.AnyAsync(s => s.Email == request.Email && !s.IsDeleted);
+
+            if (!emailExists) return;
+            string token = Guid.NewGuid().ToString("N");
+
+            var resetToken = new PasswordResetToken
+            {
+                Id = Guid.NewGuid(),
+                Token = token,
+                Email = request.Email,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+                isUsed = false
+            };
+
+            _context.PasswordResetTokens.Add(resetToken);
+            await _context.SaveChangesAsync();
+
+            string resetLink = $"https://tuapp.com/reset-password?token={token}";
+            string body = $"Hola,\n\nPara restablecer tu contraseña hacé click en el siguiente link:\n\n{resetLink}\n\nEste link vence en 15 minutos.\n\nSi no solicitaste esto, ignore este mensaje.";
+
+            await _mailService.SendEmail(request.Email, request.Email, "Recuperacion de contraseña - VetCare", body);
         }
 
-        public AuthResponse SignUp(SignUpRequest request)
+        public async Task ResetPassword(ResetPasswordRequest request)
         {
-            bool emailUsed = _context.Clients.Any(c => c.Email == request.Email && !c.IsDeleted) || _context.Veterinarians.Any(v => v.Email == request.Email && !v.IsDeleted) || _context.Administrators.Any(a => a.Email == request.Email && !a.IsDeleted);
-            bool dniUsed = _context.Clients.Any(c => c.Dni == request.Dni && !c.IsDeleted) || _context.Veterinarians.Any(v => v.Dni == request.Dni && !v.IsDeleted) || _context.Administrators.Any(a => a.Dni == request.Dni && !a.IsDeleted);
-            bool pnUsed = _context.Clients.Any(c => c.PhoneNumber == request.PhoneNumber && !c.IsDeleted) || _context.Veterinarians.Any(v => v.PhoneNumber == request.PhoneNumber && !v.IsDeleted) || _context.Administrators.Any(a => a.PhoneNumber == request.PhoneNumber && !a.IsDeleted);
-            if (emailUsed) {
+            var resetToken = await _context.PasswordResetTokens
+                .FirstOrDefaultAsync(t => t.Token == request.Token);
+
+            if (resetToken == null)
+                throw new NotFoundException("El token no es valido");
+
+            if (resetToken.isUsed)
+                throw new ValidationException("El token ya fue utilizado");
+
+            if (resetToken.ExpiresAt < DateTime.UtcNow)
+                throw new ValidationException("El token ha espirado");
+
+            User? user = 
+                (User?) await _context.Clients.FirstOrDefaultAsync(c => c.Email == resetToken.Email && !c.IsDeleted) ??
+                (User?) await _context.Veterinarians.FirstOrDefaultAsync(v => v.Email == resetToken.Email && !v.IsDeleted) ??
+                (User? )await _context.Administrators.FirstOrDefaultAsync(a => a.Email == resetToken.Email && !a.IsDeleted) ??
+                (User?) await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == resetToken.Email && !s.IsDeleted);
+
+            if (user == null)
+                throw new NotFoundException("No se encontro el usuario asociado al token");
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            resetToken.isUsed = true;
+
+            await _context.SaveChangesAsync();
+
+        }
+        public async Task<AuthResponse> SignUp(SignUpRequest request)
+        {
+            bool emailUsed = await _context.Clients.AnyAsync(c => c.Email == request.Email && !c.IsDeleted)
+                || await _context.Veterinarians.AnyAsync(v => v.Email == request.Email && !v.IsDeleted)
+                || await _context.Administrators.AnyAsync(a => a.Email == request.Email && !a.IsDeleted);
+            bool dniUsed = await _context.Clients.AnyAsync(c => c.Dni == request.Dni && !c.IsDeleted)
+                || await _context.Veterinarians.AnyAsync(v => v.Dni == request.Dni && !v.IsDeleted)
+                || await _context.Administrators.AnyAsync(a => a.Dni == request.Dni && !a.IsDeleted);
+            bool pnUsed = await _context.Clients.AnyAsync(c => c.PhoneNumber == request.PhoneNumber && !c.IsDeleted)
+                || await _context.Veterinarians.AnyAsync(v => v.PhoneNumber == request.PhoneNumber && !v.IsDeleted)
+                || await _context.Administrators.AnyAsync(a => a.PhoneNumber == request.PhoneNumber && !a.IsDeleted);
+
+            if (emailUsed)
+            {
                 throw new ConflictException($"The email {request.Email} is already in use");
-            } else if (dniUsed) {
+            }
+            else if (dniUsed)
+            {
                 throw new ConflictException($"The DNI {request.Dni} is already in use");
-            } else if (pnUsed){
+            }
+            else if (pnUsed)
+            {
                 throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
             }
+
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             request.Password = hashedPassword;
             Guid id = Guid.NewGuid();
@@ -51,18 +124,19 @@ namespace VetCareBackend.Infrastructure.ExternalService
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
             var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
-            
+
             _context.Clients.Add(client);
-            
-            
+
             try
             {
-                _context.SaveChanges();
-            }catch (DbUpdateException ex)
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
             {
                 throw new DatabaseException("There was an error saving the user in the database", ex);
             }
-            return new AuthResponse 
+
+            return new AuthResponse
             {
                 Token = GenerateToken(id, request.Email, dtoRole),
                 Role = dtoRole,
@@ -71,26 +145,26 @@ namespace VetCareBackend.Infrastructure.ExternalService
             };
         }
 
-        public AuthResponse SignIn(SignInRequest request)
+        public async Task<AuthResponse> SignIn(SignInRequest request)
         {
             Guid userId;
             string role;
 
-            var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
-            var veterinarian = _context.Veterinarians.FirstOrDefault(v => v.Email == request.Email);
-            var administrator = _context.Administrators.FirstOrDefault(a => a.Email == request.Email);
-            var sysadmin = _context.Sysadmins.FirstOrDefault(s => s.Email == request.Email);
+            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == request.Email);
+            var veterinarian = await _context.Veterinarians.FirstOrDefaultAsync(v => v.Email == request.Email);
+            var administrator = await _context.Administrators.FirstOrDefaultAsync(a => a.Email == request.Email);
+            var sysadmin = await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == request.Email);
+
             if (client != null && !client.IsDeleted)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
-                    throw new UnauthorizedException("incorrect credentials"); 
+                    throw new UnauthorizedException("incorrect credentials");
 
                 userId = client.Id;
                 role = "Client";
             }
-            else if(veterinarian != null && !veterinarian.IsDeleted)
+            else if (veterinarian != null && !veterinarian.IsDeleted)
             {
-                
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, veterinarian.Password))
                     throw new UnauthorizedException("incorrect credentials");
 
@@ -104,19 +178,22 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
                 userId = administrator.Id;
                 role = "Administrator";
-            } else if (sysadmin != null && !sysadmin.IsDeleted)
+            }
+            else if (sysadmin != null && !sysadmin.IsDeleted)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, sysadmin.Password))
                     throw new UnauthorizedException("incorrect credentials");
                 userId = sysadmin.Id;
                 role = "SysAdmin";
-            }else
+            }
+            else
             {
                 throw new UnauthorizedException("incorrect credentials");
             }
-            return new AuthResponse 
+
+            return new AuthResponse
             {
-                Token = GenerateToken(userId, request.Email,role),
+                Token = GenerateToken(userId, request.Email, role),
                 Role = role,
                 UserId = userId,
                 Email = request.Email

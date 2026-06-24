@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,7 +21,7 @@ namespace VetCareBackend.Application.Services
         private readonly IClientRepository _ClientRep;
         private readonly IAdministratorRepository _AdminRep;
         private readonly ISysadminRepository _SysadminRep;
-        public VeterinarianService (IVeterinarianRepository repository, IPasswordHash hash, IClientRepository ClientRep, IAdministratorRepository AdminRep, ISysadminRepository SysadminRep)
+        public VeterinarianService(IVeterinarianRepository repository, IPasswordHash hash, IClientRepository ClientRep, IAdministratorRepository AdminRep, ISysadminRepository SysadminRep)
         {
             _ClientRep = ClientRep;
             _AdminRep = AdminRep;
@@ -30,9 +30,9 @@ namespace VetCareBackend.Application.Services
             _hash = hash;
         }
 
-        public VeterinarianResponse Create(VeterinarianRequest request)
+        public async Task<VeterinarianResponse> Create(VeterinarianRequest request)
         {
-            if (_AdminRep.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _repository.FindEmail(request.Email) || _SysadminRep.FindEmail(request.Email))
+            if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
@@ -44,36 +44,40 @@ namespace VetCareBackend.Application.Services
 
             request.Password = _hash.Hash(request.Password);
             var veterinarian = request.ToVeterinarian();
-            _repository.Add(veterinarian);
-            return veterinarian.ToVeterinarianResponse();
-
-        }
-        public List<VeterinarianResponse> GetAll() {
-           return _repository.GetAll().Select( v => v.ToVeterinarianResponse()).ToList();
-
-        }
-        public VeterinarianResponse GetById(string Sub) {
-            bool parse = Guid.TryParse( Sub, out Guid id);
-            if (!parse)
-            {
-                throw new ValidationException("The ID sent is invalid");
-            }
-            var veterinarian = _repository.Get(id);
-            if (veterinarian == null)
-            {
-                throw new Exception("The veterinarian was not found");
-            }
-               
+            await _repository.Add(veterinarian);
             return veterinarian.ToVeterinarianResponse();
         }
-        public void Update(string Sub, VeterinarianUpdateRequest request)
+
+        public async Task<List<VeterinarianResponse>> GetAll()
+        {
+            var list = await _repository.GetAll();
+            return list.Select(v => v.ToVeterinarianResponse()).ToList();
+        }
+
+        public async Task<VeterinarianResponse> GetById(string Sub)
         {
             bool parse = Guid.TryParse(Sub, out Guid id);
             if (!parse)
             {
                 throw new ValidationException("The ID sent is invalid");
             }
-            var veterinarian = _repository.Get(id);
+            var veterinarian = await _repository.Get(id);
+            if (veterinarian == null)
+            {
+                throw new Exception("The veterinarian was not found");
+            }
+
+            return veterinarian.ToVeterinarianResponse();
+        }
+
+        public async Task Update(string Sub, VeterinarianUpdateRequest request)
+        {
+            bool parse = Guid.TryParse(Sub, out Guid id);
+            if (!parse)
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
+            var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
                 throw new Exception("The veterinarian was not found");
@@ -86,29 +90,28 @@ namespace VetCareBackend.Application.Services
             }
             var UpdVet = VeterinarianMapper.ToEntityUpdate(veterinarian, request);
 
-            _repository.Update(UpdVet);
-
+            await _repository.Update(UpdVet);
         }
-        public void Delete(string Sub)
+
+        public async Task Delete(string Sub)
         {
             bool parse = Guid.TryParse(Sub, out Guid id);
             if (!parse)
             {
                 throw new ValidationException("The ID sent is invalid");
             }
-            var veterinarian = _repository.Get(id);
+            var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
                 throw new Exception("The veterinarian was not found");
             }
-            _repository.Delete(id);
-
+            await _repository.Delete(id);
         }
 
-        public VeterinarianResponse GetByEnrollment(string enrollment)
+        public async Task<VeterinarianResponse> GetByEnrollment(string enrollment)
         {
-            var vet = _repository.GetAll()
-                .FirstOrDefault(v => v.Enrollment == enrollment);
+            var list = await _repository.GetAll();
+            var vet = list.FirstOrDefault(v => v.Enrollment == enrollment);
 
             if (vet == null)
                 throw new NotFoundException("The veterinarian was not found");

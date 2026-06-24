@@ -5,7 +5,7 @@ using System.Text;
 
 namespace VetCareBackend.Domain.Entities
 {
-    internal class PasswordResetToken
+    public class PasswordResetToken
     {
         public Guid Id { get; set; }
         public string Token { get; set; } = string.Empty;
