@@ -73,7 +73,7 @@ jobs:
       - name: Correr migraciones EF Core
         env:
           ConnectionStrings__VetCareConnectionStrings: ${{ secrets.CONNECTION_STRING }}
-        run: dotnet ef database update --project src/VetCareBackend.Infrastructure --startup-project src/VetCareBackend.Presentation --no-build
+        run: dotnet ef database update --project src/VetCareBackend.Infrastructure --startup-project src/VetCareBackend.Presentation
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -81,5 +81,5 @@ jobs:
         with:
           app-name: 'vetcare-api'
           slot-name: 'Production'
-          package: .
+          package: ./publish
           
