@@ -27,7 +27,7 @@ jobs:
         run: dotnet restore src/VetCareBackend.slnx
 
       - name: Build application
-        run: dotnet restore src/VetCareBackend.slnx --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+        run: dotnet build src/VetCareBackend.slnx --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
       - name: dotnet publish
         run: dotnet publish src/VetCareBackend.slnx -c Release -o "${{env.DOTNET_ROOT}}/myapp"
