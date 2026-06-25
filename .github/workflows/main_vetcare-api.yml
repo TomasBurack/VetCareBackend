@@ -43,6 +43,8 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
