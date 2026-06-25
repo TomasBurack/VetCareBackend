@@ -45,15 +45,17 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app
+          path: ./publish
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.x'
-
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: .net-app
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -62,11 +64,20 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_ED013BF0AAFA47D9BF231560BD5FF411 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D9EC1E29C4546EFACFC8A03034EBD58 }}
 
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version 10.*
+      - name: Restore dependencias (para dotnet-ef)
+        run: dotnet restore
 
-      - name: Update database with EF
-        run: dotnet ef database update --project src/VetCareBackend.Infrastructure/VetCareBackend.Infrastructure.csproj --startup-project src/VetCareBackend/VetCareBackend.csproj
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Correr migraciones EF Core
+        env:
+          ConnectionStrings__VetCareConnectionStrings: ${{ secrets.CONNECTION_STRING }}
+        run: |
+          dotnet ef database update \
+            --project VetCareBackend.Infrastructure \
+            --startup-project VetCareBackend.Presentation \
+            --no-build
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
