@@ -71,6 +71,7 @@ jobs:
         run: dotnet tool install --global dotnet-ef
 
       - name: Correr migraciones EF Core
+        working-directory: ./src
         env:
           ConnectionStrings__VetCareConnectionStrings: ${{ secrets.CONNECTION_STRING }}
         run: dotnet ef database update --project src/VetCareBackend.Infrastructure --startup-project src/VetCareBackend.Presentation
