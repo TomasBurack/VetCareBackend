@@ -3,7 +3,7 @@
 
 name: Build and deploy ASP.Net Core app to Azure Web App - vetcare-api
 
-on:
+on: #cuando se ejecuta el workflow(archivo)
   push:
     branches:
       - main
@@ -22,12 +22,15 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.x'
+          
+      - name: Restore dependencies
+        run: dotnet restore VetCareBackend.slnx
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Build application
+        run: dotnet restore src/VetCareBackend.slnx --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish src/VetCareBackend.slnx -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
