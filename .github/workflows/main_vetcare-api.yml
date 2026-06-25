@@ -24,7 +24,7 @@ jobs:
           dotnet-version: '10.x'
           
       - name: Restore dependencies
-        run: dotnet restore VetCareBackend.slnx
+        run: dotnet restore src/VetCareBackend.slnx
 
       - name: Build application
         run: dotnet restore src/VetCareBackend.slnx --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
