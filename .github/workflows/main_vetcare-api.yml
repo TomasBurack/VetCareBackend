@@ -1,0 +1,85 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP.Net Core app to Azure Web App - vetcare-api
+
+on: #cuando se ejecuta el workflow(archivo)
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps: #comienza la ejecucion
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Build application for azure
+        run: dotnet build src/VetCareBackend.slnx --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish src/VetCareBackend.slnx -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0D6C46B3F81C48048E954A1FC093D09A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_ED013BF0AAFA47D9BF231560BD5FF411 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D9EC1E29C4546EFACFC8A03034EBD58 }}
+
+      - name: Restore dependencias (para dotnet-ef)
+        run: dotnet restore src/VetCareBackend.slnx
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Correr migraciones EF Core
+        env:
+          ConnectionStrings__VetCareConnectionStrings: ${{ secrets.CONNECTION_STRING }}
+        run: dotnet ef database update --project src/VetCareBackend.Infrastructure --startup-project src/VetCareBackend
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'vetcare-api'
+          slot-name: 'Production'
+          package: ./publish
+          
