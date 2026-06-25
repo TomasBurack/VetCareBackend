@@ -15,19 +15,16 @@ jobs:
     permissions:
       contents: read #This is required for actions/checkout
 
-    steps:
+    steps: #comienza la ejecucion
       - uses: actions/checkout@v4
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.x'
-          
-      - name: Restore dependencies
-        run: dotnet restore src/VetCareBackend.slnx
 
-      - name: Build application
-        run: dotnet build src/VetCareBackend.slnx --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+      - name: Build application for azure
+        run: dotnet build src/VetCareBackend.slnx --configuration Release
 
       - name: dotnet publish
         run: dotnet publish src/VetCareBackend.slnx -c Release -o "${{env.DOTNET_ROOT}}/myapp"
