@@ -65,7 +65,7 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D9EC1E29C4546EFACFC8A03034EBD58 }}
 
       - name: Restore dependencias (para dotnet-ef)
-        run: dotnet restore
+        run: dotnet restore src/VetCareBackend.slnx
 
       - name: Install dotnet-ef tool
         run: dotnet tool install --global dotnet-ef
