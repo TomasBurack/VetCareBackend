@@ -43,6 +43,11 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -54,6 +59,12 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0D6C46B3F81C48048E954A1FC093D09A }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_ED013BF0AAFA47D9BF231560BD5FF411 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D9EC1E29C4546EFACFC8A03034EBD58 }}
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef --version 10.*
+
+      - name: Update database with EF
+        run: dotnet ef database update --project src/VetCareBackend.Infrastructure/VetCareBackend.Infrastructure.csproj --startup-project src/VetCareBackend/VetCareBackend.csproj
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
