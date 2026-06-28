@@ -13,7 +13,9 @@ namespace VetCareBackend.Presentation.Controllers
         {
             _dogService = dogService;
         }
-
+        /// <summary>
+        /// This endpoint retrieves a list of all dog breeds from the external Dog API.
+        /// </summary>
         [HttpGet("breeds")]
         public async Task<IReadOnlyList<string>> GetBreeds()
         {

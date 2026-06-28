@@ -17,7 +17,9 @@ namespace VetCareBackend.Presentation.Controllers
         {
             _service = service;
         }
-
+        /// <summary>
+        /// This endpoint retrieves the information of the currently authenticated sysadmin user. It requires the user to be authorized
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpGet("/sysadmin/myuser")]
         public async Task<IActionResult> Get()
@@ -26,7 +28,9 @@ namespace VetCareBackend.Presentation.Controllers
             var sysadmin = await _service.Get(sub);
             return Ok(sysadmin);
         }
-
+        /// <summary>
+        /// This endpoint deletes the currently authenticated sysadmin user.
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpDelete("/sysadmin/myuser/delete")]
         public async Task<IActionResult> Delete()
@@ -35,7 +39,10 @@ namespace VetCareBackend.Presentation.Controllers
             await _service.Delete(sub);
             return NoContent();
         }
-
+        /// <summary>
+        /// This endpoint updates the information of the currently authenticated sysadmin user. 
+        /// It requires the user to be authorized and provides a UserRequest object in the request body containing the updated information.
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpPut("/sysadmin/myuser/update")]
         public async Task<IActionResult> Update([FromBody] UserRequest request)
@@ -44,7 +51,9 @@ namespace VetCareBackend.Presentation.Controllers
             await _service.Update(sub, request);
             return NoContent();
         }
-
+        /// <summary>
+        /// This endpoint retrieves a list of all sysadmin users in the system. It requires the user to be authorized and returns a list of sysadmin information.
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpGet("/sysadmin/all")]
         public async Task<IActionResult> GetAll()
