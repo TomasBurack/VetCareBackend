@@ -14,7 +14,9 @@ namespace VetCareBackend.Presentation.Controllers
         {
             _mailService = mailService;
         }
-
+        /// <summary>
+        /// This endpoint is used to send an email. It calls the SendEmail method from the IMailService interface.
+        /// </summary>
         [HttpPost("sendemail")]
         public async Task<IActionResult> SendEmail()
         {
