@@ -37,5 +37,21 @@ namespace VetCareBackend.Presentation.Controllers
         {
             return Ok(await _service.SignIn(request));
         }
+
+        [HttpPost("forgost-post")]
+        [AllowAnonymous]
+        public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            await _service.ForgotPassword(request);
+            return Ok("Si el mail existe, recibiras las instrucciones");
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request) 
+        {
+            await _service.ResetPassword(request);
+            return Ok("Contraseña actualizada correctamente");
+        }
     }
 }

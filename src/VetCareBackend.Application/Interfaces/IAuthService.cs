@@ -10,5 +10,7 @@ namespace VetCareBackend.Application.Interfaces
     {
         Task<AuthResponse> SignUp(SignUpRequest request);
         Task<AuthResponse> SignIn(SignInRequest request);
+        Task ForgotPassword(ForgotPasswordRequest request);
+        Task ResetPassword(ResetPasswordRequest request);
     }
 }

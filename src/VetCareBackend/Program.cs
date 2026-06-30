@@ -84,7 +84,6 @@ builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
 builder.Services.AddScoped<IMailService, MailService>();
 
-#region HttpClientsFactories
 
 ApiClientConfigurationDTO dogApiResilienceConfiguration = new ApiClientConfigurationDTO()
 {
@@ -120,7 +119,7 @@ builder.Services.AddHttpClient("catHttpClient", client =>
 .AddPolicyHandler(PollyResiliencePolicies.GetCircuitBreakerPolicy(catApiResilienceConfiguration));
 
 
-#endregion
+//endregion
 
 builder.Services.AddScoped<IDogApiService, DogApiService>();
 builder.Services.AddScoped<ICatApiService, CatApiService>();
