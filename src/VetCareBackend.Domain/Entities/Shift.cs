@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VetCareBackend.Domain.Enums;
@@ -7,7 +7,7 @@ namespace VetCareBackend.Domain.Entities
 {
     public class Shift : BaseEntity
     {
-        public DateTime DateShift { get; set; }
+        public DateTimeOffset DateShift { get; set; }
 
         public string Enrollment {  get; set; } = string.Empty;
 
