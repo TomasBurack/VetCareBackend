@@ -17,7 +17,10 @@ namespace VetCareBackend.Presentation.Controllers
         {
             _service = service;
         }
-
+        /// <summary>
+        /// This endpoint allows a new user to sign up by providing their details. 
+        /// It accepts a SignUpRequest object in the request body and returns an AuthResponse object upon successful registration.
+        /// </summary>
         [HttpPost("signup")]
         [AllowAnonymous]
         public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
@@ -25,7 +28,9 @@ namespace VetCareBackend.Presentation.Controllers
             var response = await _service.SignUp(request);
             return StatusCode(StatusCodes.Status201Created, response);
         }
-
+        /// <summary>
+        /// This endpoint allows an existing user to sign in by providing their credentials.
+        /// </summary>
         [HttpPost("signin")]
         [AllowAnonymous]
         public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)

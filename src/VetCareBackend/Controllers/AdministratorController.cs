@@ -26,6 +26,12 @@ namespace VetCareBackend.Presentation.Controllers
             _sysadminService = sysadminService;
         }
 
+        /// <summary>
+        /// This enpoint allows an administrator to retrieve their own user information. 
+        /// It requires the user to be authenticated and authorized as a SoloAdministrator. 
+        /// The endpoint extracts the user's unique identifier (sub) from the claims and uses it to fetch the corresponding administrator details from the service layer. 
+        /// The response is returned in an HTTP 200 OK status with the administrator's information.
+        /// </summary>
         [Authorize(policy: Policies.SoloAdministrator)]
         [HttpGet("/admin/myuser")]
         public async Task<IActionResult> Get()
@@ -34,7 +40,9 @@ namespace VetCareBackend.Presentation.Controllers
             var admin = await _service.Get(sub);
             return Ok(admin);
         }
-
+        /// <summary>
+        /// This endpoint allows an administrator to delete their own user account.
+        /// </summary>
         [Authorize(policy: Policies.SoloAdministrator)]
         [HttpDelete("/admin/myuser/delete")]
         public async Task<IActionResult> Delete()
@@ -43,7 +51,9 @@ namespace VetCareBackend.Presentation.Controllers
             await _service.Delete(sub);
             return NoContent();
         }
-
+        /// <summary>
+        /// This endpoint allows an administrator to update their own user information.
+        /// </summary>
         [Authorize(policy: Policies.SoloAdministrator)]
         [HttpPut("/admin/myuser/update")]
         public async Task<IActionResult> Update([FromBody] UserRequest request)
@@ -52,7 +62,12 @@ namespace VetCareBackend.Presentation.Controllers
             await _service.Update(sub, request);
             return NoContent();
         }
-
+        /// <summary>
+        /// This endpoint allows a system administrator to create a new administrator user.
+        /// It requires the user to be authenticated and authorized as a SoloSysadmin. 
+        /// The endpoint accepts a SignUpRequest object in the request body, which contains the necessary information for creating the new administrator. 
+        /// The service layer handles the creation process, and upon successful creation, the endpoint returns an HTTP 200 OK status with the newly created administrator's information.
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpPost("/admin/create")]
         public async Task<IActionResult> Create([FromBody] SignUpRequest request)
@@ -60,7 +75,9 @@ namespace VetCareBackend.Presentation.Controllers
             var admin = await _service.Create(request);
             return Ok(admin);
         }
-
+        /// <summary>
+        /// This endpoint allows a system administrator to retrieve information about a specific administrator user by their unique identifier (Id).
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpGet("/admin/{Id}")]
         public async Task<IActionResult> Get([FromRoute] string Id)
@@ -68,7 +85,9 @@ namespace VetCareBackend.Presentation.Controllers
             var admin = await _service.Get(Id);
             return Ok(admin);
         }
-
+        /// <summary>
+        /// This endpoint allows a system administrator to delete a specific administrator user by their unique identifier (Id).
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpDelete("/admin/delete/{Id}")]
         public async Task<IActionResult> Delete([FromRoute] string Id)
@@ -76,7 +95,9 @@ namespace VetCareBackend.Presentation.Controllers
             await _service.Delete(Id);
             return NoContent();
         }
-
+        /// <summary>
+        /// This endpoint allows a system administrator to update the information of a specific administrator user by their unique identifier (Id).
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpPut("/admin/update/{Id}")]
         public async Task<IActionResult> Update([FromBody] UserRequest request, [FromRoute] string Id)
@@ -84,7 +105,9 @@ namespace VetCareBackend.Presentation.Controllers
             await _service.Update(Id, request);
             return NoContent();
         }
-
+        /// <summary>
+        /// This endpoint allows a system administrator to retrieve a list of all administrator users in the system.
+        /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
         [HttpGet("/admin/all")]
         public async Task<IActionResult> GetAll()
@@ -92,7 +115,9 @@ namespace VetCareBackend.Presentation.Controllers
             var admin = await _service.GetAll();
             return Ok(admin);
         }
-
+        /// <summary>
+        /// This endpoint allows a system administrator to retrieve a list of all users in the system, including administrators, clients, and veterinarians.
+        /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpGet("/alluser")]
         public async Task<IActionResult> GetAllUsers()

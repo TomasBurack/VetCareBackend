@@ -13,6 +13,9 @@ namespace VetCareBackend.Presentation.Controllers
         {
             _catService = catService;
         }
+        /// <summary>
+        /// This endpoint retrieves a list of all cat breeds from the external cat API service.
+        /// </summary>
         [HttpGet("breeds")]
         public async Task<IReadOnlyList<string>> GetBreeds()
         {
