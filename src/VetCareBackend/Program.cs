@@ -82,6 +82,7 @@ builder.Services.AddScoped<ISysadminService, SysadminService>();
 builder.Services.AddScoped<IPasswordHash, PasswordHash>();
 builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
+builder.Services.AddScoped<IMailService, MailService>();
 
 
 ApiClientConfigurationDTO dogApiResilienceConfiguration = new ApiClientConfigurationDTO()
