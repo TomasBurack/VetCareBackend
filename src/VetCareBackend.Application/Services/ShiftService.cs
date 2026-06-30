@@ -31,8 +31,14 @@ namespace VetCareBackend.Application.Services
 
         public async Task<List<ShiftResponse>> GetAll()
         {
+            var localTimeZone = TimeZoneInfo.Local;
             var shifts = await _shiftRepository.GetAll();
-            return shifts.Select(s => s.ToShiftResponse()).ToList();
+            return shifts.Select(s =>
+            {
+                var response = s.ToShiftResponse();
+                response.DateShift = TimeZoneInfo.ConvertTime(s.DateShift, localTimeZone);
+                return response;
+            }).ToList();
         }
 
         public async Task<ShiftResponse> Create(ShiftRequest shiftReq)
@@ -49,11 +55,25 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException($"No pet was found with id: '{shiftReq.PetId}'");
 
             var allShifts = await _shiftRepository.GetAll();
-            bool shiftTaken = allShifts.Any(s => s.Enrollment == shiftReq.Enrollment
+
+            bool shiftTaken = allShifts.Any(s =>
+                s.Enrollment == shiftReq.Enrollment
                 && s.DateShift == shiftReq.DateShift);
 
             if (shiftTaken)
                 throw new ValidationException($"The veterinarian already has a shift on '{shiftReq.DateShift}'.");
+
+            var window = TimeSpan.FromMinutes(30);
+            bool shiftTooClose = allShifts.Any(s =>
+                s.Enrollment == shiftReq.Enrollment
+                && s.DateShift != shiftReq.DateShift
+                && (s.DateShift - shiftReq.DateShift) > -window
+                && (s.DateShift - shiftReq.DateShift) < window);
+
+            if (shiftTooClose)
+                throw new ValidationException(
+                    $"The veterinarian already has a shift within 30 minutes of '{shiftReq.DateShift}'. " +
+                    $"Please choose a time at least 30 minutes apart.");
 
             var newShift = shiftReq.ToShift(vet, pet);
             await _shiftRepository.Add(newShift);

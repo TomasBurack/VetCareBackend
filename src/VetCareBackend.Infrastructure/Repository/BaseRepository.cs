@@ -36,7 +36,7 @@ namespace VetCareBackend.Infrastructure.Repository
 
         public virtual async Task Update(T entity)
         {
-            entity.UpdateDate = DateTime.UtcNow;
+            entity.UpdateDate = DateTimeOffset.UtcNow;
             _dbSet.Update(entity);
             await _context.SaveChangesAsync();
         }
@@ -46,7 +46,7 @@ namespace VetCareBackend.Infrastructure.Repository
             var entity = await Get(IdEntity);
             if (entity != null)
             {
-                entity.DeleteDate = DateTime.UtcNow;
+                entity.DeleteDate = DateTimeOffset.UtcNow;
                 entity.IsDeleted = true;
 
                 _dbSet.Update(entity);
