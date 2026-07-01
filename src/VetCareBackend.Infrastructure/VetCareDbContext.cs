@@ -14,6 +14,7 @@ namespace VetCareBackend.Infrastructure
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Shift> Shifts { get; set; }
         public DbSet<Veterinarian> Veterinarians { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         public VetCareDbContext(DbContextOptions<VetCareDbContext> options) : base(options)
         {

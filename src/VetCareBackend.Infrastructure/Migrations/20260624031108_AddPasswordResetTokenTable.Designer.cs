@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VetCareBackend.Infrastructure;
 
@@ -11,9 +12,11 @@ using VetCareBackend.Infrastructure;
 namespace VetCareBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(VetCareDbContext))]
-    partial class VetCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260624031108_AddPasswordResetTokenTable")]
+    partial class AddPasswordResetTokenTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,8 +66,8 @@ namespace VetCareBackend.Infrastructure.Migrations
                     b.Property<Guid?>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeleteDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("DeleteDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("IdClient")
                         .HasColumnType("uniqueidentifier");
@@ -79,8 +82,8 @@ namespace VetCareBackend.Infrastructure.Migrations
                     b.Property<int>("TypePet")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("UpdateDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -95,11 +98,11 @@ namespace VetCareBackend.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DateShift")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("DateShift")
+                        .HasColumnType("datetime2");
 
-                    b.Property<DateTimeOffset>("DeleteDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("DeleteDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -118,8 +121,8 @@ namespace VetCareBackend.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("UpdateDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("VeterinarianId")
                         .HasColumnType("uniqueidentifier");
@@ -139,8 +142,8 @@ namespace VetCareBackend.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeleteDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("DeleteDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Dni")
                         .IsRequired()
@@ -172,8 +175,8 @@ namespace VetCareBackend.Infrastructure.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("UpdateDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

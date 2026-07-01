@@ -7,6 +7,7 @@ using System.Text;
 using VetCareBackend.Application.Configuration;
 using MailKit.Net.Smtp;
 using VetCareBackend.Application.Interfaces;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace VetCareBackend.Infrastructure.ExternalService
 {
@@ -18,27 +19,15 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _mailOptions = mailOptions.Value;
         }
 
-        public async Task SendEmail()
+        public async Task SendEmail(string ToEmail, string ToName, string subjet, string body)
         {
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("tomas", "tomasburack33@gmail.com"));
-            message.To.Add(new MailboxAddress("tomas", "tomasburack22@gmail.com"));
-            message.Subject = "How you doin?";
+            message.From.Add(new MailboxAddress(_mailOptions.UserName, _mailOptions.UserName));
+            message.To.Add(new MailboxAddress(ToName, ToEmail));
+            message.Subject = subjet;
+            message.Body = new TextPart("plain") { Text = body };
 
-            message.Body = new TextPart("plain")
-            {
-                Text = @"Hey Alice,
-
-                        What are you up to this weekend? Monica is throwing one of her parties on
-                        Saturday and I was hoping you could make it.
-
-                        Will you be my +1?
-
-                        -- Joey
-                        "
-            };
-
-            SmtpClient smtp = new SmtpClient();
+            using SmtpClient smtp = new SmtpClient();
             await smtp.ConnectAsync(_mailOptions.Host, _mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync(_mailOptions.UserName, _mailOptions.Password);
             await smtp.SendAsync(message);

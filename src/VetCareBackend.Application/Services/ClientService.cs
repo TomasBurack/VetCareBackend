@@ -80,15 +80,17 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ValidationException("The ID sent is invalid");
             }
-            if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
-            {
-                throw new ConflictException($"The email {request.Email} is already in use");
-            }
 
             var client = await _repository.Get(Id);
             if (client == null)
             {
                 throw new NotFoundException("The user was not found.");
+            }
+
+            bool emailChanged = !string.IsNullOrWhiteSpace(request.Email) && request.Email != client.Email;
+            if (emailChanged && (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email)))
+            {
+                throw new ConflictException($"The email {request.Email} is already in use");
             }
 
             UserRequestValidation validation = new UserRequestValidation();

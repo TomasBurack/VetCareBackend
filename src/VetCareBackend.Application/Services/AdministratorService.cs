@@ -69,15 +69,17 @@ namespace VetCareBackend.Application.Services
             {
                 throw new NotFoundException("Invalid ID format");
             }
-            if (await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
-            {
-                throw new ConflictException($"The email {request.Email} is already in use");
-            }
 
             var admin = await _AdminRep.Get(Id);
             if (admin == null)
             {
                 throw new NotFoundException("Administrator not found");
+            }
+
+            bool emailChanged = !string.IsNullOrWhiteSpace(request.Email) && request.Email != admin.Email;
+            if (emailChanged && (await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email)))
+            {
+                throw new ConflictException($"The email {request.Email} is already in use");
             }
 
             UserRequestValidation validation = new UserRequestValidation();
