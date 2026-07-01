@@ -28,12 +28,54 @@ namespace VetCareBackend.Application.Services
             _petRepository = petRepository;
             _veterinarianRepository = veterinarianRepository;
         }
-
-        public async Task<List<ShiftResponse>> GetAll()
+        public async Task<List<ShiftResponse>> GetAllAdmin(DateTimeOffset? date, Status? status, string? enrollment)
         {
+            var shifts = await _shiftRepository.GetAll();
+
+            if (date.HasValue)
+                shifts = shifts.Where(s => s.DateShift.Date == date.Value.Date).ToList();
+
+            if (status.HasValue)
+                shifts = shifts.Where(s => s.Status == status.Value).ToList();
+
+            if (!string.IsNullOrEmpty(enrollment))
+                shifts = shifts.Where(s => s.Enrollment == enrollment).ToList();
+
+            return shifts.Select(s => s.ToShiftResponse()).ToList();
+        }
+        public async Task<List<ShiftResponse>> GetAllVeterinarian(string sub)
+        {
+            bool parse = Guid.TryParse(sub, out Guid vetId);
+            if (!parse)
+                throw new ValidationException("The ID sent is invalid");
+
+            var vet = await _veterinarianRepository.Get(vetId);
+            if (vet == null)
+                throw new NotFoundException("The veterinarian was not found.");
+
             var shifts = await _shiftRepository.GetAll();
             return shifts.Select(s => s.ToShiftResponse()).ToList();
         }
+
+        public async Task<List<ShiftResponse>> GetAllClient(string sub)
+        {
+            bool parse = Guid.TryParse(sub, out Guid clientId);
+            if (!parse)
+                throw new ValidationException("The ID sent is invalid");
+
+            var pets = await _petRepository.GetAll();
+            var petIds = pets
+                .Where(p => p.IdClient == clientId)
+                .Select(p => p.Id)
+                .ToList();
+
+            var shifts = await _shiftRepository.GetAll();
+            return shifts
+                .Where(s => petIds.Contains(s.PetId))
+                .Select(s => s.ToShiftResponse())
+                .ToList();
+        }
+
 
         public async Task<ShiftResponse> Create(ShiftRequest shiftReq)
         {
