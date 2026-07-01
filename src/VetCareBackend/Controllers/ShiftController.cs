@@ -83,7 +83,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows the deletion of a shift by its unique identifier (id).
         /// </summary>
-        [Authorize(policy: Policies.VetAdm)]
+        [Authorize(policy: Policies.Admins)]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Interfaces;
@@ -24,7 +26,7 @@ public class ShiftControllerTests
     {
         var request = new ShiftRequest
         {
-            DateShift = DateTime.UtcNow.AddDays(1),
+            DateShift = DateTimeOffset.UtcNow.AddDays(1),
             Description = "Consulta general",
             PetId = Guid.NewGuid(),
             Enrollment = "VET001"
@@ -46,20 +48,84 @@ public class ShiftControllerTests
     }
 
     [Fact]
-    public async Task GetAll_ReturnsOk_WithShiftList()
+    public async Task GetAllAdmin_ReturnsOk_WithShiftList()
     {
         var shifts = new List<ShiftResponse>
         {
             new() { Description = "Turno 1", Status = "Pendient" },
             new() { Description = "Turno 2", Status = "Served" }
         };
-        _shiftServiceMock.Setup(s => s.GetAll()).ReturnsAsync(shifts);
+        _shiftServiceMock
+            .Setup(s => s.GetAllAdmin(null, null, null))
+            .ReturnsAsync(shifts);
 
-        var result = await _controller.GetAll();
+        var result = await _controller.GetAllAdmin(null, null, null);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(shifts, ok.Value);
-        _shiftServiceMock.Verify(s => s.GetAll(), Times.Once);
+        _shiftServiceMock.Verify(s => s.GetAllAdmin(null, null, null), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllClient_ReturnsOk_WithShiftList()
+    {
+       
+        var clientId = Guid.NewGuid().ToString();
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, clientId)
+        };
+        var identity = new ClaimsIdentity(claims);
+        var principal = new ClaimsPrincipal(identity);
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = principal }
+        };
+
+        var shifts = new List<ShiftResponse>
+        {
+            new() { Description = "Turno mascota 1", Status = "Pendient" }
+        };
+        _shiftServiceMock
+            .Setup(s => s.GetAllClient(clientId))
+            .ReturnsAsync(shifts);
+
+        var result = await _controller.GetAllClient();
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(shifts, ok.Value);
+        _shiftServiceMock.Verify(s => s.GetAllClient(clientId), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllVeterinarian_ReturnsOk_WithShiftList()
+    {
+        
+        var vetId = Guid.NewGuid().ToString();
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, vetId)
+        };
+        var identity = new ClaimsIdentity(claims);
+        var principal = new ClaimsPrincipal(identity);
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = principal }
+        };
+
+        var shifts = new List<ShiftResponse>
+        {
+            new() { Description = "Turno vet 1", Status = "Pendient" }
+        };
+        _shiftServiceMock
+            .Setup(s => s.GetAllVeterinarian(vetId))
+            .ReturnsAsync(shifts);
+
+        var result = await _controller.GetAllVeterinarian();
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(shifts, ok.Value);
+        _shiftServiceMock.Verify(s => s.GetAllVeterinarian(vetId), Times.Once);
     }
 
     [Fact]
