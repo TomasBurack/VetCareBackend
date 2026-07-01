@@ -31,14 +31,8 @@ namespace VetCareBackend.Application.Services
 
         public async Task<List<ShiftResponse>> GetAll()
         {
-            var localTimeZone = TimeZoneInfo.Local;
             var shifts = await _shiftRepository.GetAll();
-            return shifts.Select(s =>
-            {
-                var response = s.ToShiftResponse();
-                response.DateShift = TimeZoneInfo.ConvertTime(s.DateShift, localTimeZone);
-                return response;
-            }).ToList();
+            return shifts.Select(s => s.ToShiftResponse()).ToList();
         }
 
         public async Task<ShiftResponse> Create(ShiftRequest shiftReq)
