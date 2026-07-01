@@ -12,5 +12,7 @@ namespace VetCareBackend.Application.Interfaces
         Task<bool> FindEmail(string email);
         Task<bool> FindDni(string dni);
         Task<bool> FindPN(string pn);
+
+        Task<bool> FindEnr(string enr);
     }
 }
