@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Domain.Enums;
@@ -29,16 +30,46 @@ namespace VetCareBackend.Presentation.Controllers
             var shift = await _shiftService.Create(request);
             return Ok(shift);
         }
+
         /// <summary>
-        /// This endpoint retrieves all shifts for veterinarians.
+        /// This endpoint retrieves all shifts for administrators with optional filters by date, status and enrollment.
         /// </summary>
-        [Authorize(policy: Policies.VetAdm)]
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [Authorize(policy: Policies.Admins)]
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetAllAdmin(
+            [FromQuery] DateTimeOffset? date,
+            [FromQuery] Status? status,
+            [FromQuery] string? enrollment)
         {
-            var shift = await _shiftService.GetAll();
-            return Ok(shift);
+            var shifts = await _shiftService.GetAllAdmin(date, status, enrollment);
+            return Ok(shifts);
         }
+
+        /// <summary>
+        /// This endpoint retrieves all shifts belonging to the authenticated client's pets.
+        /// </summary>
+
+        [Authorize(policy: Policies.SoloClient)]
+        [HttpGet("client")]
+        public async Task<IActionResult> GetAllClient()
+        { 
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var shifts = await _shiftService.GetAllClient(sub!);
+            return Ok(shifts);
+        }
+        /// <summary>
+        /// This endpoint retrieves all shifts assigned to the authenticated veterinarian.
+        /// </summary>
+
+        [Authorize(policy: Policies.SoloVeterinarian)]
+        [HttpGet("veterinarian")]
+        public async Task<IActionResult> GetAllVeterinarian()
+        {
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var shifts = await _shiftService.GetAllVeterinarian(sub!);
+            return Ok(shifts);
+        }
+
         /// <summary>
         /// This endpoint retrieves all shifts for a specific veterinarian by their ID.
         /// </summary>
