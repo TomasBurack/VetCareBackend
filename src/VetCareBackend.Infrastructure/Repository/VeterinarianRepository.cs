@@ -27,5 +27,10 @@ namespace VetCareBackend.Infrastructure.Repository
         {
             return await _dbSet.AnyAsync(x => x.PhoneNumber == pn && !x.IsDeleted);
         }
+
+        public async Task<bool> FindEnr(string enr)
+        {
+            return await _dbSet.AnyAsync(x => x.Enrollment == enr && !x.IsDeleted);
+        }
     }
 }
