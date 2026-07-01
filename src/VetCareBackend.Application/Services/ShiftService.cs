@@ -54,11 +54,9 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException("The veterinarian was not found.");
 
             var shifts = await _shiftRepository.GetAll();
-            return shifts
-                .Where(s => s.Enrollment == vet.Enrollment)
-                .Select(s => s.ToShiftResponse())
-                .ToList();
+            return shifts.Select(s => s.ToShiftResponse()).ToList();
         }
+
         public async Task<List<ShiftResponse>> GetAllClient(string sub)
         {
             bool parse = Guid.TryParse(sub, out Guid clientId);
@@ -77,7 +75,7 @@ namespace VetCareBackend.Application.Services
                 .Select(s => s.ToShiftResponse())
                 .ToList();
         }
-       
+
 
         public async Task<ShiftResponse> Create(ShiftRequest shiftReq)
         {
