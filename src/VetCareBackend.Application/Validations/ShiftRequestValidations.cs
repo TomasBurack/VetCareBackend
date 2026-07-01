@@ -21,9 +21,6 @@ namespace VetCareBackend.Application.Validations
                 .NotEmpty().WithMessage("the pet is required");
             RuleFor(request => request.Description)
                 .NotEmpty().WithMessage("descriptions is requerid");
-
-
-
         }
     }
 }

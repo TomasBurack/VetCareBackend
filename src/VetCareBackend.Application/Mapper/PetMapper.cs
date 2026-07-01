@@ -25,11 +25,7 @@ namespace VetCareBackend.Application.Mapper
         }
         public static Pet ToPet(this PetRequest petReq, Client client)
         {
-            PetRequestValidations validations = new PetRequestValidations();
-            if (!validations.Validate(petReq).IsValid)
-            {
-                throw new ValidationException(validations.Validate(petReq).ToString("~"));
-            }
+
             return new Pet
             {
                 Id = Guid.NewGuid(),

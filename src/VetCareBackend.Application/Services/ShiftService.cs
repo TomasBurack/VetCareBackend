@@ -10,6 +10,7 @@ using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Infrastructure;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 using VetCareBackend.Domain.Enums;
 using ValidationException = VetCareBackend.Application.Exceptions.ValidationException;
@@ -77,8 +78,21 @@ namespace VetCareBackend.Application.Services
         }
 
 
-        public async Task<ShiftResponse> Create(ShiftRequest shiftReq)
+        public async Task<ShiftResponse> Create(ShiftRequest shiftReq, string sub)
         {
+            ShiftRequestValidations validation = new ShiftRequestValidations();
+
+            if (!validation.Validate(shiftReq).IsValid)
+            {
+                throw new ValidationException(validation.Validate(shiftReq).ToString("-"));
+            }
+
+            bool Parse = Guid.TryParse(sub, out Guid Id);
+            if (Parse == false)
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
+
             var vets = await _veterinarianRepository.GetAll();
             var vet = vets.FirstOrDefault(v => v.Enrollment == shiftReq.Enrollment);
 
@@ -90,7 +104,12 @@ namespace VetCareBackend.Application.Services
             if (pet == null)
                 throw new NotFoundException($"No pet was found with id: '{shiftReq.PetId}'");
 
-            var allShifts = await _shiftRepository.GetAll();
+            if(Id != pet.IdClient) 
+            { 
+                throw new ValidationException("The pet does not belong to the authenticated client.");
+            }
+
+        var allShifts = await _shiftRepository.GetAll();
 
             bool shiftTaken = allShifts.Any(s =>
                 s.Enrollment == shiftReq.Enrollment

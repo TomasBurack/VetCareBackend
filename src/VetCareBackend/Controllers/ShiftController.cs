@@ -27,6 +27,7 @@ namespace VetCareBackend.Presentation.Controllers
         [HttpPost("/create")]
         public async Task<IActionResult> Create([FromBody] ShiftRequest request)
         {
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var shift = await _shiftService.Create(request);
             return Ok(shift);
         }

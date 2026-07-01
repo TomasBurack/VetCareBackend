@@ -7,6 +7,7 @@ using VetCareBackend.Application.Exceptions;
 using VetCareBackend.Application.Infrastructure;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
+using VetCareBackend.Application.Validations;
 using VetCareBackend.Domain.Entities;
 
 namespace VetCareBackend.Application.Services
@@ -24,12 +25,25 @@ namespace VetCareBackend.Application.Services
 
         public async Task<PetResponse> Create(PetRequest petReq, string sub)
         {
+            
             bool Parse = Guid.TryParse(sub, out Guid Id);
             if (Parse == false)
             {
                 throw new ValidationException("The ID sent is invalid");
             }
             var client = await _clientRepository.Get(Id);
+
+            if(client == null) 
+            {
+                throw new NotFoundException($"No client was found with id '{Id}'.");
+            }
+
+            PetRequestValidations validations = new PetRequestValidations();
+            if (!validations.Validate(petReq).IsValid)
+            {
+                throw new ValidationException(validations.Validate(petReq).ToString("~"));
+            }
+
             var newPet = petReq.ToPet(client);
             await _petRepository.Add(newPet);
             return newPet.ToPetResponse();
@@ -74,9 +88,16 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException($"No pet was found with id '{id}'.");
             }
 
+            PetRequestValidations validations = new PetRequestValidations();
+            if (!validations.Validate(petReq).IsValid)
+            {
+                throw new ValidationException(validations.Validate(petReq).ToString("~"));
+            }
+
             petToUpdate.Name = petReq.Name;
             petToUpdate.Age = petReq.Age;
             petToUpdate.TypePet = petReq.typePet;
+            petToUpdate.Breed = petReq.Breed;
 
             await _petRepository.Update(petToUpdate);
         }
