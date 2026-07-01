@@ -32,9 +32,14 @@ namespace VetCareBackend.Application.Services
 
         public async Task<VeterinarianResponse> Create(VeterinarianRequest request)
         {
-            if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
+            if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
+            }
+            bool enrollmentUsed = await _repository.FindEnr(request.Enrollment);
+            if (enrollmentUsed)
+            {
+                throw new ConflictException($"The enrollment {request.Enrollment} is already in use");
             }
             VeterinarianRequestValidation validation = new VeterinarianRequestValidation();
             if (!validation.Validate(request).IsValid)
@@ -64,7 +69,7 @@ namespace VetCareBackend.Application.Services
             var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
-                throw new Exception("The veterinarian was not found");
+                throw new NotFoundException("The veterinarian was not found");
             }
 
             return veterinarian.ToVeterinarianResponse();
@@ -80,7 +85,17 @@ namespace VetCareBackend.Application.Services
             var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
-                throw new Exception("The veterinarian was not found");
+                throw new NotFoundException("The veterinarian was not found");
+            }
+            bool emailUsed = await _repository.FindEmail(request.Email) || await _AdminRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email);
+            if (emailUsed && request.Email != veterinarian.Email)
+            {
+                throw new ConflictException($"The email {request.Email} is already in use");
+            }
+            bool enrollmentUsed = await _repository.FindEnr(request.Enrollment);
+            if (enrollmentUsed && request.Enrollment != veterinarian.Enrollment)
+            {
+                throw new ConflictException($"The enrollment {request.Enrollment} is already in use");
             }
 
             VeterinarianUpdateRequestValidation validation = new VeterinarianUpdateRequestValidation();
@@ -103,7 +118,7 @@ namespace VetCareBackend.Application.Services
             var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
-                throw new Exception("The veterinarian was not found");
+                throw new NotFoundException("The veterinarian was not found");
             }
             await _repository.Delete(id);
         }

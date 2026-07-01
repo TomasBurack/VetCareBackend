@@ -61,7 +61,7 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new NotFoundException("Invalid ID format");
+                throw new ValidationException("Invalid ID format");
             }
             var Sysadmin = await _repository.Get(Id);
             if (Sysadmin == null)
@@ -76,7 +76,7 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new NotFoundException("Invalid ID format");
+                throw new ValidationException("Invalid ID format");
             }
 
             var Sysadmin = await _repository.Get(Id);
@@ -105,7 +105,13 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new NotFoundException("Invalid ID format");
+                throw new ValidationException("Invalid ID format");
+            }
+
+            var Sysadmin = await _repository.Get(Id);
+            if (Sysadmin == null)
+            {
+                throw new NotFoundException("Sysadmin not found");
             }
 
             await _repository.Delete(Id);

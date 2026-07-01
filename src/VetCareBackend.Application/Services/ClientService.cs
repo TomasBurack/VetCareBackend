@@ -35,7 +35,7 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            request.Password = _hash.Hash(request.Password);
+            
             Guid id = Guid.NewGuid();
             string dtoRole = "Client";
             SignUpValidator validation = new SignUpValidator();
@@ -43,6 +43,7 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
+            request.Password = _hash.Hash(request.Password);
             var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
             await _repository.Add(client);
             return UserMapper.ToDto<UserResponse>(client);
@@ -50,6 +51,16 @@ namespace VetCareBackend.Application.Services
 
         public async Task Delete(string Sub)
         {
+            
+            if(Guid.TryParse(Sub, out Guid id))
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
+            var client = await _repository.Get(id);
+            if(client == null)
+            {
+                throw new NotFoundException("The user was not found.");
+            }
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
             {

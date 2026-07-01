@@ -52,7 +52,7 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new NotFoundException("Invalid ID format");
+                throw new ValidationException("Invalid ID format");
             }
             var admin = await _AdminRep.Get(Id);
             if (admin == null)
@@ -67,7 +67,7 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new NotFoundException("Invalid ID format");
+                throw new ValidationException("Invalid ID format");
             }
 
             var admin = await _AdminRep.Get(Id);
@@ -96,7 +96,12 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new NotFoundException("Invalid ID format");
+                throw new ValidationException("Invalid ID format");
+            }
+            var admin = await _AdminRep.Get(Id);
+            if(admin == null)
+            {
+                throw new NotFoundException("Administrator not found");
             }
 
             await _AdminRep.Delete(Id);
