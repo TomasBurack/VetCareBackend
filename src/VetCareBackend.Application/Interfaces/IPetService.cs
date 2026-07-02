@@ -8,10 +8,10 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IPetService
     {
-        Task<List<PetResponse>> GetAll();
-        Task<PetResponse> GetById(Guid id);
+        Task<List<PetResponse>> GetAll(string sub);
+        Task<PetResponse> GetById(Guid id, string sub);
         Task<PetResponse> Create(PetRequest petReq, string sub);
-        Task Update(PetRequest petReq, Guid id);
-        Task Delete(Guid id);
+        Task Update(PetRequest petReq, Guid id, string sub);
+        Task Delete(Guid id, string sub);
     }
 }

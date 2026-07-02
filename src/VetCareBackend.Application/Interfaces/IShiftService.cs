@@ -9,10 +9,10 @@ namespace VetCareBackend.Application.Interfaces
 {
     public interface IShiftService
     {
-        Task<List<ShiftResponse>> GetAllAdmin(DateTimeOffset? date, Status? status, string? enrollment);
+        Task<List<ShiftResponse>> GetAllAdmin();
         Task<List<ShiftResponse>> GetAllVeterinarian(string sub);
         Task<List<ShiftResponse>> GetAllClient(string sub);
-        Task<ShiftResponse> Create(ShiftRequest shiftReq);
+        Task<ShiftResponse> Create(ShiftRequest shiftReq, string sub);
         Task UpdateStatus(Guid id, ShiftStatusRequest request);
         Task Delete(Guid id);
     }

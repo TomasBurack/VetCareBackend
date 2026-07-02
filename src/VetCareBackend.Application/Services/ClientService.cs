@@ -52,7 +52,7 @@ namespace VetCareBackend.Application.Services
         public async Task Delete(string Sub)
         {
             
-            if(Guid.TryParse(Sub, out Guid id))
+            if(!Guid.TryParse(Sub, out Guid id))
             {
                 throw new ValidationException("The ID sent is invalid");
             }

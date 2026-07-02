@@ -25,11 +25,7 @@ namespace VetCareBackend.Application.Mapper
         }
         public static Pet ToPet(this PetRequest petReq, Client client)
         {
-            PetRequestValidations validations = new PetRequestValidations();
-            if (!validations.Validate(petReq).IsValid)
-            {
-                throw new ValidationException(validations.Validate(petReq).ToString("~"));
-            }
+
             return new Pet
             {
                 Id = Guid.NewGuid(),
@@ -40,6 +36,15 @@ namespace VetCareBackend.Application.Mapper
                 TypePet = petReq.typePet,
                 Breed = petReq.Breed
             };
+        }
+
+        public static Pet ToPetUpdate(this Pet Entity, PetRequest request)
+        {
+            Entity.Name = string.IsNullOrWhiteSpace(request.Name) ? Entity.Name : request.Name;
+            Entity.Age = request.Age;
+            Entity.TypePet = request.typePet;
+            Entity.Breed = string.IsNullOrWhiteSpace(request.Breed) ? Entity.Breed : request.Breed;
+            return Entity;
         }
     }
 }

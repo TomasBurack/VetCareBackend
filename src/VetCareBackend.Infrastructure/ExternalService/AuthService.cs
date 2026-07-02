@@ -81,9 +81,21 @@ namespace VetCareBackend.Infrastructure.ExternalService
                 (User?) await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == resetToken.Email && !s.IsDeleted);
 
             if (user == null)
-                throw new NotFoundException("No se encontro el usuario asociado al token");
+                throw new NotFoundException("The user associated with the token could not be found.");
 
-            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            ResetPasswordRequestValidations validation = new ResetPasswordRequestValidations();
+
+            if(!validation.Validate(request).IsValid)
+            {
+                throw new ValidationException(validation.Validate(request).ToString("~"));
+            }
+
+            if(BCrypt.Net.BCrypt.Verify(request.NewPassword, user.Password))
+            {
+                throw new ValidationException("The new password cannot be the same as the previous one.");
+            }
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword); ;
             resetToken.isUsed = true;
 
             await _context.SaveChangesAsync();
@@ -94,28 +106,12 @@ namespace VetCareBackend.Infrastructure.ExternalService
             bool emailUsed = await _context.Clients.AnyAsync(c => c.Email == request.Email && !c.IsDeleted)
                 || await _context.Veterinarians.AnyAsync(v => v.Email == request.Email && !v.IsDeleted)
                 || await _context.Administrators.AnyAsync(a => a.Email == request.Email && !a.IsDeleted);
-            bool dniUsed = await _context.Clients.AnyAsync(c => c.Dni == request.Dni && !c.IsDeleted)
-                || await _context.Veterinarians.AnyAsync(v => v.Dni == request.Dni && !v.IsDeleted)
-                || await _context.Administrators.AnyAsync(a => a.Dni == request.Dni && !a.IsDeleted);
-            bool pnUsed = await _context.Clients.AnyAsync(c => c.PhoneNumber == request.PhoneNumber && !c.IsDeleted)
-                || await _context.Veterinarians.AnyAsync(v => v.PhoneNumber == request.PhoneNumber && !v.IsDeleted)
-                || await _context.Administrators.AnyAsync(a => a.PhoneNumber == request.PhoneNumber && !a.IsDeleted);
 
             if (emailUsed)
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
-            else if (dniUsed)
-            {
-                throw new ConflictException($"The DNI {request.Dni} is already in use");
-            }
-            else if (pnUsed)
-            {
-                throw new ConflictException($"The Phone Number {request.PhoneNumber} is already in use");
-            }
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            request.Password = hashedPassword;
             Guid id = Guid.NewGuid();
             string dtoRole = "Client";
             SignUpValidator validation = new SignUpValidator();
@@ -123,6 +119,10 @@ namespace VetCareBackend.Infrastructure.ExternalService
             {
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
+
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            request.Password = hashedPassword;
+            
             var client = UserMapper.ToEntity<Client>(request, dtoRole, id);
 
             _context.Clients.Add(client);
@@ -150,12 +150,12 @@ namespace VetCareBackend.Infrastructure.ExternalService
             Guid userId;
             string role;
 
-            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == request.Email);
-            var veterinarian = await _context.Veterinarians.FirstOrDefaultAsync(v => v.Email == request.Email);
-            var administrator = await _context.Administrators.FirstOrDefaultAsync(a => a.Email == request.Email);
-            var sysadmin = await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == request.Email);
+            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == request.Email && !c.IsDeleted);
+            var veterinarian = await _context.Veterinarians.FirstOrDefaultAsync(v => v.Email == request.Email && !v.IsDeleted);
+            var administrator = await _context.Administrators.FirstOrDefaultAsync(a => a.Email == request.Email && !a.IsDeleted);
+            var sysadmin = await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == request.Email && !s.IsDeleted);
 
-            if (client != null && !client.IsDeleted)
+            if (client != null)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
                     throw new UnauthorizedException("incorrect credentials");

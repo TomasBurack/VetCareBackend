@@ -7,7 +7,7 @@ namespace VetCareBackend.Domain.Enums
     public enum Status
     {
         Served = 1,
-        Pendient = 2,
+        Pendant = 2,
         Canceled = 3
     }
 }
