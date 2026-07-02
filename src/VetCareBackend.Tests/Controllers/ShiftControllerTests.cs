@@ -138,16 +138,28 @@ public class ShiftControllerTests
     }
 
     [Fact]
-    public async Task UpdateStatus_ReturnsNoContent()
+    public async Task UpdateStatusClient_ReturnsNoContent()
+    {
+        var shiftId = Guid.NewGuid();
+        _shiftServiceMock.Setup(s => s.CancelStatusClient(shiftId, UserId)).Returns(Task.CompletedTask);
+
+        var result = await _controller.UpdateStatusClient(shiftId);
+
+        Assert.IsType<NoContentResult>(result);
+        _shiftServiceMock.Verify(s => s.CancelStatusClient(shiftId, UserId), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateStatusVeterinarian_ReturnsNoContent()
     {
         var shiftId = Guid.NewGuid();
         var request = new ShiftStatusRequest { Status = Status.Served };
-        _shiftServiceMock.Setup(s => s.UpdateStatus(shiftId, request)).Returns(Task.CompletedTask);
+        _shiftServiceMock.Setup(s => s.UpdateStatusVeterinarian(shiftId, request, UserId)).Returns(Task.CompletedTask);
 
-        var result = await _controller.UpdateStatus(shiftId, request);
+        var result = await _controller.UpdateStatusVeterinarian(shiftId, request);
 
         Assert.IsType<NoContentResult>(result);
-        _shiftServiceMock.Verify(s => s.UpdateStatus(shiftId, request), Times.Once);
+        _shiftServiceMock.Verify(s => s.UpdateStatusVeterinarian(shiftId, request, UserId), Times.Once);
     }
 
     [Fact]
