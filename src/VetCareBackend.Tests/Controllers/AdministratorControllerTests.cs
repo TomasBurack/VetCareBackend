@@ -13,7 +13,6 @@ public class AdministratorControllerTests
     private readonly Mock<IAdministratorService> _adminServiceMock;
     private readonly Mock<IVeterinarianService> _vetServiceMock;
     private readonly Mock<IClientService> _clientServiceMock;
-    private readonly Mock<ISysadminService> _sysadminServiceMock;
     private readonly AdministratorController _controller;
     private const string UserId = "auth0|abc123";
 
@@ -22,12 +21,10 @@ public class AdministratorControllerTests
         _adminServiceMock = new Mock<IAdministratorService>();
         _vetServiceMock = new Mock<IVeterinarianService>();
         _clientServiceMock = new Mock<IClientService>();
-        _sysadminServiceMock = new Mock<ISysadminService>();
         _controller = new AdministratorController(
             _adminServiceMock.Object,
             _vetServiceMock.Object,
-            _clientServiceMock.Object,
-            _sysadminServiceMock.Object
+            _clientServiceMock.Object
         );
         ControllerTestHelper.SetUserClaim(_controller, UserId);
     }
@@ -142,12 +139,10 @@ public class AdministratorControllerTests
         var admins = new List<UserResponse> { new() { FirstName = "Admin1" } };
         var clients = new List<UserResponse> { new() { FirstName = "Client1" } };
         var vets = new List<VeterinarianResponse> { new() { FirstName = "Vet1" } };
-        var sysadmins = new List<UserResponse> { new() { FirstName = "Sys1" } };
 
         _adminServiceMock.Setup(s => s.GetAll()).ReturnsAsync(admins);
         _clientServiceMock.Setup(s => s.GetAll()).ReturnsAsync(clients);
         _vetServiceMock.Setup(s => s.GetAll()).ReturnsAsync(vets);
-        _sysadminServiceMock.Setup(s => s.GetAll()).ReturnsAsync(sysadmins);
 
         var result = await _controller.GetAllUsers();
 

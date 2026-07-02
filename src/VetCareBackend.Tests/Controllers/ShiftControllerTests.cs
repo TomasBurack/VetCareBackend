@@ -14,11 +14,20 @@ public class ShiftControllerTests
 {
     private readonly Mock<IShiftService> _shiftServiceMock;
     private readonly ShiftController _controller;
+    private const string UserId = "auth0|client123";
 
     public ShiftControllerTests()
     {
         _shiftServiceMock = new Mock<IShiftService>();
         _controller = new ShiftController(_shiftServiceMock.Object);
+
+        var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, UserId) };
+        var identity = new ClaimsIdentity(claims);
+        var principal = new ClaimsPrincipal(identity);
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = principal }
+        };
     }
 
     [Fact]
@@ -38,13 +47,13 @@ public class ShiftControllerTests
             Status = "Pendient",
             Enrollment = "VET001"
         };
-        _shiftServiceMock.Setup(s => s.Create(request)).ReturnsAsync(expected);
+        _shiftServiceMock.Setup(s => s.Create(request, UserId)).ReturnsAsync(expected);
 
         var result = await _controller.Create(request);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(expected, ok.Value);
-        _shiftServiceMock.Verify(s => s.Create(request), Times.Once);
+        _shiftServiceMock.Verify(s => s.Create(request, UserId), Times.Once);
     }
 
     [Fact]
@@ -56,14 +65,14 @@ public class ShiftControllerTests
             new() { Description = "Turno 2", Status = "Served" }
         };
         _shiftServiceMock
-            .Setup(s => s.GetAllAdmin(null, null, null))
+            .Setup(s => s.GetAllAdmin())
             .ReturnsAsync(shifts);
 
-        var result = await _controller.GetAllAdmin(null, null, null);
+        var result = await _controller.GetAllAdmin();
 
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(shifts, ok.Value);
-        _shiftServiceMock.Verify(s => s.GetAllAdmin(null, null, null), Times.Once);
+        _shiftServiceMock.Verify(s => s.GetAllAdmin(), Times.Once);
     }
 
     [Fact]
