@@ -33,20 +33,20 @@ public class PetControllerTests
             new() { IdPet = Guid.NewGuid(), Name = "Firulais", TypePet = TypePet.Canine },
             new() { IdPet = Guid.NewGuid(), Name = "Michi", TypePet = TypePet.Feline }
         };
-        _petServiceMock.Setup(s => s.GetAll()).ReturnsAsync(pets);
+        _petServiceMock.Setup(s => s.GetAll(UserId)).ReturnsAsync(pets);
 
         var result = await _controller.GetAll();
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         var body = Assert.IsType<List<PetResponse>>(ok.Value);
         Assert.Equal(2, body.Count);
-        _petServiceMock.Verify(s => s.GetAll(), Times.Once);
+        _petServiceMock.Verify(s => s.GetAll(UserId), Times.Once);
     }
 
     [Fact]
     public async Task GetAll_ReturnsNotFound_WhenNoPets()
     {
-        _petServiceMock.Setup(s => s.GetAll()).ReturnsAsync(new List<PetResponse>());
+        _petServiceMock.Setup(s => s.GetAll(UserId)).ReturnsAsync(new List<PetResponse>());
 
         var result = await _controller.GetAll();
 
@@ -59,14 +59,14 @@ public class PetControllerTests
     {
         var petId = Guid.NewGuid();
         var expected = new PetResponse { IdPet = petId, Name = "Firulais", TypePet = TypePet.Canine };
-        _petServiceMock.Setup(s => s.GetById(petId)).ReturnsAsync(expected);
+        _petServiceMock.Setup(s => s.GetById(petId, UserId)).ReturnsAsync(expected);
 
         var result = await _controller.GetById(petId);
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         var body = Assert.IsType<PetResponse>(ok.Value);
         Assert.Equal(petId, body.IdPet);
-        _petServiceMock.Verify(s => s.GetById(petId), Times.Once);
+        _petServiceMock.Verify(s => s.GetById(petId, UserId), Times.Once);
     }
 
     [Fact]
@@ -90,12 +90,12 @@ public class PetControllerTests
     public async Task Delete_ReturnsNoContent()
     {
         var petId = Guid.NewGuid();
-        _petServiceMock.Setup(s => s.Delete(petId)).Returns(Task.CompletedTask);
+        _petServiceMock.Setup(s => s.Delete(petId, UserId)).Returns(Task.CompletedTask);
 
         var result = await _controller.Delete(petId);
 
         Assert.IsType<NoContentResult>(result);
-        _petServiceMock.Verify(s => s.Delete(petId), Times.Once);
+        _petServiceMock.Verify(s => s.Delete(petId, UserId), Times.Once);
     }
 
     [Fact]
@@ -103,11 +103,11 @@ public class PetControllerTests
     {
         var petId = Guid.NewGuid();
         var request = new PetRequest { Name = "Firulais Updated", Age = 4, typePet = TypePet.Canine };
-        _petServiceMock.Setup(s => s.Update(request, petId)).Returns(Task.CompletedTask);
+        _petServiceMock.Setup(s => s.Update(request, petId, UserId)).Returns(Task.CompletedTask);
 
         var result = await _controller.Update(request, petId);
 
         Assert.IsType<NoContentResult>(result);
-        _petServiceMock.Verify(s => s.Update(request, petId), Times.Once);
+        _petServiceMock.Verify(s => s.Update(request, petId, UserId), Times.Once);
     }
 }
