@@ -69,13 +69,26 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         /// <summary>
-        /// This endpoint allows the update of a shift's status by its unique identifier (id).
+        /// This endpoint allows the update of a shift's status by its unique identifier (id) for a client.
         /// </summary>
-        [Authorize(policy: Policies.VetAdm)]
-        [HttpPut("status/{id}")]
-        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] ShiftStatusRequest request)
+        [Authorize(policy: Policies.SoloClient)]
+        [HttpPut("status/client/{id}")]
+        public async Task<IActionResult> UpdateStatusClient(Guid id)
         {
-            await _shiftService.UpdateStatus(id, request);
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _shiftService.CancelStatusClient(id, sub!);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// This endpoint allows the update of a shift's status by its unique identifier (id) for a veterinarian.
+        /// </summary>
+        [Authorize(policy: Policies.SoloVeterinarian)]
+        [HttpPut("status/veterinarian/{id}")]
+        public async Task<IActionResult> UpdateStatusVeterinarian(Guid id, [FromBody] ShiftStatusRequest request)
+        {
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _shiftService.UpdateStatusVeterinarian(id, request, sub!);
             return NoContent();
         }
         /// <summary>

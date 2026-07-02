@@ -54,7 +54,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _context.PasswordResetTokens.Add(resetToken);
             await _context.SaveChangesAsync();
 
-            string resetLink = $"https://tuapp.com/reset-password?token={token}";
+            string resetLink = $"https://vetcare-api-e3f2djcgdacnfkca.chilecentral-01.azurewebsites.net/reset-password?token={token}";
             string body = $"Hola,\n\nPara restablecer tu contraseña hacé click en el siguiente link:\n\n{resetLink}\n\nEste link vence en 15 minutos.\n\nSi no solicitaste esto, ignore este mensaje.";
 
             await _mailService.SendEmail(request.Email, request.Email, "Recuperacion de contraseña - VetCare", body);
