@@ -59,7 +59,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// It requires the user to be authenticated and authorized as a SoloSysadmin.
         /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
-        [HttpGet("/api/sysadmin/all")]
+        [HttpGet("/api/sysadmin/allusers")]
         public async Task<IActionResult> GetAll()
         {
             var sysadmin = await _service.GetAll();
