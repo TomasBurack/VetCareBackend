@@ -146,12 +146,56 @@ namespace VetCareBackend.Application.Services
             return newShift.ToShiftResponse();
         }
 
-        public async Task UpdateStatus(Guid id, ShiftStatusRequest request)
+       
+        public async Task CancelStatusClient(Guid id, string sub)
         {
+            bool parse = Guid.TryParse(sub, out Guid clientId);
+            if (!parse)
+                throw new ValidationException("The ID sent is invalid");
+
             var shift = await _shiftRepository.Get(id);
             if (shift == null)
             {
                 throw new NotFoundException($"No shift was found with id '{id}'.");
+            }
+
+            var pet = await _petRepository.Get(shift.PetId);
+            if (pet == null)
+                throw new NotFoundException($"No pet was found with id: '{shift.PetId}'");
+
+            if (pet.IdClient != clientId)
+            {
+                throw new ValidationException("The shift does not belong to the authenticated client.");
+            }
+
+            if (shift.Status != Status.Pendant)
+            {
+                throw new ValidationException("Only shifts with status 'Pendant' can be updated.");
+            }
+
+            shift.Status = Status.Canceled;
+            await _shiftRepository.Update(shift);
+        }
+
+        public async Task UpdateStatusVeterinarian(Guid id, ShiftStatusRequest request, string sub)
+        {
+            bool parse = Guid.TryParse(sub, out Guid vetId);
+            if (!parse)
+                throw new ValidationException("The ID sent is invalid");
+
+            var vet = await _veterinarianRepository.Get(vetId);
+            if (vet == null)
+                throw new NotFoundException("The veterinarian was not found.");
+
+            var shift = await _shiftRepository.Get(id);
+            if (shift == null)
+            {
+                throw new NotFoundException($"No shift was found with id '{id}'.");
+            }
+
+            if (shift.Enrollment != vet.Enrollment)
+            {
+                throw new ValidationException("The shift does not belong to the authenticated veterinarian.");
             }
 
             ShiftStatusRequestValidation validations = new ShiftStatusRequestValidation();
