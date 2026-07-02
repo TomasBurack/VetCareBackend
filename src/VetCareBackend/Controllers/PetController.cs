@@ -26,7 +26,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// This endpoint retrieves all pets associated with the authenticated user. 
         /// It returns a list of PetResponse objects if pets are found, or a NotFound response if no pets are registered for the user.
         /// </summary>
-        [HttpGet]
+        [HttpGet("/api/client/pet/")]
         public async Task<ActionResult<List<PetResponse>>> GetAll()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -40,7 +40,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint retrieves a specific pet by its unique identifier (id).
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet("/api/client/pet/{id}")]
         public async Task<ActionResult<PetResponse>> GetById([FromRoute] Guid id)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -49,7 +49,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows the creation of a new pet associated with the authenticated user.
         /// </summary>
-        [HttpPost]
+        [HttpPost("/api/client/pet/create")]
         public async Task<ActionResult<PetResponse>> Create([FromBody] PetRequest pet)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -59,7 +59,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows the deletion of a pet by its unique identifier (id).
         /// </summary>
-        [HttpDelete("{id}")]
+        [HttpDelete("/api/client/pet/delete/{id}")]
         public async Task<ActionResult> Delete([FromRoute] Guid id)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -69,7 +69,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows the update of an existing pet's information by its unique identifier (id).
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut("/api/client/pet/update/{id}")]
         public async Task<ActionResult> Update([FromBody] PetRequest pet, [FromRoute] Guid id)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

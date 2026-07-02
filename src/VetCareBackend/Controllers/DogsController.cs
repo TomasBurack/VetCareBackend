@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VetCareBackend.Application.Interfaces;
+using VetCareBackend.Presentation.Authorization;
 
 namespace VetCareBackend.Presentation.Controllers
 {
@@ -16,7 +18,8 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint retrieves a list of all dog breeds from the external Dog API.
         /// </summary>
-        [HttpGet("breeds")]
+        [Authorize(policy: Policies.SoloClient)]
+        [HttpGet("/api/dog-breeds")]
         public async Task<IReadOnlyList<string>> GetBreeds()
         {
             var breeds = await _dogService.GetAllBreedsAsync();

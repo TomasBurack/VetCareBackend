@@ -19,9 +19,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint retrieves the information of the currently authenticated sysadmin user. It requires the user to be authorized
+        /// It requires the user to be authenticated and authorized as a SoloSysadmin.
         /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
-        [HttpGet("/sysadmin/myuser")]
+        [HttpGet("/api/sysadmin/myuser")]
         public async Task<IActionResult> Get()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -30,9 +31,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint deletes the currently authenticated sysadmin user.
+        /// It requires the user to be authenticated and authorized as a SoloSysadmin.
         /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
-        [HttpDelete("/sysadmin/myuser/delete")]
+        [HttpDelete("/api/sysadmin/myuser/delete")]
         public async Task<IActionResult> Delete()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -40,11 +42,12 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
         /// <summary>
-        /// This endpoint updates the information of the currently authenticated sysadmin user. 
+        /// This endpoint updates the information of the currently authenticated sysadmin user.
+        /// It requires the user to be authenticated and authorized as a SoloSysadmin.
         /// It requires the user to be authorized and provides a UserRequest object in the request body containing the updated information.
         /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
-        [HttpPut("/sysadmin/myuser/update")]
+        [HttpPut("/api/sysadmin/myuser/update")]
         public async Task<IActionResult> Update([FromBody] UserRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -53,9 +56,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint retrieves a list of all sysadmin users in the system. It requires the user to be authorized and returns a list of sysadmin information.
+        /// It requires the user to be authenticated and authorized as a SoloSysadmin.
         /// </summary>
         [Authorize(policy: Policies.SoloSysadmin)]
-        [HttpGet("/sysadmin/all")]
+        [HttpGet("/api/sysadmin/all")]
         public async Task<IActionResult> GetAll()
         {
             var sysadmin = await _service.GetAll();

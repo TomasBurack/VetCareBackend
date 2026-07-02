@@ -19,12 +19,12 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows the creation of a new shift. 
-        /// It requires the user to have the ClientAdm policy authorization. 
+        /// It requires the user to have the SoloClient policy authorization. 
         /// The request body should contain the necessary details for creating the shift, such as date, description, pet ID, and enrollment. 
         /// Upon successful creation, it returns the created shift details.
         /// </summary>
         [Authorize(policy: Policies.SoloClient)]
-        [HttpPost("/create")]
+        [HttpPost("/api/shift/create")]
         public async Task<IActionResult> Create([FromBody] ShiftRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -34,9 +34,10 @@ namespace VetCareBackend.Presentation.Controllers
 
         /// <summary>
         /// This endpoint retrieves all shifts for administratorS, status and enrollment.
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
-        [HttpGet("admin")]
+        [HttpGet("/api/shift/admin")]
         public async Task<IActionResult> GetAllAdmin()
         {
             var shifts = await _shiftService.GetAllAdmin();
@@ -45,10 +46,11 @@ namespace VetCareBackend.Presentation.Controllers
 
         /// <summary>
         /// This endpoint retrieves all shifts belonging to the authenticated client's pets.
+        /// It requires the user to have the SoloClient policy authorization.
         /// </summary>
 
         [Authorize(policy: Policies.SoloClient)]
-        [HttpGet("client")]
+        [HttpGet("/api/shift/client")]
         public async Task<IActionResult> GetAllClient()
         { 
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -57,10 +59,11 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint retrieves all shifts assigned to the authenticated veterinarian.
+        /// It requires the user to have the SoloVeterinarian policy authorization
         /// </summary>
 
         [Authorize(policy: Policies.SoloVeterinarian)]
-        [HttpGet("veterinarian")]
+        [HttpGet("/api/shift/veterinarian")]
         public async Task<IActionResult> GetAllVeterinarian()
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -70,9 +73,10 @@ namespace VetCareBackend.Presentation.Controllers
 
         /// <summary>
         /// This endpoint allows the update of a shift's status by its unique identifier (id) for a client.
+        /// It requires the user to have the SoloClient policy authorization.
         /// </summary>
         [Authorize(policy: Policies.SoloClient)]
-        [HttpPut("status/client/{id}")]
+        [HttpPut("/api/shift/status/client/{id}")]
         public async Task<IActionResult> UpdateStatusClient(Guid id)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -82,9 +86,10 @@ namespace VetCareBackend.Presentation.Controllers
 
         /// <summary>
         /// This endpoint allows the update of a shift's status by its unique identifier (id) for a veterinarian.
+        /// It requires the user to have the SoloVeterinarian policy authorization
         /// </summary>
         [Authorize(policy: Policies.SoloVeterinarian)]
-        [HttpPut("status/veterinarian/{id}")]
+        [HttpPut("/api/shift/status/veterinarian/{id}")]
         public async Task<IActionResult> UpdateStatusVeterinarian(Guid id, [FromBody] ShiftStatusRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -93,9 +98,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows the deletion of a shift by its unique identifier (id).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("/api/admins/shift/delete/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _shiftService.Delete(id);
