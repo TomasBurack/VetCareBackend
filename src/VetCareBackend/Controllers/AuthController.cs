@@ -37,7 +37,11 @@ namespace VetCareBackend.Presentation.Controllers
         {
             return Ok(await _service.SignIn(request));
         }
-
+        /// <summary>
+        /// This endpoint allows users to request a password reset.
+        /// It receives the registered email address and, if it exists in the system, sends an email with a reset link.
+        /// For security reasons, it always returns the same message without confirming whether the email address exists or not.
+        /// </summary>
         [HttpPost("forgost-post")]
         [AllowAnonymous]
         public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
@@ -45,7 +49,11 @@ namespace VetCareBackend.Presentation.Controllers
             await _service.ForgotPassword(request);
             return Ok("Si el mail existe, recibiras las instrucciones");
         }
-
+        /// <summary>
+        /// This endpoint allows the user to reset their password.
+        /// It accepts the token sent via email and the desired new password.
+        /// The token must be valid, must not have been used previously, and must not have expired.
+        /// </summary>
         [HttpPost("reset-password")]
         [AllowAnonymous]
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request) 
