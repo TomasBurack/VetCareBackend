@@ -32,7 +32,10 @@ namespace VetCareBackend.Application.Services
 
         public async Task<VeterinarianResponse> Create(VeterinarianRequest request)
         {
-            if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email))
+            if (await _AdminRep.FindEmail(request.Email) 
+                || await _repository.FindEmail(request.Email) 
+                || await _SysadminRep.FindEmail(request.Email) 
+                || await _ClientRep.FindEmail(request.Email))
             {
                 throw new ConflictException($"The email {request.Email} is already in use");
             }
@@ -121,17 +124,6 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException("The veterinarian was not found");
             }
             await _repository.Delete(id);
-        }
-
-        public async Task<VeterinarianResponse> GetByEnrollment(string enrollment)
-        {
-            var list = await _repository.GetAll();
-            var vet = list.FirstOrDefault(v => v.Enrollment == enrollment);
-
-            if (vet == null)
-                throw new NotFoundException("The veterinarian was not found");
-
-            return vet.ToVeterinarianResponse();
         }
     }
 }

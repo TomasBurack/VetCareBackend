@@ -49,11 +49,16 @@ namespace VetCareBackend.Application.Services
             return newPet.ToPetResponse();
         }
 
-        public async Task Delete(Guid id)
+        public async Task Delete(Guid id, string sub)
         {
+            bool Parse = Guid.TryParse(sub, out Guid Id);
+            if (Parse == false)
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
             var pet = await _petRepository.Get(id);
 
-            if (pet == null)
+            if (pet == null || pet.IdClient != Id)
             {
                 throw new NotFoundException($"No pet was found with id '{id}'.");
             }
@@ -61,17 +66,27 @@ namespace VetCareBackend.Application.Services
             await _petRepository.Delete(id);
         }
 
-        public async Task<List<PetResponse>> GetAll()
+        public async Task<List<PetResponse>> GetAll(string sub)
         {
+            bool Parse = Guid.TryParse(sub, out Guid Id);
+            if (Parse == false)
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
             var pets = await _petRepository.GetAll();
-            return pets.Select(p => p.ToPetResponse()).ToList();
+            return pets.Where(p => p.IdClient == Id).Select(p => p.ToPetResponse()).ToList();
         }
 
-        public async Task<PetResponse> GetById(Guid id)
+        public async Task<PetResponse> GetById(Guid id, string sub)
         {
+            bool Parse = Guid.TryParse(sub, out Guid Id);
+            if (Parse == false)
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
             var pet = await _petRepository.Get(id);
 
-            if (pet == null)
+            if (pet == null || pet.IdClient != Id)
             {
                 throw new NotFoundException($"No pet was found with id '{id}'.");
             }
@@ -79,11 +94,16 @@ namespace VetCareBackend.Application.Services
             return pet.ToPetResponse();
         }
 
-        public async Task Update(PetRequest petReq, Guid id)
+        public async Task Update(PetRequest petReq, Guid id, string sub)
         {
+            bool Parse = Guid.TryParse(sub, out Guid Id);
+            if (Parse == false)
+            {
+                throw new ValidationException("The ID sent is invalid");
+            }
             var petToUpdate = await _petRepository.Get(id);
 
-            if (petToUpdate == null)
+            if (petToUpdate == null || petToUpdate.IdClient != Id)
             {
                 throw new NotFoundException($"No pet was found with id '{id}'.");
             }
@@ -94,12 +114,8 @@ namespace VetCareBackend.Application.Services
                 throw new ValidationException(validations.Validate(petReq).ToString("~"));
             }
 
-            petToUpdate.Name = petReq.Name;
-            petToUpdate.Age = petReq.Age;
-            petToUpdate.TypePet = petReq.typePet;
-            petToUpdate.Breed = petReq.Breed;
-
-            await _petRepository.Update(petToUpdate);
+            
+            await _petRepository.Update(petToUpdate.ToPetUpdate(petReq));
         }
     }
 }

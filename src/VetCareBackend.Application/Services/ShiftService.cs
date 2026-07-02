@@ -29,18 +29,9 @@ namespace VetCareBackend.Application.Services
             _petRepository = petRepository;
             _veterinarianRepository = veterinarianRepository;
         }
-        public async Task<List<ShiftResponse>> GetAllAdmin(DateTimeOffset? date, Status? status, string? enrollment)
+        public async Task<List<ShiftResponse>> GetAllAdmin()
         {
             var shifts = await _shiftRepository.GetAll();
-
-            if (date.HasValue)
-                shifts = shifts.Where(s => s.DateShift.Date == date.Value.Date).ToList();
-
-            if (status.HasValue)
-                shifts = shifts.Where(s => s.Status == status.Value).ToList();
-
-            if (!string.IsNullOrEmpty(enrollment))
-                shifts = shifts.Where(s => s.Enrollment == enrollment).ToList();
 
             return shifts.Select(s => s.ToShiftResponse()).ToList();
         }
@@ -55,7 +46,10 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException("The veterinarian was not found.");
 
             var shifts = await _shiftRepository.GetAll();
-            return shifts.Select(s => s.ToShiftResponse()).ToList();
+            return shifts
+                .Where(s => s.Enrollment == vet.Enrollment)
+                .Select(s => s.ToShiftResponse())
+                .ToList();
         }
 
         public async Task<List<ShiftResponse>> GetAllClient(string sub)
@@ -113,7 +107,8 @@ namespace VetCareBackend.Application.Services
 
             bool shiftTaken = allShifts.Any(s =>
                 s.Enrollment == shiftReq.Enrollment
-                && s.DateShift == shiftReq.DateShift);
+                && s.DateShift == shiftReq.DateShift
+                && s.Status != Status.Canceled);
 
             if (shiftTaken)
                 throw new ValidationException($"The veterinarian already has a shift on '{shiftReq.DateShift}'.");
@@ -143,6 +138,18 @@ namespace VetCareBackend.Application.Services
                 throw new NotFoundException($"No shift was found with id '{id}'.");
             }
 
+            ShiftStatusRequestValidation validations = new ShiftStatusRequestValidation();
+
+            if(!validations.Validate(request).IsValid)
+            {
+                throw new ValidationException(validations.Validate(request).ToString("-"));
+            }
+
+            if (shift.Status != Status.Pendant)
+            {
+                throw new ValidationException("Only shifts with status 'Pendant' can be updated.");
+            }
+
             shift.Status = request.Status;
             await _shiftRepository.Update(shift);
         }
@@ -153,6 +160,11 @@ namespace VetCareBackend.Application.Services
             if (shift == null)
             {
                 throw new NotFoundException($"No shift was found with id '{id}'.");
+            }
+
+            if (shift.Status != Status.Pendant)
+            {
+                throw new ValidationException("Only shifts with status 'Pendant' can be deleted.");
             }
 
             await _shiftRepository.Delete(id);

@@ -14,7 +14,6 @@ namespace VetCareBackend.Application.Interfaces
        Task<VeterinarianResponse> Create(VeterinarianRequest request);
        Task<List<VeterinarianResponse>> GetAll();
        Task<VeterinarianResponse> GetById(string Sub);
-       Task<VeterinarianResponse> GetByEnrollment(string enrollment);
        Task Update(string Sub, VeterinarianUpdateRequest request);
        Task Delete(string Sub);
     }

@@ -16,7 +16,8 @@ namespace VetCareBackend.Application.Validations
                 .WithMessage(" the shift date is invalid ");
             RuleFor(request => request.Enrollment)
                 .NotEmpty().WithMessage("The enrollment is required.")
-                .Length(4).WithMessage("Enrrolment must be exactly 4 characters long.");
+                .Length(4).WithMessage("Enrrolment must be exactly 4 characters long.")
+                .Must(enrollment => enrollment.All(char.IsDigit)).WithMessage("Enrollment must contain only numbers."); 
             RuleFor(request => request.PetId)
                 .NotEmpty().WithMessage("the pet is required");
             RuleFor(request => request.Description)

@@ -28,7 +28,7 @@ namespace VetCareBackend.Presentation.Controllers
         public async Task<IActionResult> Create([FromBody] ShiftRequest request)
         {
             string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var shift = await _shiftService.Create(request);
+            var shift = await _shiftService.Create(request, sub);
             return Ok(shift);
         }
 
@@ -37,12 +37,9 @@ namespace VetCareBackend.Presentation.Controllers
         /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpGet("admin")]
-        public async Task<IActionResult> GetAllAdmin(
-            [FromQuery] DateTimeOffset? date,
-            [FromQuery] Status? status,
-            [FromQuery] string? enrollment)
+        public async Task<IActionResult> GetAllAdmin()
         {
-            var shifts = await _shiftService.GetAllAdmin(date, status, enrollment);
+            var shifts = await _shiftService.GetAllAdmin();
             return Ok(shifts);
         }
 
@@ -72,10 +69,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         /// <summary>
-        /// This endpoint retrieves all shifts for a specific veterinarian by their ID.
+        /// This endpoint allows the update of a shift's status by its unique identifier (id).
         /// </summary>
         [Authorize(policy: Policies.VetAdm)]
-        [HttpPatch("status/{id}")]
+        [HttpPut("status/{id}")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] ShiftStatusRequest request)
         {
             await _shiftService.UpdateStatus(id, request);

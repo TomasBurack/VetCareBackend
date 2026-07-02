@@ -48,7 +48,7 @@ namespace VetCareBackend.Application.Mapper
                 Enrollment = veterinarian.Enrollment,
                 Veterinarian = veterinarian,
                 PetId = pet.Id,
-                Status = Status.Pendient
+                Status = Status.Pendant
 
             };
 

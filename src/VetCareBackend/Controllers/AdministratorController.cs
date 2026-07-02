@@ -17,13 +17,11 @@ namespace VetCareBackend.Presentation.Controllers
         private readonly IAdministratorService _service;
         private readonly IVeterinarianService _vetService;
         private readonly IClientService _clientService;
-        private readonly ISysadminService _sysadminService;
-        public AdministratorController(IAdministratorService service, IVeterinarianService vetService, IClientService clientService, ISysadminService sysadminService)
+        public AdministratorController(IAdministratorService service, IVeterinarianService vetService, IClientService clientService)
         {
             _service = service;
             _vetService = vetService;
             _clientService = clientService;
-            _sysadminService = sysadminService;
         }
 
         /// <summary>
@@ -125,7 +123,6 @@ namespace VetCareBackend.Presentation.Controllers
             var admins = await _service.GetAll();
             var clients = await _clientService.GetAll();
             var vets = await _vetService.GetAll();
-            var sysadmins = await _sysadminService.GetAll();
             return Ok(new { admins, clients, vets });
         }
     }

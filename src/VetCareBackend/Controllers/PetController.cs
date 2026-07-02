@@ -29,7 +29,8 @@ namespace VetCareBackend.Presentation.Controllers
         [HttpGet]
         public async Task<ActionResult<List<PetResponse>>> GetAll()
         {
-            var pets = await _petService.GetAll();
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var pets = await _petService.GetAll(sub);
 
             if (!pets.Any())
                 return NotFound("No ha mascotas registradas.");
@@ -42,7 +43,8 @@ namespace VetCareBackend.Presentation.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<PetResponse>> GetById([FromRoute] Guid id)
         {
-            return Ok(await _petService.GetById(id));
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Ok(await _petService.GetById(id,sub));
         }
         /// <summary>
         /// This endpoint allows the creation of a new pet associated with the authenticated user.
@@ -60,7 +62,8 @@ namespace VetCareBackend.Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete([FromRoute] Guid id)
         {
-            await _petService.Delete(id);
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _petService.Delete(id, sub);
             return NoContent();
         }
         /// <summary>
@@ -69,7 +72,8 @@ namespace VetCareBackend.Presentation.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> Update([FromBody] PetRequest pet, [FromRoute] Guid id)
         {
-            await _petService.Update(pet, id);
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _petService.Update(pet, id, sub);
             return NoContent();
         }
     }

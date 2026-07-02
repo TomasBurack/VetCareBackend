@@ -37,5 +37,14 @@ namespace VetCareBackend.Application.Mapper
                 Breed = petReq.Breed
             };
         }
+
+        public static Pet ToPetUpdate(this Pet Entity, PetRequest request)
+        {
+            Entity.Name = string.IsNullOrWhiteSpace(request.Name) ? Entity.Name : request.Name;
+            Entity.Age = request.Age;
+            Entity.TypePet = request.typePet;
+            Entity.Breed = string.IsNullOrWhiteSpace(request.Breed) ? Entity.Breed : request.Breed;
+            return Entity;
+        }
     }
 }

@@ -53,7 +53,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows an administrator to delete a specific veterinarian by their unique identifier (ID).
         /// </summary>
-        [Authorize(policy: Policies.SoloAdministrator)]
+        [Authorize(policy: Policies.Admins)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> AdminDelete([FromRoute] string id)
         {
