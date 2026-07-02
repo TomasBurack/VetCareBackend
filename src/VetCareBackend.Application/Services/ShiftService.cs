@@ -32,8 +32,15 @@ namespace VetCareBackend.Application.Services
         public async Task<List<ShiftResponse>> GetAllAdmin()
         {
             var shifts = await _shiftRepository.GetAll();
-
-            return shifts.Select(s => s.ToShiftResponse()).ToList();
+            var pets = await _petRepository.GetAll();
+            var petIds = pets
+                .Select(p => p.Id)
+                .ToList();
+            var vet = await _veterinarianRepository.GetAll();
+            var vetEnr = vet
+                .Select(v => v.Enrollment)
+                .ToList();
+            return shifts.Where(s => petIds.Contains(s.PetId) && vetEnr.Contains(s.Enrollment)).Select(s => s.ToShiftResponse()).ToList();
         }
         public async Task<List<ShiftResponse>> GetAllVeterinarian(string sub)
         {
@@ -45,9 +52,14 @@ namespace VetCareBackend.Application.Services
             if (vet == null)
                 throw new NotFoundException("The veterinarian was not found.");
 
+            var pets = await _petRepository.GetAll();
+            var petIds = pets
+                .Select(p => p.Id)
+                .ToList();
+
             var shifts = await _shiftRepository.GetAll();
             return shifts
-                .Where(s => s.Enrollment == vet.Enrollment)
+                .Where(s => s.Enrollment == vet.Enrollment && petIds.Contains(s.PetId))
                 .Select(s => s.ToShiftResponse())
                 .ToList();
         }
@@ -63,10 +75,14 @@ namespace VetCareBackend.Application.Services
                 .Where(p => p.IdClient == clientId)
                 .Select(p => p.Id)
                 .ToList();
+            var vet = await _veterinarianRepository.GetAll();
+            var vetEnr = vet
+                .Select(v => v.Enrollment)
+                .ToList();
 
             var shifts = await _shiftRepository.GetAll();
             return shifts
-                .Where(s => petIds.Contains(s.PetId))
+                .Where(s => petIds.Contains(s.PetId) && vetEnr.Contains(s.Enrollment))
                 .Select(s => s.ToShiftResponse())
                 .ToList();
         }

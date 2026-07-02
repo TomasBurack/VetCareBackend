@@ -126,9 +126,9 @@ builder.Services.AddScoped<ICatApiService, CatApiService>();
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(Policies.SoloClient, policy => policy.RequireRole(nameof(Role.Client), nameof(Role.SysAdmin)));
-    options.AddPolicy(Policies.SoloVeterinarian, policy => policy.RequireRole(nameof(Role.Veterinarian), nameof(Role.SysAdmin)));
-    options.AddPolicy(Policies.SoloAdministrator, policy => policy.RequireRole(nameof(Role.Administrator), nameof(Role.SysAdmin)));
+    options.AddPolicy(Policies.SoloClient, policy => policy.RequireRole(nameof(Role.Client)));
+    options.AddPolicy(Policies.SoloVeterinarian, policy => policy.RequireRole(nameof(Role.Veterinarian)));
+    options.AddPolicy(Policies.SoloAdministrator, policy => policy.RequireRole(nameof(Role.Administrator)));
     options.AddPolicy(Policies.SoloSysadmin, policy => policy.RequireRole(nameof(Role.SysAdmin), nameof(Role.SysAdmin)));
     options.AddPolicy(Policies.VetAdm, policy => policy.RequireRole(nameof(Role.Veterinarian), nameof(Role.Administrator), nameof(Role.SysAdmin)));
     options.AddPolicy(Policies.ClientAdm, policy => policy.RequireRole(nameof(Role.Client), nameof(Role.Administrator), nameof(Role.SysAdmin)));
