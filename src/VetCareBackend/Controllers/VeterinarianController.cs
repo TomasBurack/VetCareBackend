@@ -22,9 +22,10 @@ namespace VetCareBackend.Presentation.Controllers
         /// This endpoint allows an administrator to create a new veterinarian in the system. 
         /// The request body should contain the necessary information for the veterinarian, such as their name, email, phone number, and other relevant details. 
         /// Only users with the "Admins" policy are authorized to access this endpoint.
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
-        [HttpPost]
+        [HttpPost("/api/admins/veterinarian-create")]
         public async Task<IActionResult> Create([FromBody] VeterinarianRequest request)
         {
             var veterinarian = await _veterinarianService.Create(request);
@@ -32,9 +33,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to retrieve the details of a specific veterinarian by their unique identifier (ID).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
-        [HttpGet("{id}")]
+        [HttpGet("/api/admins/veterinarian-retrieve/{id}")]
         public async Task<IActionResult> GetById([FromRoute] string id)
         {
             var veterinarian = await _veterinarianService.GetById(id);
@@ -42,9 +44,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to update the information of a specific veterinarian by their unique identifier (ID).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
-        [HttpPut("{id}")]
+        [HttpPut("/api/admins/veterinarian-update/{id}")]
         public async Task<IActionResult> UpdateByAdmin([FromRoute] string id, [FromBody] VeterinarianUpdateRequest request)
         {
             await _veterinarianService.Update(id, request);
@@ -52,9 +55,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to delete a specific veterinarian by their unique identifier (ID).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
-        [HttpDelete("{id}")]
+        [HttpDelete("/api/admins/veterinarian-delete/{id}")]
         public async Task<IActionResult> AdminDelete([FromRoute] string id)
         {
             await _veterinarianService.Delete(id);
@@ -62,9 +66,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to retrieve a list of all veterinarians in the system.
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
-        [HttpGet("veterinarian")]
+        [HttpGet("/api/admins/veterinarian-retrieves-all")]
         public async Task<IActionResult> GetAll()
         {
             var veterinarians = await _veterinarianService.GetAll();
@@ -73,9 +78,10 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint retrieves the information of the currently authenticated veterinarian user. 
         /// It requires the user to be authorized and returns the veterinarian's details.
+        /// It requires the user to be authenticated and authorized as a SoloVeterinarian.
         /// </summary>
         [Authorize(policy: Policies.SoloVeterinarian)]
-        [HttpGet("myuser")]
+        [HttpGet("/api/veterinarian/myuser")]
         public async Task<IActionResult> Get()
         {
             string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -84,9 +90,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows the currently authenticated veterinarian user to update their own information.
+        /// It requires the user to be authenticated and authorized as a SoloVeterinarian
         /// </summary>
         [Authorize(policy: Policies.SoloVeterinarian)]
-        [HttpPut("myuser")]
+        [HttpPut("/api/veterinarian/myuser")]
         public async Task<IActionResult> Update([FromBody] VeterinarianUpdateRequest request)
         {
             string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -95,9 +102,10 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows the currently authenticated veterinarian user to delete their own account from the system.
+        /// It requires the user to be authenticated and authorized as a SoloVeterinarian
         /// </summary>
         [Authorize(policy: Policies.SoloVeterinarian)]
-        [HttpDelete("myuser")]
+        [HttpDelete("/api/veterinarian/myuser")]
         public async Task<IActionResult> Delete()
         {
             string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

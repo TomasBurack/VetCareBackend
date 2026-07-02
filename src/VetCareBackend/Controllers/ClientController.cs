@@ -22,6 +22,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows a client to retrieve their own user information.
+        /// It requires the user to be authenticated and authorized as a SoloClient.
         /// </summary>
         [Authorize(policy: Policies.SoloClient)]
         [HttpGet("/myuser")]
@@ -33,6 +34,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows a client to delete their own user account.
+        /// /// It requires the user to be authenticated and authorized as a SoloClient.
         /// </summary>
         [Authorize(policy: Policies.SoloClient)]
         [HttpDelete("/myuser/delete")]
@@ -44,6 +46,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows a client to update their own user information.
+        /// /// It requires the user to be authenticated and authorized as a SoloClient.
         /// </summary>
         [Authorize(policy: Policies.SoloClient)]
         [HttpPut("/myuser/update")]
@@ -55,6 +58,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to retrieve a specific client's information by their unique identifier (Id).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpGet("/client/{Id}")]
@@ -66,6 +70,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows an administrator to create a new client user account. 
         /// It accepts a SignUpRequest object in the request body and returns the created client information upon successful registration.
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpPost("/client/create")]
@@ -76,6 +81,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to delete a specific client user account by their unique identifier (Id).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpDelete("/client/delete/{Id}")]
@@ -86,6 +92,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to update a specific client's information by their unique identifier (Id).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpPut("/client/update/{Id}")]
@@ -96,6 +103,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
         /// <summary>
         /// This endpoint allows an administrator to retrieve a list of all clients in the system.
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpGet("/client/all")]
