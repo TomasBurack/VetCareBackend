@@ -23,7 +23,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// The request body should contain the necessary details for creating the shift, such as date, description, pet ID, and enrollment. 
         /// Upon successful creation, it returns the created shift details.
         /// </summary>
-        [Authorize(policy: Policies.ClientAdm)]
+        [Authorize(policy: Policies.SoloClient)]
         [HttpPost("/create")]
         public async Task<IActionResult> Create([FromBody] ShiftRequest request)
         {
@@ -33,7 +33,7 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         /// <summary>
-        /// This endpoint retrieves all shifts for administrators with optional filters by date, status and enrollment.
+        /// This endpoint retrieves all shifts for administratorS, status and enrollment.
         /// </summary>
         [Authorize(policy: Policies.Admins)]
         [HttpGet("admin")]
