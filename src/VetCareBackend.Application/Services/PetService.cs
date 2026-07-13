@@ -16,11 +16,13 @@ namespace VetCareBackend.Application.Services
     {
         private readonly IPetRepository _petRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IBreedService _breedService;
 
-        public PetService(IPetRepository petRepo, IClientRepository clientRepo)
+        public PetService(IPetRepository petRepo, IClientRepository clientRepo, IBreedService breedService)
         {
             _petRepository = petRepo;
             _clientRepository = clientRepo;
+            _breedService = breedService;
         }
 
         public async Task<PetResponse> Create(PetRequest petReq, string sub)
@@ -43,6 +45,8 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ValidationException(validations.Validate(petReq).ToString("~"));
             }
+
+            await ValidateBreed(petReq);
 
             var newPet = petReq.ToPet(client);
             await _petRepository.Add(newPet);
@@ -114,8 +118,18 @@ namespace VetCareBackend.Application.Services
                 throw new ValidationException(validations.Validate(petReq).ToString("~"));
             }
 
-            
+            await ValidateBreed(petReq);
+
             await _petRepository.Update(petToUpdate.ToPetUpdate(petReq));
+        }
+
+        private async Task ValidateBreed(PetRequest petReq)
+        {
+            var availableBreeds = await _breedService.GetBreedsByTypeAsync(petReq.typePet);
+            if (availableBreeds.Any() && !availableBreeds.Contains(petReq.Breed, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new ValidationException($"'{petReq.Breed}' is not a valid breed for the selected pet type.");
+            }
         }
     }
 }
