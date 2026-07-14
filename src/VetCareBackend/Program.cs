@@ -123,6 +123,7 @@ builder.Services.AddHttpClient("catHttpClient", client =>
 
 builder.Services.AddScoped<IDogApiService, DogApiService>();
 builder.Services.AddScoped<ICatApiService, CatApiService>();
+builder.Services.AddScoped<IBreedService, BreedService>();
 
 builder.Services.AddAuthorization(options =>
 {
