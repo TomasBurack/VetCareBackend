@@ -29,7 +29,6 @@ namespace VetCareBackend.Infrastructure.ExternalService
     {
         private const string TwoFactorPurpose = "2fa-pending";
         private const int TwoFactorPendingTokenMinutes = 5;
-        private const int RecoveryCodesCount = 10;
         private const int MaxTwoFactorAttempts = 3;
         private static readonly TimeSpan TwoFactorAttemptsWindow = TimeSpan.FromMinutes(TwoFactorPendingTokenMinutes);
 
@@ -207,7 +206,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             return new TwoFactorSetupResponse { OtpAuthUri = otpAuthUri };
         }
 
-        public async Task<TwoFactorRecoveryCodesResponse> ConfirmTwoFactorEnrollment(Guid userId, string code)
+        public async Task ConfirmTwoFactorEnrollment(Guid userId, string code)
         {
             var (user, _) = await FindUserById(userId)
                 ?? throw new NotFoundException("User not found");
@@ -226,12 +225,8 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
             _memoryCache.Remove(attemptsCacheKey);
 
-            var recoveryCodes = GenerateRecoveryCodes();
-            user.TwoFactorRecoveryCodesHash = HashRecoveryCodes(recoveryCodes);
             user.TwoFactorEnabled = true;
             await _context.SaveChangesAsync();
-
-            return new TwoFactorRecoveryCodesResponse { RecoveryCodes = recoveryCodes };
         }
 
         public async Task<AuthResponse> VerifyTwoFactor(string pendingToken, string code)
@@ -249,15 +244,6 @@ namespace VetCareBackend.Infrastructure.ExternalService
             EnforceAttemptLimit(attemptsCacheKey);
 
             bool isValid = ValidateTotpCode(user.TwoFactorSecret, code);
-
-            if (!isValid && !string.IsNullOrEmpty(user.TwoFactorRecoveryCodesHash))
-            {
-                isValid = ConsumeRecoveryCodeIfValid(user, code);
-                if (isValid)
-                {
-                    await _context.SaveChangesAsync();
-                }
-            }
 
             if (!isValid)
             {
@@ -286,23 +272,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
             user.TwoFactorEnabled = false;
             user.TwoFactorSecret = null;
-            user.TwoFactorRecoveryCodesHash = null;
             await _context.SaveChangesAsync();
-        }
-
-        public async Task<TwoFactorRecoveryCodesResponse> RegenerateRecoveryCodes(Guid userId)
-        {
-            var (user, _) = await FindUserById(userId)
-                ?? throw new NotFoundException("User not found");
-
-            if (!user.TwoFactorEnabled)
-                throw new ValidationException("Two-factor authentication is not enabled for this user");
-
-            var recoveryCodes = GenerateRecoveryCodes();
-            user.TwoFactorRecoveryCodesHash = HashRecoveryCodes(recoveryCodes);
-            await _context.SaveChangesAsync();
-
-            return new TwoFactorRecoveryCodesResponse { RecoveryCodes = recoveryCodes };
         }
 
         public async Task<bool> IsTwoFactorEnabled(Guid userId)
@@ -368,35 +338,6 @@ namespace VetCareBackend.Infrastructure.ExternalService
             string base32Secret = _dataProtector.Unprotect(protectedSecret);
             var totp = new Totp(Base32Encoding.ToBytes(base32Secret));
             return totp.VerifyTotp(code, out _, new VerificationWindow(previous: 1, future: 1));
-        }
-
-        private static List<string> GenerateRecoveryCodes()
-        {
-            var codes = new List<string>(RecoveryCodesCount);
-            for (int i = 0; i < RecoveryCodesCount; i++)
-            {
-                codes.Add(RandomNumberGenerator.GetInt32(0, 100_000_000).ToString("D8"));
-            }
-            return codes;
-        }
-
-        private static string HashRecoveryCodes(List<string> recoveryCodes)
-        {
-            var hashes = recoveryCodes.Select(BCrypt.Net.BCrypt.HashPassword);
-            return string.Join('|', hashes);
-        }
-
-        private static bool ConsumeRecoveryCodeIfValid(User user, string code)
-        {
-            var hashes = user.TwoFactorRecoveryCodesHash!.Split('|').ToList();
-            var matchedHash = hashes.FirstOrDefault(hash => BCrypt.Net.BCrypt.Verify(code, hash));
-
-            if (matchedHash == null)
-                return false;
-
-            hashes.Remove(matchedHash);
-            user.TwoFactorRecoveryCodesHash = string.Join('|', hashes);
-            return true;
         }
 
         private string GeneratePendingTwoFactorToken(Guid userId)

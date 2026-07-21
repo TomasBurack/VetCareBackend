@@ -26,7 +26,5 @@ namespace VetCareBackend.Domain.Entities
 
         public string? TwoFactorSecret { get; set; }
 
-        public string? TwoFactorRecoveryCodesHash { get; set; }
-
     }
 }
