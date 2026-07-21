@@ -18,6 +18,7 @@ namespace VetCareBackend.Application.Mapper
         {
             return new ShiftResponse
             {
+                Id = shift.Id,
                 DateShift = TimeZoneInfo.ConvertTime(shift.DateShift, ArgentinaTimeZone),
                 Description = shift.Description,
                 Status = shift.Status.ToString(),
