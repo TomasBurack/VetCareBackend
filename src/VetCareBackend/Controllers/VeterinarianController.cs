@@ -76,7 +76,19 @@ namespace VetCareBackend.Presentation.Controllers
             return Ok(veterinarians);
         }
         /// <summary>
-        /// This endpoint retrieves the information of the currently authenticated veterinarian user. 
+        /// This endpoint allows an authenticated client to retrieve a summarized list of all veterinarians
+        /// (name, specialty and enrollment) so they can pick one when requesting a shift.
+        /// It requires the user to be authenticated and authorized as a SoloClient.
+        /// </summary>
+        [Authorize(policy: Policies.SoloClient)]
+        [HttpGet("/api/client/veterinarians")]
+        public async Task<IActionResult> GetAllForClient()
+        {
+            var veterinarians = await _veterinarianService.GetAllSummary();
+            return Ok(veterinarians);
+        }
+        /// <summary>
+        /// This endpoint retrieves the information of the currently authenticated veterinarian user.
         /// It requires the user to be authorized and returns the veterinarian's details.
         /// It requires the user to be authenticated and authorized as a SoloVeterinarian.
         /// </summary>

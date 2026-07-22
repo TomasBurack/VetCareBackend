@@ -165,7 +165,7 @@ namespace VetCareBackend.Presentation.Controllers
         public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
             await _service.ForgotPassword(request);
-            return Ok("Si el mail existe, recibiras las instrucciones");
+            return Ok(new { message = "Si el mail existe, recibiras las instrucciones" });
         }
         /// <summary>
         /// This endpoint allows the user to reset their password.
@@ -177,7 +177,7 @@ namespace VetCareBackend.Presentation.Controllers
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request) 
         {
             await _service.ResetPassword(request);
-            return Ok("Contraseña actualizada correctamente");
+            return Ok(new { message = "Contraseña actualizada correctamente" });
         }
     }
 }
