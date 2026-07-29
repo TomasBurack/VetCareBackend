@@ -13,8 +13,10 @@ namespace VetCareBackend.Application.Interfaces
         Task<List<ShiftResponse>> GetAllVeterinarian(string sub);
         Task<List<ShiftResponse>> GetAllClient(string sub);
         Task<ShiftResponse> Create(ShiftRequest shiftReq, string sub);
+        Task<List<DateTime>> GetBusyTimes(string enrollment, DateTime date);
         Task CancelStatusClient(Guid id, string sub);
         Task UpdateStatusVeterinarian(Guid id, ShiftStatusRequest request, string sub);
+        Task UpdateStatusAdmin(Guid id, ShiftStatusRequest request);
         Task Delete(Guid id);
     }
 }

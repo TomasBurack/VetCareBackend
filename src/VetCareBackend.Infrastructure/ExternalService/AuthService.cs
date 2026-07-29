@@ -68,7 +68,8 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _context.PasswordResetTokens.Add(resetToken);
             await _context.SaveChangesAsync();
 
-            string frontendBaseUrl = _configuration["FrontendBaseUrl"];
+            string frontendBaseUrl = _configuration["FrontendBaseUrl"]
+                ?? throw new InvalidOperationException("FrontendBaseUrl configuration value is missing");
             string resetLink = $"{frontendBaseUrl}/reset-password?token={token}";
             string body = $"Hola,\n\nPara restablecer tu contraseña hacé click en el siguiente link:\n\n{resetLink}\n\nEste link vence en 15 minutos.\n\nSi no solicitaste esto, ignore este mensaje.";
 
