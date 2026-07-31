@@ -188,6 +188,8 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseCors(x => x
     .WithOrigins(builder.Configuration["Cors:AllowedOrigin"]!)
     .AllowAnyHeader()
