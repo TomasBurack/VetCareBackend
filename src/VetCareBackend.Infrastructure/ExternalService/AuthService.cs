@@ -1,12 +1,17 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using OtpNet;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using VetCareBackend.Application.dtos.Requests;
@@ -22,14 +27,23 @@ namespace VetCareBackend.Infrastructure.ExternalService
 {
     public class AuthService : IAuthService
     {
+        private const string TwoFactorPurpose = "2fa-pending";
+        private const int TwoFactorPendingTokenMinutes = 5;
+        private const int MaxTwoFactorAttempts = 3;
+        private static readonly TimeSpan TwoFactorAttemptsWindow = TimeSpan.FromMinutes(TwoFactorPendingTokenMinutes);
+
         private readonly VetCareDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IMailService _mailService;
-        public AuthService(VetCareDbContext context, IConfiguration configuration, IMailService mailService)
+        private readonly IDataProtector _dataProtector;
+        private readonly IMemoryCache _memoryCache;
+        public AuthService(VetCareDbContext context, IConfiguration configuration, IMailService mailService, IDataProtectionProvider dataProtectionProvider, IMemoryCache memoryCache)
         {
             _context = context;
             _configuration = configuration;
             _mailService = mailService;
+            _dataProtector = dataProtectionProvider.CreateProtector("VetCareBackend.TwoFactorSecret");
+            _memoryCache = memoryCache;
         }
         public async Task ForgotPassword(ForgotPasswordRequest request)
         {
@@ -54,7 +68,9 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _context.PasswordResetTokens.Add(resetToken);
             await _context.SaveChangesAsync();
 
-            string resetLink = $"https://vetcare-api-e3f2djcgdacnfkca.chilecentral-01.azurewebsites.net/reset-password?token={token}";
+            string frontendBaseUrl = _configuration["FrontendBaseUrl"]
+                ?? throw new InvalidOperationException("FrontendBaseUrl configuration value is missing");
+            string resetLink = $"{frontendBaseUrl}/reset-password?token={token}";
             string body = $"Hola,\n\nPara restablecer tu contraseña hacé click en el siguiente link:\n\n{resetLink}\n\nEste link vence en 15 minutos.\n\nSi no solicitaste esto, ignore este mensaje.";
 
             await _mailService.SendEmail(request.Email, request.Email, "Recuperacion de contraseña - VetCare", body);
@@ -147,57 +163,244 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
         public async Task<AuthResponse> SignIn(SignInRequest request)
         {
-            Guid userId;
-            string role;
+            var (user, role) = await FindUserByEmail(request.Email)
+                ?? throw new UnauthorizedException("incorrect credentials");
 
-            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == request.Email && !c.IsDeleted);
-            var veterinarian = await _context.Veterinarians.FirstOrDefaultAsync(v => v.Email == request.Email && !v.IsDeleted);
-            var administrator = await _context.Administrators.FirstOrDefaultAsync(a => a.Email == request.Email && !a.IsDeleted);
-            var sysadmin = await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == request.Email && !s.IsDeleted);
-
-            if (client != null)
-            {
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
-                    throw new UnauthorizedException("incorrect credentials");
-
-                userId = client.Id;
-                role = "Client";
-            }
-            else if (veterinarian != null && !veterinarian.IsDeleted)
-            {
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, veterinarian.Password))
-                    throw new UnauthorizedException("incorrect credentials");
-
-                userId = veterinarian.Id;
-                role = "Veterinarian";
-            }
-            else if (administrator != null && !administrator.IsDeleted)
-            {
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, administrator.Password))
-                    throw new UnauthorizedException("incorrect credentials");
-
-                userId = administrator.Id;
-                role = "Administrator";
-            }
-            else if (sysadmin != null && !sysadmin.IsDeleted)
-            {
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, sysadmin.Password))
-                    throw new UnauthorizedException("incorrect credentials");
-                userId = sysadmin.Id;
-                role = "SysAdmin";
-            }
-            else
-            {
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
                 throw new UnauthorizedException("incorrect credentials");
+
+            if (user.TwoFactorEnabled)
+            {
+                return new AuthResponse
+                {
+                    TwoFactorRequired = true,
+                    PendingTwoFactorToken = GeneratePendingTwoFactorToken(user.Id),
+                    Role = role,
+                    UserId = user.Id,
+                    Email = user.Email
+                };
             }
 
             return new AuthResponse
             {
-                Token = GenerateToken(userId, request.Email, role),
+                Token = GenerateToken(user.Id, user.Email, role),
                 Role = role,
-                UserId = userId,
-                Email = request.Email
+                UserId = user.Id,
+                Email = user.Email
             };
+        }
+
+        public async Task<TwoFactorSetupResponse> BeginTwoFactorEnrollment(Guid userId)
+        {
+            var (user, _) = await FindUserById(userId)
+                ?? throw new NotFoundException("User not found");
+
+            var secretKey = KeyGeneration.GenerateRandomKey(20);
+            var base32Secret = Base32Encoding.ToString(secretKey);
+
+            user.TwoFactorSecret = _dataProtector.Protect(base32Secret);
+            await _context.SaveChangesAsync();
+
+            string issuer = _configuration["Jwt:Issuer"]!;
+            string otpAuthUri = $"otpauth://totp/{Uri.EscapeDataString(issuer)}:{Uri.EscapeDataString(user.Email)}" +
+                $"?secret={base32Secret}&issuer={Uri.EscapeDataString(issuer)}&digits=6&period=30";
+
+            return new TwoFactorSetupResponse { OtpAuthUri = otpAuthUri };
+        }
+
+        public async Task ConfirmTwoFactorEnrollment(Guid userId, string code)
+        {
+            var (user, _) = await FindUserById(userId)
+                ?? throw new NotFoundException("User not found");
+
+            if (string.IsNullOrEmpty(user.TwoFactorSecret))
+                throw new ValidationException("Two-factor enrollment was not started");
+
+            string attemptsCacheKey = $"2fa-confirm-attempts:{userId}";
+            EnforceAttemptLimit(attemptsCacheKey);
+
+            if (!ValidateTotpCode(user.TwoFactorSecret, code))
+            {
+                RegisterFailedAttempt(attemptsCacheKey);
+                throw new UnauthorizedException("Invalid verification code");
+            }
+
+            _memoryCache.Remove(attemptsCacheKey);
+
+            user.TwoFactorEnabled = true;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<AuthResponse> VerifyTwoFactor(string pendingToken, string code)
+        {
+            var userId = ValidatePendingTwoFactorToken(pendingToken)
+                ?? throw new UnauthorizedException("Invalid or expired session");
+
+            var (user, role) = await FindUserById(userId)
+                ?? throw new UnauthorizedException("incorrect credentials");
+
+            if (!user.TwoFactorEnabled || string.IsNullOrEmpty(user.TwoFactorSecret))
+                throw new ValidationException("Two-factor authentication is not enabled for this user");
+
+            string attemptsCacheKey = $"2fa-verify-attempts:{userId}";
+            EnforceAttemptLimit(attemptsCacheKey);
+
+            bool isValid = ValidateTotpCode(user.TwoFactorSecret, code);
+
+            if (!isValid)
+            {
+                RegisterFailedAttempt(attemptsCacheKey);
+                throw new UnauthorizedException("Invalid verification code");
+            }
+
+            _memoryCache.Remove(attemptsCacheKey);
+
+            return new AuthResponse
+            {
+                Token = GenerateToken(user.Id, user.Email, role),
+                Role = role,
+                UserId = user.Id,
+                Email = user.Email
+            };
+        }
+
+        public async Task DisableTwoFactor(Guid userId, string password)
+        {
+            var (user, _) = await FindUserById(userId)
+                ?? throw new NotFoundException("User not found");
+
+            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
+                throw new UnauthorizedException("incorrect credentials");
+
+            user.TwoFactorEnabled = false;
+            user.TwoFactorSecret = null;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> IsTwoFactorEnabled(Guid userId)
+        {
+            var (user, _) = await FindUserById(userId)
+                ?? throw new NotFoundException("User not found");
+
+            return user.TwoFactorEnabled;
+        }
+
+        private void EnforceAttemptLimit(string cacheKey)
+        {
+            int attempts = _memoryCache.Get<int?>(cacheKey) ?? 0;
+            if (attempts >= MaxTwoFactorAttempts)
+                throw new UnauthorizedException("Too many failed attempts. Please try again.");
+        }
+
+        private void RegisterFailedAttempt(string cacheKey)
+        {
+            int attempts = (_memoryCache.Get<int?>(cacheKey) ?? 0) + 1;
+            _memoryCache.Set(cacheKey, attempts, TwoFactorAttemptsWindow);
+        }
+
+        private async Task<(User User, string Role)?> FindUserByEmail(string email)
+        {
+            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == email && !c.IsDeleted);
+            if (client != null) return (client, "Client");
+
+            var veterinarian = await _context.Veterinarians.FirstOrDefaultAsync(v => v.Email == email && !v.IsDeleted);
+            if (veterinarian != null) return (veterinarian, "Veterinarian");
+
+            var administrator = await _context.Administrators.FirstOrDefaultAsync(a => a.Email == email && !a.IsDeleted);
+            if (administrator != null) return (administrator, "Administrator");
+
+            var sysadmin = await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == email && !s.IsDeleted);
+            if (sysadmin != null) return (sysadmin, "SysAdmin");
+
+            return null;
+        }
+
+        private async Task<(User User, string Role)?> FindUserById(Guid id)
+        {
+            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+            if (client != null) return (client, "Client");
+
+            var veterinarian = await _context.Veterinarians.FirstOrDefaultAsync(v => v.Id == id && !v.IsDeleted);
+            if (veterinarian != null) return (veterinarian, "Veterinarian");
+
+            var administrator = await _context.Administrators.FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
+            if (administrator != null) return (administrator, "Administrator");
+
+            var sysadmin = await _context.Sysadmins.FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+            if (sysadmin != null) return (sysadmin, "SysAdmin");
+
+            return null;
+        }
+
+        private bool ValidateTotpCode(string protectedSecret, string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                return false;
+
+            string base32Secret = _dataProtector.Unprotect(protectedSecret);
+            var totp = new Totp(Base32Encoding.ToBytes(base32Secret));
+            return totp.VerifyTotp(code, out _, new VerificationWindow(previous: 1, future: 1));
+        }
+
+        private string GeneratePendingTwoFactorToken(Guid userId)
+        {
+            string key = _configuration["Jwt:Key"]!;
+            string issuer = _configuration["Jwt:Issuer"]!;
+            string audience = _configuration["Jwt:Audience"]!;
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim("purpose", TwoFactorPurpose),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(TwoFactorPendingTokenMinutes),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private Guid? ValidatePendingTwoFactorToken(string token)
+        {
+            string key = _configuration["Jwt:Key"]!;
+            string issuer = _configuration["Jwt:Issuer"]!;
+            string audience = _configuration["Jwt:Audience"]!;
+
+            var handler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+                ValidateAudience = true,
+                ValidAudience = audience,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+            };
+
+            try
+            {
+                var principal = handler.ValidateToken(token, validationParameters, out _);
+                var purpose = principal.FindFirst("purpose")?.Value;
+                if (purpose != TwoFactorPurpose)
+                    return null;
+
+                var sub = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+                return sub != null ? Guid.Parse(sub) : null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private string GenerateToken(Guid UserId, string Email, string Role)

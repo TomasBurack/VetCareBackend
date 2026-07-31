@@ -24,7 +24,17 @@ namespace VetCareBackend.Application.Mapper
                 Email = veterinarian.Email,
                 PhoneNumber = veterinarian.PhoneNumber,
                 Enrollment = veterinarian.Enrollment,
-                Speciality = nameof(veterinarian.Speciality)
+                Speciality = veterinarian.Speciality.ToString()
+            };
+        }
+        public static VeterinarianSummaryResponse ToVeterinarianSummaryResponse(this Veterinarian veterinarian)
+        {
+            return new VeterinarianSummaryResponse
+            {
+                FirstName = veterinarian.FirstName,
+                LastName = veterinarian.LastName,
+                Enrollment = veterinarian.Enrollment,
+                Speciality = veterinarian.Speciality.ToString()
             };
         }
         public static Veterinarian ToVeterinarian(this VeterinarianRequest request)

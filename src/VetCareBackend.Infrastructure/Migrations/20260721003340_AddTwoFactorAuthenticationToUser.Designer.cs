@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VetCareBackend.Infrastructure;
 
@@ -11,9 +12,11 @@ using VetCareBackend.Infrastructure;
 namespace VetCareBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(VetCareDbContext))]
-    partial class VetCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721003340_AddTwoFactorAuthenticationToUser")]
+    partial class AddTwoFactorAuthenticationToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,6 +177,9 @@ namespace VetCareBackend.Infrastructure.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
+
+                    b.Property<string>("TwoFactorRecoveryCodesHash")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TwoFactorSecret")
                         .HasColumnType("nvarchar(max)");

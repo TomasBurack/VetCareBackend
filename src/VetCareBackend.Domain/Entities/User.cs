@@ -22,5 +22,9 @@ namespace VetCareBackend.Domain.Entities
 
         public Role Role { get; set; }
 
+        public bool TwoFactorEnabled { get; set; }
+
+        public string? TwoFactorSecret { get; set; }
+
     }
 }

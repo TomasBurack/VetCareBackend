@@ -10,7 +10,13 @@ namespace VetCareBackend.Application.dtos.Responses
         public string Role { get; set; } = string.Empty;
 
         public Guid UserId { get; set; }
-        
+
         public string Email { get; set; } = string.Empty;
+
+        public bool TwoFactorRequired { get; set; }
+
+        public string? PendingTwoFactorToken { get; set; }
+
+        public bool TwoFactorEnabled { get; set; }
     }
 }

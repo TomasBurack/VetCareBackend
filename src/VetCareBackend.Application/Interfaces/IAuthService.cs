@@ -12,5 +12,10 @@ namespace VetCareBackend.Application.Interfaces
         Task<AuthResponse> SignIn(SignInRequest request);
         Task ForgotPassword(ForgotPasswordRequest request);
         Task ResetPassword(ResetPasswordRequest request);
+        Task<TwoFactorSetupResponse> BeginTwoFactorEnrollment(Guid userId);
+        Task ConfirmTwoFactorEnrollment(Guid userId, string code);
+        Task<AuthResponse> VerifyTwoFactor(string pendingToken, string code);
+        Task DisableTwoFactor(Guid userId, string password);
+        Task<bool> IsTwoFactorEnabled(Guid userId);
     }
 }

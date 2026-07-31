@@ -146,7 +146,31 @@ namespace VetCareBackend.Application.Services
             return newShift.ToShiftResponse();
         }
 
-       
+        public async Task<List<DateTime>> GetBusyTimes(string enrollment, DateTime date)
+        {
+            var window = TimeSpan.FromMinutes(30);
+            var dayStart = date.Date;
+            var dayEnd = dayStart.AddDays(1);
+
+            var allShifts = await _shiftRepository.GetAll();
+            var vetShifts = allShifts
+                .Where(s => s.Enrollment == enrollment && s.Status != Status.Canceled)
+                .ToList();
+
+            var busyTimes = new List<DateTime>();
+            for (var slot = dayStart; slot < dayEnd; slot = slot.AddMinutes(30))
+            {
+                bool isBusy = vetShifts.Any(s =>
+                    (s.DateShift - slot) > -window && (s.DateShift - slot) < window);
+
+                if (isBusy)
+                    busyTimes.Add(slot);
+            }
+
+            return busyTimes;
+        }
+
+
         public async Task CancelStatusClient(Guid id, string sub)
         {
             bool parse = Guid.TryParse(sub, out Guid clientId);
@@ -201,6 +225,30 @@ namespace VetCareBackend.Application.Services
             ShiftStatusRequestValidation validations = new ShiftStatusRequestValidation();
 
             if(!validations.Validate(request).IsValid)
+            {
+                throw new ValidationException(validations.Validate(request).ToString("-"));
+            }
+
+            if (shift.Status != Status.Pendant)
+            {
+                throw new ValidationException("Only shifts with status 'Pendant' can be updated.");
+            }
+
+            shift.Status = request.Status;
+            await _shiftRepository.Update(shift);
+        }
+
+        public async Task UpdateStatusAdmin(Guid id, ShiftStatusRequest request)
+        {
+            var shift = await _shiftRepository.Get(id);
+            if (shift == null)
+            {
+                throw new NotFoundException($"No shift was found with id '{id}'.");
+            }
+
+            ShiftStatusRequestValidation validations = new ShiftStatusRequestValidation();
+
+            if (!validations.Validate(request).IsValid)
             {
                 throw new ValidationException(validations.Validate(request).ToString("-"));
             }

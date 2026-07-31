@@ -62,6 +62,12 @@ namespace VetCareBackend.Application.Services
             return list.Select(v => v.ToVeterinarianResponse()).ToList();
         }
 
+        public async Task<List<VeterinarianSummaryResponse>> GetAllSummary()
+        {
+            var list = await _repository.GetAll();
+            return list.Select(v => v.ToVeterinarianSummaryResponse()).ToList();
+        }
+
         public async Task<VeterinarianResponse> GetById(string Sub)
         {
             bool parse = Guid.TryParse(Sub, out Guid id);

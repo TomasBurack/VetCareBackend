@@ -33,6 +33,20 @@ namespace VetCareBackend.Presentation.Controllers
         }
 
         /// <summary>
+        /// This endpoint retrieves the times of the given day that are already taken (or within
+        /// 30 minutes of another shift) for the given veterinarian, so the client can disable
+        /// those time slots when picking a time for a new shift.
+        /// It requires the user to have the SoloClient policy authorization.
+        /// </summary>
+        [Authorize(policy: Policies.SoloClient)]
+        [HttpGet("/api/shift/busy-times")]
+        public async Task<IActionResult> GetBusyTimes([FromQuery] string enrollment, [FromQuery] DateTime date)
+        {
+            var busyTimes = await _shiftService.GetBusyTimes(enrollment, date);
+            return Ok(busyTimes);
+        }
+
+        /// <summary>
         /// This endpoint retrieves all shifts for administratorS, status and enrollment.
         /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>
@@ -96,6 +110,18 @@ namespace VetCareBackend.Presentation.Controllers
             await _shiftService.UpdateStatusVeterinarian(id, request, sub!);
             return NoContent();
         }
+        /// <summary>
+        /// This endpoint allows the update of a shift's status by its unique identifier (id) for an admin.
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
+        /// </summary>
+        [Authorize(policy: Policies.Admins)]
+        [HttpPut("/api/admins/shift/status/{id}")]
+        public async Task<IActionResult> UpdateStatusAdmin(Guid id, [FromBody] ShiftStatusRequest request)
+        {
+            await _shiftService.UpdateStatusAdmin(id, request);
+            return NoContent();
+        }
+
         /// <summary>
         /// This endpoint allows the deletion of a shift by its unique identifier (id).
         /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).

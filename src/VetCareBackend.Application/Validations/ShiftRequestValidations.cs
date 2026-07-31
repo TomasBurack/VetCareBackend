@@ -14,6 +14,9 @@ namespace VetCareBackend.Application.Validations
             RuleFor(request => request.DateShift)
                 .GreaterThan(DateTime.UtcNow)
                 .WithMessage(" the shift date is invalid ");
+            RuleFor(request => request.DateShift.TimeOfDay)
+                .InclusiveBetween(new TimeSpan(8, 0, 0), new TimeSpan(20, 0, 0))
+                .WithMessage("The shift time must be between 08:00 and 20:00.");
             RuleFor(request => request.Enrollment)
                 .NotEmpty().WithMessage("The enrollment is required.")
                 .Length(4).WithMessage("Enrrolment must be exactly 4 characters long.")
