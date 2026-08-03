@@ -16,7 +16,8 @@ namespace VetCareBackend.Application.Validations
                 .MaximumLength(20).WithMessage("Pet name cannot exceed 20 characters.")
                 .When(request => !string.IsNullOrWhiteSpace(request.Name));
             RuleFor(pr => pr.Age).NotEmpty().WithMessage("This field is requiered.")
-                .GreaterThanOrEqualTo(0).WithMessage("The pet age must be positive.");
+                .GreaterThanOrEqualTo(0).WithMessage("The pet age must be positive.")
+                .LessThanOrEqualTo(100).WithMessage("The pet age cannot exceed 100 years.");
             RuleFor(pr => pr.typePet)
                 .IsInEnum<PetRequest, TypePet>()
                 .WithMessage("Invalid pet type. Please select a valid option from the list.");
