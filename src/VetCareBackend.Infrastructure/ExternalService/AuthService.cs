@@ -97,7 +97,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
                 (User?) await _context.Sysadmins.FirstOrDefaultAsync(s => s.Email == resetToken.Email && !s.IsDeleted);
 
             if (user == null)
-                throw new NotFoundException("The user associated with the token could not be found.");
+                throw new NotFoundException("No se encontró el usuario asociado al token.");
 
             ResetPasswordRequestValidations validation = new ResetPasswordRequestValidations();
 
@@ -108,7 +108,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
             if(BCrypt.Net.BCrypt.Verify(request.NewPassword, user.Password))
             {
-                throw new ValidationException("The new password cannot be the same as the previous one.");
+                throw new ValidationException("La nueva contraseña no puede ser igual a la anterior.");
             }
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword); ;
@@ -125,7 +125,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
 
             if (emailUsed)
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
 
             Guid id = Guid.NewGuid();
@@ -149,7 +149,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             }
             catch (DbUpdateException ex)
             {
-                throw new DatabaseException("There was an error saving the user in the database", ex);
+                throw new DatabaseException("Ocurrió un error al guardar el usuario en la base de datos", ex);
             }
 
             return new AuthResponse
@@ -164,10 +164,10 @@ namespace VetCareBackend.Infrastructure.ExternalService
         public async Task<AuthResponse> SignIn(SignInRequest request)
         {
             var (user, role) = await FindUserByEmail(request.Email)
-                ?? throw new UnauthorizedException("incorrect credentials");
+                ?? throw new UnauthorizedException("Credenciales incorrectas");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
-                throw new UnauthorizedException("incorrect credentials");
+                throw new UnauthorizedException("Credenciales incorrectas");
 
             if (user.TwoFactorEnabled)
             {
@@ -193,7 +193,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
         public async Task<TwoFactorSetupResponse> BeginTwoFactorEnrollment(Guid userId)
         {
             var (user, _) = await FindUserById(userId)
-                ?? throw new NotFoundException("User not found");
+                ?? throw new NotFoundException("No se encontró el usuario");
 
             var secretKey = KeyGeneration.GenerateRandomKey(20);
             var base32Secret = Base32Encoding.ToString(secretKey);
@@ -211,10 +211,10 @@ namespace VetCareBackend.Infrastructure.ExternalService
         public async Task ConfirmTwoFactorEnrollment(Guid userId, string code)
         {
             var (user, _) = await FindUserById(userId)
-                ?? throw new NotFoundException("User not found");
+                ?? throw new NotFoundException("No se encontró el usuario");
 
             if (string.IsNullOrEmpty(user.TwoFactorSecret))
-                throw new ValidationException("Two-factor enrollment was not started");
+                throw new ValidationException("No se inició el proceso de configuración de la autenticación en dos pasos");
 
             string attemptsCacheKey = $"2fa-confirm-attempts:{userId}";
             EnforceAttemptLimit(attemptsCacheKey);
@@ -222,7 +222,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             if (!ValidateTotpCode(user.TwoFactorSecret, code))
             {
                 RegisterFailedAttempt(attemptsCacheKey);
-                throw new UnauthorizedException("Invalid verification code");
+                throw new UnauthorizedException("El código de verificación no es válido");
             }
 
             _memoryCache.Remove(attemptsCacheKey);
@@ -234,13 +234,13 @@ namespace VetCareBackend.Infrastructure.ExternalService
         public async Task<AuthResponse> VerifyTwoFactor(string pendingToken, string code)
         {
             var userId = ValidatePendingTwoFactorToken(pendingToken)
-                ?? throw new UnauthorizedException("Invalid or expired session");
+                ?? throw new UnauthorizedException("La sesión no es válida o expiró");
 
             var (user, role) = await FindUserById(userId)
-                ?? throw new UnauthorizedException("incorrect credentials");
+                ?? throw new UnauthorizedException("Credenciales incorrectas");
 
             if (!user.TwoFactorEnabled || string.IsNullOrEmpty(user.TwoFactorSecret))
-                throw new ValidationException("Two-factor authentication is not enabled for this user");
+                throw new ValidationException("La autenticación en dos pasos no está habilitada para este usuario");
 
             string attemptsCacheKey = $"2fa-verify-attempts:{userId}";
             EnforceAttemptLimit(attemptsCacheKey);
@@ -250,7 +250,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             if (!isValid)
             {
                 RegisterFailedAttempt(attemptsCacheKey);
-                throw new UnauthorizedException("Invalid verification code");
+                throw new UnauthorizedException("El código de verificación no es válido");
             }
 
             _memoryCache.Remove(attemptsCacheKey);
@@ -267,10 +267,10 @@ namespace VetCareBackend.Infrastructure.ExternalService
         public async Task DisableTwoFactor(Guid userId, string password)
         {
             var (user, _) = await FindUserById(userId)
-                ?? throw new NotFoundException("User not found");
+                ?? throw new NotFoundException("No se encontró el usuario");
 
             if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
-                throw new UnauthorizedException("incorrect credentials");
+                throw new UnauthorizedException("Credenciales incorrectas");
 
             user.TwoFactorEnabled = false;
             user.TwoFactorSecret = null;
@@ -280,7 +280,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
         public async Task<bool> IsTwoFactorEnabled(Guid userId)
         {
             var (user, _) = await FindUserById(userId)
-                ?? throw new NotFoundException("User not found");
+                ?? throw new NotFoundException("No se encontró el usuario");
 
             return user.TwoFactorEnabled;
         }
@@ -289,7 +289,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
         {
             int attempts = _memoryCache.Get<int?>(cacheKey) ?? 0;
             if (attempts >= MaxTwoFactorAttempts)
-                throw new UnauthorizedException("Too many failed attempts. Please try again.");
+                throw new UnauthorizedException("Demasiados intentos fallidos. Por favor, intentá de nuevo más tarde.");
         }
 
         private void RegisterFailedAttempt(string cacheKey)

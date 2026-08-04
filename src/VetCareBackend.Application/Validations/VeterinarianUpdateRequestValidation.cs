@@ -13,32 +13,32 @@ namespace VetCareBackend.Application.Validations
         public VeterinarianUpdateRequestValidation()
         {
             RuleFor(vet => vet.FirstName)
-                .MinimumLength(3).WithMessage("First name must be at least 3 characters long.")
-                .MaximumLength(15).WithMessage("First name cannot exceed 15 characters.")
-                .When(request => !string.IsNullOrWhiteSpace(request.FirstName)); 
+                .MinimumLength(3).WithMessage("El nombre debe tener al menos 3 caracteres.")
+                .MaximumLength(15).WithMessage("El nombre no puede superar los 15 caracteres.")
+                .When(request => !string.IsNullOrWhiteSpace(request.FirstName));
             RuleFor(vet => vet.LastName)
-                .MinimumLength(3).WithMessage("Last name must be at least 3 characters long.")
-                .MaximumLength(15).WithMessage("Last name cannot exceed 15 characters.")
+                .MinimumLength(3).WithMessage("El apellido debe tener al menos 3 caracteres.")
+                .MaximumLength(15).WithMessage("El apellido no puede superar los 15 caracteres.")
                 .When(request => !string.IsNullOrWhiteSpace(request.LastName));
             RuleFor(vet => vet.Dni)
-                .Length(8).WithMessage("DNI must be exactly 8 characters long.")
-                .Must(dni => dni.All(char.IsDigit)).WithMessage("DNI must contain only numbers.")
+                .Length(8).WithMessage("El DNI debe tener exactamente 8 caracteres.")
+                .Must(dni => dni.All(char.IsDigit)).WithMessage("El DNI debe contener solo números.")
                 .When(request => !string.IsNullOrWhiteSpace(request.Dni));
             RuleFor(vet => vet.Email)
-                .EmailAddress().WithMessage("The email address format is not valid.")
+                .EmailAddress().WithMessage("El formato del email no es válido.")
                 .When(request => !string.IsNullOrWhiteSpace(request.Email));
             RuleFor(vet => vet.PhoneNumber)
-                .MinimumLength(9).WithMessage("Phone number must be at least 9 characters long.")
-                .MaximumLength(11).WithMessage("Phone number cannot exceed 11 characters.")
-                .Must(pn => pn.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.")
+                .MinimumLength(9).WithMessage("El teléfono debe tener al menos 9 caracteres.")
+                .MaximumLength(11).WithMessage("El teléfono no puede superar los 11 caracteres.")
+                .Must(pn => pn.All(char.IsDigit)).WithMessage("El teléfono debe contener solo números.")
                 .When(request => !string.IsNullOrWhiteSpace(request.PhoneNumber));
             RuleFor(vet => vet.Enrollment)
-                .Length(4).WithMessage("Enrollment must be exactly 4 characters long.")
-                .Must(enrollment => enrollment.All(char.IsDigit)).WithMessage("Enrollment must contain only numbers.")
+                .Length(4).WithMessage("La matrícula debe tener exactamente 4 caracteres.")
+                .Must(enrollment => enrollment.All(char.IsDigit)).WithMessage("La matrícula debe contener solo números.")
                 .When(vet => !string.IsNullOrWhiteSpace(vet.Enrollment));
             RuleFor(vet => vet.Speciality)
                 .IsInEnum<VeterinarianUpdateRequest, Speciality>()
-                .WithMessage("Invalid veterinary speciality. Please select a valid option from the list.");
+                .WithMessage("La especialidad veterinaria no es válida. Por favor, seleccioná una opción válida de la lista.");
         }
     }
 }
