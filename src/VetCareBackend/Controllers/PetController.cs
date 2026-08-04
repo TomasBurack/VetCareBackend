@@ -76,5 +76,38 @@ namespace VetCareBackend.Presentation.Controllers
             await _petService.Update(pet, id, sub);
             return NoContent();
         }
+        /// <summary>
+        /// This endpoint retrieves all pets belonging to every client in the system, including owner information.
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
+        /// </summary>
+        [Authorize(policy: Policies.Admins)]
+        [HttpGet("/api/admins/pet/all")]
+        public async Task<ActionResult<List<PetAdminResponse>>> GetAllAdmin()
+        {
+            var pets = await _petService.GetAllAdmin();
+            return Ok(pets);
+        }
+        /// <summary>
+        /// This endpoint allows an administrator or sysadmin to update any client's pet by its unique identifier (id).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
+        /// </summary>
+        [Authorize(policy: Policies.Admins)]
+        [HttpPut("/api/admins/pet/update/{id}")]
+        public async Task<ActionResult> UpdateAdmin([FromBody] PetRequest pet, [FromRoute] Guid id)
+        {
+            await _petService.UpdatePetAdmin(pet, id);
+            return NoContent();
+        }
+        /// <summary>
+        /// This endpoint allows an administrator or sysadmin to delete any client's pet by its unique identifier (id).
+        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
+        /// </summary>
+        [Authorize(policy: Policies.Admins)]
+        [HttpDelete("/api/admins/pet/delete/{id}")]
+        public async Task<ActionResult> DeleteAdmin([FromRoute] Guid id)
+        {
+            await _petService.DeletePetAdmin(id);
+            return NoContent();
+        }
     }
 }

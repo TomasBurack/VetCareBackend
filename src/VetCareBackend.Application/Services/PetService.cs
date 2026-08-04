@@ -123,6 +123,44 @@ namespace VetCareBackend.Application.Services
             await _petRepository.Update(petToUpdate.ToPetUpdate(petReq));
         }
 
+        public async Task<List<PetAdminResponse>> GetAllAdmin()
+        {
+            var pets = await _petRepository.GetAllWithClient();
+            return pets.Select(p => p.ToPetAdminResponse()).ToList();
+        }
+
+        public async Task UpdatePetAdmin(PetRequest petReq, Guid id)
+        {
+            var petToUpdate = await _petRepository.Get(id);
+
+            if (petToUpdate == null)
+            {
+                throw new NotFoundException($"No pet was found with id '{id}'.");
+            }
+
+            PetRequestValidations validations = new PetRequestValidations();
+            if (!validations.Validate(petReq).IsValid)
+            {
+                throw new ValidationException(validations.Validate(petReq).ToString("~"));
+            }
+
+            await ValidateBreed(petReq);
+
+            await _petRepository.Update(petToUpdate.ToPetUpdate(petReq));
+        }
+
+        public async Task DeletePetAdmin(Guid id)
+        {
+            var pet = await _petRepository.Get(id);
+
+            if (pet == null)
+            {
+                throw new NotFoundException($"No pet was found with id '{id}'.");
+            }
+
+            await _petRepository.Delete(id);
+        }
+
         private async Task ValidateBreed(PetRequest petReq)
         {
             var availableBreeds = await _breedService.GetBreedsByTypeAsync(petReq.typePet);

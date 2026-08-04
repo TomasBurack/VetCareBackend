@@ -5,6 +5,7 @@ using System.Text;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
+using VetCareBackend.Application.Infrastructure;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
 using VetCareBackend.Application.Validations;
@@ -20,13 +21,15 @@ namespace VetCareBackend.Application.Services
         private readonly IVeterinarianRepository _VetRep;
         private readonly IPasswordHash _hash;
         private readonly ISysadminRepository _SysadminRep;
-        public ClientService(IAdministratorRepository AdminRep, IClientRepository repository, IVeterinarianRepository VetRep, IPasswordHash hash, ISysadminRepository sysadmin)
+        private readonly IPetRepository _petRepository;
+        public ClientService(IAdministratorRepository AdminRep, IClientRepository repository, IVeterinarianRepository VetRep, IPasswordHash hash, ISysadminRepository sysadmin, IPetRepository petRepository)
         {
             _SysadminRep = sysadmin;
             _AdminRep = AdminRep;
             _repository = repository;
             _VetRep = VetRep;
             _hash = hash;
+            _petRepository = petRepository;
         }
 
         public async Task<UserResponse> Create(SignUpRequest request)
@@ -66,6 +69,13 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ValidationException("The ID sent is invalid");
             }
+
+            var pets = await _petRepository.GetAll();
+            foreach (var pet in pets.Where(p => p.IdClient == Id))
+            {
+                await _petRepository.Delete(pet.Id);
+            }
+
             await _repository.Delete(Id);
         }
 
