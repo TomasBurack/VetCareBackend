@@ -31,13 +31,13 @@ namespace VetCareBackend.Application.Services
             bool Parse = Guid.TryParse(sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var client = await _clientRepository.Get(Id);
 
             if(client == null) 
             {
-                throw new NotFoundException($"No client was found with id '{Id}'.");
+                throw new NotFoundException($"No se encontró ningún cliente con el id '{Id}'.");
             }
 
             PetRequestValidations validations = new PetRequestValidations();
@@ -58,13 +58,13 @@ namespace VetCareBackend.Application.Services
             bool Parse = Guid.TryParse(sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var pet = await _petRepository.Get(id);
 
             if (pet == null || pet.IdClient != Id)
             {
-                throw new NotFoundException($"No pet was found with id '{id}'.");
+                throw new NotFoundException($"No se encontró ninguna mascota con el id '{id}'.");
             }
 
             await _petRepository.Delete(id);
@@ -75,7 +75,7 @@ namespace VetCareBackend.Application.Services
             bool Parse = Guid.TryParse(sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var pets = await _petRepository.GetAll();
             return pets.Where(p => p.IdClient == Id).Select(p => p.ToPetResponse()).ToList();
@@ -86,13 +86,13 @@ namespace VetCareBackend.Application.Services
             bool Parse = Guid.TryParse(sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var pet = await _petRepository.Get(id);
 
             if (pet == null || pet.IdClient != Id)
             {
-                throw new NotFoundException($"No pet was found with id '{id}'.");
+                throw new NotFoundException($"No se encontró ninguna mascota con el id '{id}'.");
             }
 
             return pet.ToPetResponse();
@@ -103,13 +103,13 @@ namespace VetCareBackend.Application.Services
             bool Parse = Guid.TryParse(sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var petToUpdate = await _petRepository.Get(id);
 
             if (petToUpdate == null || petToUpdate.IdClient != Id)
             {
-                throw new NotFoundException($"No pet was found with id '{id}'.");
+                throw new NotFoundException($"No se encontró ninguna mascota con el id '{id}'.");
             }
 
             PetRequestValidations validations = new PetRequestValidations();
@@ -135,7 +135,7 @@ namespace VetCareBackend.Application.Services
 
             if (petToUpdate == null)
             {
-                throw new NotFoundException($"No pet was found with id '{id}'.");
+                throw new NotFoundException($"No se encontró ninguna mascota con el id '{id}'.");
             }
 
             PetRequestValidations validations = new PetRequestValidations();
@@ -155,7 +155,7 @@ namespace VetCareBackend.Application.Services
 
             if (pet == null)
             {
-                throw new NotFoundException($"No pet was found with id '{id}'.");
+                throw new NotFoundException($"No se encontró ninguna mascota con el id '{id}'.");
             }
 
             await _petRepository.Delete(id);
@@ -166,7 +166,7 @@ namespace VetCareBackend.Application.Services
             var availableBreeds = await _breedService.GetBreedsByTypeAsync(petReq.typePet);
             if (availableBreeds.Any() && !availableBreeds.Contains(petReq.Breed, StringComparer.OrdinalIgnoreCase))
             {
-                throw new ValidationException($"'{petReq.Breed}' is not a valid breed for the selected pet type.");
+                throw new ValidationException($"'{petReq.Breed}' no es una raza válida para el tipo de mascota seleccionado.");
             }
         }
     }

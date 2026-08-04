@@ -10,12 +10,12 @@ namespace VetCareBackend.Application.Validations
     {
         public ResetPasswordRequestValidations() 
         {
-            RuleFor(r => r.NewPassword).NotEmpty().WithMessage("New Password is required.")
-                .MinimumLength(8).WithMessage("New Password must be at least 8 characters long.")
-                .Matches("[A-Z]").WithMessage("New Password must contain at least one uppercase letter.")
-                .Matches("[a-z]").WithMessage("New Password must contain at least one lowercase letter.")
-                .Matches("[0-9]").WithMessage("New Password must contain at least one number.")
-                .Matches("[^a-zA-Z0-9]").WithMessage("New Password must contain at least one special character."); 
+            RuleFor(r => r.NewPassword).NotEmpty().WithMessage("La nueva contraseña es obligatoria.")
+                .MinimumLength(8).WithMessage("La nueva contraseña debe tener al menos 8 caracteres.")
+                .Matches("[A-Z]").WithMessage("La nueva contraseña debe contener al menos una letra mayúscula.")
+                .Matches("[a-z]").WithMessage("La nueva contraseña debe contener al menos una letra minúscula.")
+                .Matches("[0-9]").WithMessage("La nueva contraseña debe contener al menos un número.")
+                .Matches("[^a-zA-Z0-9]").WithMessage("La nueva contraseña debe contener al menos un carácter especial.");
         }
     }
 }

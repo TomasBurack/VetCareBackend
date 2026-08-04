@@ -37,12 +37,12 @@ namespace VetCareBackend.Application.Services
                 || await _SysadminRep.FindEmail(request.Email) 
                 || await _ClientRep.FindEmail(request.Email))
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
             bool enrollmentUsed = await _repository.FindEnr(request.Enrollment);
             if (enrollmentUsed)
             {
-                throw new ConflictException($"The enrollment {request.Enrollment} is already in use");
+                throw new ConflictException($"La matrícula {request.Enrollment} ya está en uso");
             }
             VeterinarianRequestValidation validation = new VeterinarianRequestValidation();
             if (!validation.Validate(request).IsValid)
@@ -73,12 +73,12 @@ namespace VetCareBackend.Application.Services
             bool parse = Guid.TryParse(Sub, out Guid id);
             if (!parse)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
-                throw new NotFoundException("The veterinarian was not found");
+                throw new NotFoundException("No se encontró el veterinario");
             }
 
             return veterinarian.ToVeterinarianResponse();
@@ -89,22 +89,22 @@ namespace VetCareBackend.Application.Services
             bool parse = Guid.TryParse(Sub, out Guid id);
             if (!parse)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
-                throw new NotFoundException("The veterinarian was not found");
+                throw new NotFoundException("No se encontró el veterinario");
             }
             bool emailUsed = await _repository.FindEmail(request.Email) || await _AdminRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email);
             if (emailUsed && request.Email != veterinarian.Email)
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
             bool enrollmentUsed = await _repository.FindEnr(request.Enrollment);
             if (enrollmentUsed && request.Enrollment != veterinarian.Enrollment)
             {
-                throw new ConflictException($"The enrollment {request.Enrollment} is already in use");
+                throw new ConflictException($"La matrícula {request.Enrollment} ya está en uso");
             }
 
             VeterinarianUpdateRequestValidation validation = new VeterinarianUpdateRequestValidation();
@@ -122,12 +122,12 @@ namespace VetCareBackend.Application.Services
             bool parse = Guid.TryParse(Sub, out Guid id);
             if (!parse)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var veterinarian = await _repository.Get(id);
             if (veterinarian == null)
             {
-                throw new NotFoundException("The veterinarian was not found");
+                throw new NotFoundException("No se encontró el veterinario");
             }
             await _repository.Delete(id);
         }

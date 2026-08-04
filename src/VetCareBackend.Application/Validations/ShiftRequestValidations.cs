@@ -13,18 +13,18 @@ namespace VetCareBackend.Application.Validations
         {
             RuleFor(request => request.DateShift)
                 .GreaterThan(DateTime.UtcNow)
-                .WithMessage(" the shift date is invalid ");
+                .WithMessage("La fecha del turno no es válida");
             RuleFor(request => request.DateShift.TimeOfDay)
                 .InclusiveBetween(new TimeSpan(8, 0, 0), new TimeSpan(20, 0, 0))
-                .WithMessage("The shift time must be between 08:00 and 20:00.");
+                .WithMessage("El horario del turno debe estar entre las 08:00 y las 20:00.");
             RuleFor(request => request.Enrollment)
-                .NotEmpty().WithMessage("The enrollment is required.")
-                .Length(4).WithMessage("Enrrolment must be exactly 4 characters long.")
-                .Must(enrollment => enrollment.All(char.IsDigit)).WithMessage("Enrollment must contain only numbers."); 
+                .NotEmpty().WithMessage("La matrícula es obligatoria.")
+                .Length(4).WithMessage("La matrícula debe tener exactamente 4 caracteres.")
+                .Must(enrollment => enrollment.All(char.IsDigit)).WithMessage("La matrícula debe contener solo números.");
             RuleFor(request => request.PetId)
-                .NotEmpty().WithMessage("the pet is required");
+                .NotEmpty().WithMessage("La mascota es obligatoria");
             RuleFor(request => request.Description)
-                .NotEmpty().WithMessage("descriptions is requerid");
+                .NotEmpty().WithMessage("La descripción es obligatoria");
         }
     }
 }

@@ -12,32 +12,32 @@ namespace VetCareBackend.Application.Validations
         public SignUpValidator()
         {
             RuleFor(ur => ur.FirstName)
-                .NotEmpty().WithMessage("First name is required.")
-                .MinimumLength(3).WithMessage("First name must be at least 3 characters long.")
-                .MaximumLength(15).WithMessage("First name cannot exceed 15 characters.");
+                .NotEmpty().WithMessage("El nombre es obligatorio.")
+                .MinimumLength(3).WithMessage("El nombre debe tener al menos 3 caracteres.")
+                .MaximumLength(15).WithMessage("El nombre no puede superar los 15 caracteres.");
             RuleFor(ur => ur.LastName)
-                .NotEmpty().WithMessage("Last name is required.")
-                .MinimumLength(3).WithMessage("Last name must be at least 3 characters long.")
-                .MaximumLength(15).WithMessage("Last name cannot exceed 15 characters.");
+                .NotEmpty().WithMessage("El apellido es obligatorio.")
+                .MinimumLength(3).WithMessage("El apellido debe tener al menos 3 caracteres.")
+                .MaximumLength(15).WithMessage("El apellido no puede superar los 15 caracteres.");
             RuleFor(ur => ur.Dni)
-                .NotEmpty().WithMessage("DNI is required.")
-                .Length(8).WithMessage("DNI must be exactly 8 characters long.")
-                .Must(dni => dni.All(char.IsDigit)).WithMessage("DNI must contain only numbers.");
+                .NotEmpty().WithMessage("El DNI es obligatorio.")
+                .Length(8).WithMessage("El DNI debe tener exactamente 8 caracteres.")
+                .Must(dni => dni.All(char.IsDigit)).WithMessage("El DNI debe contener solo números.");
             RuleFor(ur => ur.Email)
-                .NotEmpty().WithMessage("Email address is required.")
-                .EmailAddress().WithMessage("The email address format is not valid.");
+                .NotEmpty().WithMessage("El email es obligatorio.")
+                .EmailAddress().WithMessage("El formato del email no es válido.");
             RuleFor(ur => ur.PhoneNumber)
-                .NotEmpty().WithMessage("Phone number is required.")
-                .MinimumLength(9).WithMessage("Phone number must be at least 9 characters long.")
-                .MaximumLength(11).WithMessage("Phone number cannot exceed 11 characters.")
-                .Must(pn => pn.All(char.IsDigit)).WithMessage("Phone number must contain only numbers.");
+                .NotEmpty().WithMessage("El teléfono es obligatorio.")
+                .MinimumLength(9).WithMessage("El teléfono debe tener al menos 9 caracteres.")
+                .MaximumLength(11).WithMessage("El teléfono no puede superar los 11 caracteres.")
+                .Must(pn => pn.All(char.IsDigit)).WithMessage("El teléfono debe contener solo números.");
             RuleFor(ur => ur.Password)
-                .NotEmpty().WithMessage("Password is required.")
-                .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
-                .Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
-                .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
-                .Matches("[0-9]").WithMessage("Password must contain at least one number.")
-                .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.");
+                .NotEmpty().WithMessage("La contraseña es obligatoria.")
+                .MinimumLength(8).WithMessage("La contraseña debe tener al menos 8 caracteres.")
+                .Matches("[A-Z]").WithMessage("La contraseña debe contener al menos una letra mayúscula.")
+                .Matches("[a-z]").WithMessage("La contraseña debe contener al menos una letra minúscula.")
+                .Matches("[0-9]").WithMessage("La contraseña debe contener al menos un número.")
+                .Matches("[^a-zA-Z0-9]").WithMessage("La contraseña debe contener al menos un carácter especial.");
         }
     }
 }
