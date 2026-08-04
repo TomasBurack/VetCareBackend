@@ -8,6 +8,6 @@ namespace VetCareBackend.Application.Infrastructure
 {
     public interface IPetRepository : IBaseRepository<Pet>
     {
-
+        Task<List<Pet>> GetAllWithClient();
     }
 }
