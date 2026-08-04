@@ -19,7 +19,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint retrieves the list of breeds for the given pet type (TypePet), sourced from the corresponding external API.
         /// </summary>
-        [Authorize(policy: Policies.SoloClient)]
+        [Authorize(policy: Policies.ClientAdm)]
         [HttpGet("/api/breeds")]
         public async Task<IReadOnlyList<string>> GetBreeds([FromQuery] TypePet typePet)
         {
