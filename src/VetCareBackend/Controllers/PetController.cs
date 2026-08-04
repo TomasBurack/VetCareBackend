@@ -9,7 +9,6 @@ using VetCareBackend.Presentation.Authorization;
 
 namespace VetCareBackend.Presentation.Controllers
 {
-    [Authorize(policy: Policies.SoloClient)]
     [Route("api/[controller]")]
     [ApiController]
     public class PetController : Controller
@@ -23,9 +22,10 @@ namespace VetCareBackend.Presentation.Controllers
             _contextAccessor = contextAccessor;
         }
         /// <summary>
-        /// This endpoint retrieves all pets associated with the authenticated user. 
+        /// This endpoint retrieves all pets associated with the authenticated user.
         /// It returns a list of PetResponse objects if pets are found, or a NotFound response if no pets are registered for the user.
         /// </summary>
+        [Authorize(policy: Policies.SoloClient)]
         [HttpGet("/api/client/pet/")]
         public async Task<ActionResult<List<PetResponse>>> GetAll()
         {
@@ -40,6 +40,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint retrieves a specific pet by its unique identifier (id).
         /// </summary>
+        [Authorize(policy: Policies.SoloClient)]
         [HttpGet("/api/client/pet/{id}")]
         public async Task<ActionResult<PetResponse>> GetById([FromRoute] Guid id)
         {
@@ -49,6 +50,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows the creation of a new pet associated with the authenticated user.
         /// </summary>
+        [Authorize(policy: Policies.SoloClient)]
         [HttpPost("/api/client/pet/create")]
         public async Task<ActionResult<PetResponse>> Create([FromBody] PetRequest pet)
         {
@@ -59,6 +61,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows the deletion of a pet by its unique identifier (id).
         /// </summary>
+        [Authorize(policy: Policies.SoloClient)]
         [HttpDelete("/api/client/pet/delete/{id}")]
         public async Task<ActionResult> Delete([FromRoute] Guid id)
         {
@@ -69,6 +72,7 @@ namespace VetCareBackend.Presentation.Controllers
         /// <summary>
         /// This endpoint allows the update of an existing pet's information by its unique identifier (id).
         /// </summary>
+        [Authorize(policy: Policies.SoloClient)]
         [HttpPut("/api/client/pet/update/{id}")]
         public async Task<ActionResult> Update([FromBody] PetRequest pet, [FromRoute] Guid id)
         {
