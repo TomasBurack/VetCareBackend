@@ -273,6 +273,11 @@ namespace VetCareBackend.Application.Services
                 throw new ValidationException(validations.Validate(request).ToString("-"));
             }
 
+            if (shift.Status != Status.Served)
+            {
+                throw new ValidationException("Solo se pueden agregar observaciones a los turnos con estado 'Served'.");
+            }
+
             shift.Observations = request.Observations;
             await _shiftRepository.Update(shift);
         }
