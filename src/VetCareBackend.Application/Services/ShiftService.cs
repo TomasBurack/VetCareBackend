@@ -146,6 +146,9 @@ namespace VetCareBackend.Application.Services
             return newShift.ToShiftResponse();
         }
 
+        private static readonly TimeZoneInfo ArgentinaTimeZone =
+            TimeZoneInfo.FindSystemTimeZoneById("America/Argentina/Buenos_Aires");
+
         public async Task<List<DateTime>> GetBusyTimes(string enrollment, DateTime date)
         {
             var window = TimeSpan.FromMinutes(30);
@@ -160,8 +163,12 @@ namespace VetCareBackend.Application.Services
             var busyTimes = new List<DateTime>();
             for (var slot = dayStart; slot < dayEnd; slot = slot.AddMinutes(30))
             {
+                var slotOffset = new DateTimeOffset(
+                    DateTime.SpecifyKind(slot, DateTimeKind.Unspecified),
+                    ArgentinaTimeZone.GetUtcOffset(slot));
+
                 bool isBusy = vetShifts.Any(s =>
-                    (s.DateShift - slot) > -window && (s.DateShift - slot) < window);
+                    (s.DateShift - slotOffset) > -window && (s.DateShift - slotOffset) < window);
 
                 if (isBusy)
                     busyTimes.Add(slot);
