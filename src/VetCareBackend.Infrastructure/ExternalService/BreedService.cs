@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Domain.Enums;
@@ -7,6 +8,8 @@ namespace VetCareBackend.Infrastructure.ExternalService
 {
     public class BreedService : IBreedService
     {
+        private const string MixedBreed = "Mixed Breed";
+
         private readonly ICatApiService _catApiService;
         private readonly IDogApiService _dogApiService;
 
@@ -21,9 +24,9 @@ namespace VetCareBackend.Infrastructure.ExternalService
             switch (typePet)
             {
                 case TypePet.Feline:
-                    return await _catApiService.GetAllBreedsAsync();
+                    return (await _catApiService.GetAllBreedsAsync()).Prepend(MixedBreed).ToList();
                 case TypePet.Canine:
-                    return await _dogApiService.GetAllBreedsAsync();
+                    return (await _dogApiService.GetAllBreedsAsync()).Prepend(MixedBreed).ToList();
                 default:
                     return new List<string>();
             }

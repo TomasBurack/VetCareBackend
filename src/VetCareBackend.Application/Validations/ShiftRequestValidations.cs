@@ -13,7 +13,9 @@ namespace VetCareBackend.Application.Validations
         {
             RuleFor(request => request.DateShift)
                 .GreaterThan(DateTime.UtcNow)
-                .WithMessage("La fecha del turno no es válida");
+                .WithMessage("La fecha del turno no es válida")
+                .LessThanOrEqualTo(DateTime.UtcNow.AddYears(1))
+                .WithMessage("La fecha del turno no puede ser mayor a 1 año a futuro.");
             RuleFor(request => request.DateShift.TimeOfDay)
                 .InclusiveBetween(new TimeSpan(8, 0, 0), new TimeSpan(20, 0, 0))
                 .WithMessage("El horario del turno debe estar entre las 08:00 y las 20:00.");

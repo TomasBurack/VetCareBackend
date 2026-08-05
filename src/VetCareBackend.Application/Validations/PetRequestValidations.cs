@@ -14,6 +14,7 @@ namespace VetCareBackend.Application.Validations
             RuleFor(pr => pr.Name).NotEmpty().WithMessage("El nombre de la mascota es obligatorio.")
                 .MinimumLength(3).WithMessage("El nombre de la mascota debe tener al menos 3 caracteres.")
                 .MaximumLength(20).WithMessage("El nombre de la mascota no puede superar los 20 caracteres.")
+                .Matches(@"^[A-Za-zÀ-ÿ\s]+$").WithMessage("El nombre de la mascota solo puede contener letras.")
                 .When(request => !string.IsNullOrWhiteSpace(request.Name));
             RuleFor(pr => pr.Age).NotEmpty().WithMessage("La edad de la mascota es obligatoria.")
                 .GreaterThanOrEqualTo(0).WithMessage("La edad de la mascota debe ser positiva.")

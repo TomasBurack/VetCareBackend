@@ -14,11 +14,13 @@ namespace VetCareBackend.Application.Validations
             RuleFor(vet => vet.FirstName)
                 .NotEmpty().WithMessage("El nombre es obligatorio.")
                 .MinimumLength(3).WithMessage("El nombre debe tener al menos 3 caracteres.")
-                .MaximumLength(15).WithMessage("El nombre no puede superar los 15 caracteres.");
+                .MaximumLength(15).WithMessage("El nombre no puede superar los 15 caracteres.")
+                .Matches(@"^[A-Za-zÀ-ÿ\s]+$").WithMessage("El nombre solo puede contener letras.");
             RuleFor(vet => vet.LastName)
                 .NotEmpty().WithMessage("El apellido es obligatorio.")
                 .MinimumLength(3).WithMessage("El apellido debe tener al menos 3 caracteres.")
-                .MaximumLength(15).WithMessage("El apellido no puede superar los 15 caracteres.");
+                .MaximumLength(15).WithMessage("El apellido no puede superar los 15 caracteres.")
+                .Matches(@"^[A-Za-zÀ-ÿ\s]+$").WithMessage("El apellido solo puede contener letras.");
             RuleFor(vet => vet.Dni)
                 .NotEmpty().WithMessage("El DNI es obligatorio.")
                 .Length(8).WithMessage("El DNI debe tener exactamente 8 caracteres.")

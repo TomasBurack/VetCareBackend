@@ -45,7 +45,7 @@ namespace VetCareBackend.Infrastructure.ExternalService
             _dataProtector = dataProtectionProvider.CreateProtector("VetCareBackend.TwoFactorSecret");
             _memoryCache = memoryCache;
         }
-        public async Task ForgotPassword(ForgotPasswordRequest request)
+        public async Task ForgotPassword(ForgotPasswordRequest request, string? language)
         {
             bool emailExists =
                 await _context.Clients.AnyAsync(c => c.Email == request.Email && !c.IsDeleted) ||
@@ -71,9 +71,14 @@ namespace VetCareBackend.Infrastructure.ExternalService
             string frontendBaseUrl = _configuration["FrontendBaseUrl"]
                 ?? throw new InvalidOperationException("FrontendBaseUrl configuration value is missing");
             string resetLink = $"{frontendBaseUrl}/reset-password?token={token}";
-            string body = $"Hola,\n\nPara restablecer tu contraseña hacé click en el siguiente link:\n\n{resetLink}\n\nEste link vence en 15 minutos.\n\nSi no solicitaste esto, ignore este mensaje.";
 
-            await _mailService.SendEmail(request.Email, request.Email, "Recuperacion de contraseña - VetCare", body);
+            bool isEnglish = language?.StartsWith("en", StringComparison.OrdinalIgnoreCase) == true;
+            string subject = isEnglish ? "Password Recovery - VetCare" : "Recuperacion de contraseña - VetCare";
+            string body = isEnglish
+                ? $"Hello,\n\nTo reset your password, click the following link:\n\n{resetLink}\n\nThis link expires in 15 minutes.\n\nIf you didn't request this, please ignore this message."
+                : $"Hola,\n\nPara restablecer tu contraseña hacé click en el siguiente link:\n\n{resetLink}\n\nEste link vence en 15 minutos.\n\nSi no solicitaste esto, ignore este mensaje.";
+
+            await _mailService.SendEmail(request.Email, request.Email, subject, body);
         }
 
         public async Task ResetPassword(ResetPasswordRequest request)
