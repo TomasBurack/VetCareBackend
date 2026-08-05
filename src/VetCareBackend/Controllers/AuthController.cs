@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Security.Claims;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
@@ -170,7 +171,8 @@ namespace VetCareBackend.Presentation.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            await _service.ForgotPassword(request);
+            string? language = Request.Headers.AcceptLanguage.FirstOrDefault();
+            await _service.ForgotPassword(request, language);
             return Ok(new { message = "Si el mail existe, recibiras las instrucciones" });
         }
         /// <summary>

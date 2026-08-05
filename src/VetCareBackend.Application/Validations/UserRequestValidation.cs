@@ -13,10 +13,12 @@ namespace VetCareBackend.Application.Validations
             RuleFor(request => request.FirstName)
                 .MinimumLength(3).WithMessage("El nombre debe tener al menos 3 caracteres.")
                 .MaximumLength(15).WithMessage("El nombre no puede superar los 15 caracteres.")
+                .Matches(@"^[A-Za-zÀ-ÿ\s]+$").WithMessage("El nombre solo puede contener letras.")
                 .When(request => !string.IsNullOrWhiteSpace(request.FirstName));
             RuleFor(request => request.LastName)
                 .MinimumLength(3).WithMessage("El apellido debe tener al menos 3 caracteres.")
                 .MaximumLength(15).WithMessage("El apellido no puede superar los 15 caracteres.")
+                .Matches(@"^[A-Za-zÀ-ÿ\s]+$").WithMessage("El apellido solo puede contener letras.")
                 .When(request => !string.IsNullOrWhiteSpace(request.LastName));
             RuleFor(request => request.Dni)
                 .Length(8).WithMessage("El DNI debe tener exactamente 8 caracteres.")

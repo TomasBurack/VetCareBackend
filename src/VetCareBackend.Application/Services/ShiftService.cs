@@ -141,6 +141,14 @@ namespace VetCareBackend.Application.Services
                     $"El veterinario ya tiene un turno dentro de los 30 minutos de '{shiftReq.DateShift}'. " +
                     $"Por favor elegí un horario con al menos 30 minutos de diferencia.");
 
+            bool petShiftTaken = allShifts.Any(s =>
+                s.PetId == shiftReq.PetId
+                && s.DateShift == shiftReq.DateShift
+                && s.Status != Status.Canceled);
+
+            if (petShiftTaken)
+                throw new ValidationException($"La mascota ya tiene un turno el '{shiftReq.DateShift}'.");
+
             var newShift = shiftReq.ToShift(vet, pet);
             await _shiftRepository.Add(newShift);
             return newShift.ToShiftResponse();
