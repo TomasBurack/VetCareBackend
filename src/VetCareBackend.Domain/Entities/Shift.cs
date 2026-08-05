@@ -21,6 +21,8 @@ namespace VetCareBackend.Domain.Entities
 
         public Status Status { get; set; }
 
+        public string? Observations { get; set; }
+
 
 
     }

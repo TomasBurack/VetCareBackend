@@ -25,7 +25,8 @@ namespace VetCareBackend.Application.Mapper
                 Enrollment = shift.Enrollment,
                 VeterinarianName = shift.Veterinarian?.FirstName + " " + shift.Veterinarian?.LastName,
                 PetId = shift.PetId,
-                PetName = shift.Pet?.Name ?? string.Empty
+                PetName = shift.Pet?.Name ?? string.Empty,
+                Observations = shift.Observations
             };
 
         }

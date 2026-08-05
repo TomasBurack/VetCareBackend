@@ -111,6 +111,20 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
         /// <summary>
+        /// This endpoint allows a veterinarian to add or update clinical observations on a shift
+        /// by its unique identifier (id), regardless of the shift's current status.
+        /// It requires the user to have the SoloVeterinarian policy authorization.
+        /// </summary>
+        [Authorize(policy: Policies.SoloVeterinarian)]
+        [HttpPut("/api/shift/observations/{id}")]
+        public async Task<IActionResult> UpdateObservationsVeterinarian(Guid id, [FromBody] ShiftObservationsRequest request)
+        {
+            string? sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _shiftService.UpdateObservationsVeterinarian(id, request, sub!);
+            return NoContent();
+        }
+
+        /// <summary>
         /// This endpoint allows the update of a shift's status by its unique identifier (id) for an admin.
         /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
         /// </summary>

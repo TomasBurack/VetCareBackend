@@ -16,6 +16,7 @@ namespace VetCareBackend.Application.Interfaces
         Task<List<DateTime>> GetBusyTimes(string enrollment, DateTime date);
         Task CancelStatusClient(Guid id, string sub);
         Task UpdateStatusVeterinarian(Guid id, ShiftStatusRequest request, string sub);
+        Task UpdateObservationsVeterinarian(Guid id, ShiftObservationsRequest request, string sub);
         Task UpdateStatusAdmin(Guid id, ShiftStatusRequest request);
         Task Delete(Guid id);
     }
