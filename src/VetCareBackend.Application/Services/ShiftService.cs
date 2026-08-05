@@ -241,6 +241,11 @@ namespace VetCareBackend.Application.Services
                 throw new ValidationException("Solo se pueden actualizar los turnos con estado 'Pendant'.");
             }
 
+            if (request.Status == Status.Served && shift.DateShift > DateTimeOffset.Now)
+            {
+                throw new ValidationException("No se puede marcar como 'Served' un turno cuya fecha aún no llegó.");
+            }
+
             shift.Status = request.Status;
             await _shiftRepository.Update(shift);
         }
@@ -300,6 +305,11 @@ namespace VetCareBackend.Application.Services
             if (shift.Status != Status.Pendant)
             {
                 throw new ValidationException("Solo se pueden actualizar los turnos con estado 'Pendant'.");
+            }
+
+            if (request.Status == Status.Served && shift.DateShift > DateTimeOffset.Now)
+            {
+                throw new ValidationException("No se puede marcar como 'Served' un turno cuya fecha aún no llegó.");
             }
 
             shift.Status = request.Status;
