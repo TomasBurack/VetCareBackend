@@ -245,6 +245,38 @@ namespace VetCareBackend.Application.Services
             await _shiftRepository.Update(shift);
         }
 
+        public async Task UpdateObservationsVeterinarian(Guid id, ShiftObservationsRequest request, string sub)
+        {
+            bool parse = Guid.TryParse(sub, out Guid vetId);
+            if (!parse)
+                throw new ValidationException("El ID enviado no es válido");
+
+            var vet = await _veterinarianRepository.Get(vetId);
+            if (vet == null)
+                throw new NotFoundException("No se encontró el veterinario.");
+
+            var shift = await _shiftRepository.Get(id);
+            if (shift == null)
+            {
+                throw new NotFoundException($"No se encontró ningún turno con el id '{id}'.");
+            }
+
+            if (shift.Enrollment != vet.Enrollment)
+            {
+                throw new ValidationException("El turno no pertenece al veterinario autenticado.");
+            }
+
+            ShiftObservationsRequestValidation validations = new ShiftObservationsRequestValidation();
+
+            if (!validations.Validate(request).IsValid)
+            {
+                throw new ValidationException(validations.Validate(request).ToString("-"));
+            }
+
+            shift.Observations = request.Observations;
+            await _shiftRepository.Update(shift);
+        }
+
         public async Task UpdateStatusAdmin(Guid id, ShiftStatusRequest request)
         {
             var shift = await _shiftRepository.Get(id);

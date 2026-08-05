@@ -15,6 +15,7 @@ namespace VetCareBackend.Application.dtos.Responses
         public string VeterinarianName { get; set; } = string.Empty;
         public Guid PetId { get; set; }
         public string PetName {  get; set; } = string.Empty;
+        public string? Observations { get; set; }
 
     }
 }
