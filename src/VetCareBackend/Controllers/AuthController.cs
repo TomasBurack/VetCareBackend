@@ -114,12 +114,15 @@ namespace VetCareBackend.Presentation.Controllers
         [AllowAnonymous]
         public new ActionResult SignOut()
         {
-            Response.Cookies.Delete("access_token", new CookieOptions
+            var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None
-            });
+            };
+            cookieOptions.Extensions.Add("Partitioned");
+
+            Response.Cookies.Delete("access_token", cookieOptions);
             return Ok();
         }
         /// <summary>
@@ -147,13 +150,16 @@ namespace VetCareBackend.Presentation.Controllers
         {
             int expirationMinutes = int.Parse(_configuration["Jwt:ExpirationMinutes"]!);
 
-            Response.Cookies.Append("access_token", token, new CookieOptions
+            var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(expirationMinutes)
-            });
+            };
+            cookieOptions.Extensions.Add("Partitioned");
+
+            Response.Cookies.Append("access_token", token, cookieOptions);
         }
         /// <summary>
         /// This endpoint allows users to request a password reset.
