@@ -94,7 +94,7 @@ namespace VetCareBackend.Application.Services
 
             if (!validation.Validate(shiftReq).IsValid)
             {
-                throw new ValidationException(validation.Validate(shiftReq).ToString("-"));
+                throw new ValidationException(validation.Validate(shiftReq).ToString("~"));
             }
 
             bool Parse = Guid.TryParse(sub, out Guid Id);
@@ -241,7 +241,7 @@ namespace VetCareBackend.Application.Services
 
             if(!validations.Validate(request).IsValid)
             {
-                throw new ValidationException(validations.Validate(request).ToString("-"));
+                throw new ValidationException(validations.Validate(request).ToString("~"));
             }
 
             if (shift.Status != Status.Pendant)
@@ -283,7 +283,7 @@ namespace VetCareBackend.Application.Services
 
             if (!validations.Validate(request).IsValid)
             {
-                throw new ValidationException(validations.Validate(request).ToString("-"));
+                throw new ValidationException(validations.Validate(request).ToString("~"));
             }
 
             if (shift.Status != Status.Served)
@@ -307,7 +307,7 @@ namespace VetCareBackend.Application.Services
 
             if (!validations.Validate(request).IsValid)
             {
-                throw new ValidationException(validations.Validate(request).ToString("-"));
+                throw new ValidationException(validations.Validate(request).ToString("~"));
             }
 
             if (shift.Status != Status.Pendant)
