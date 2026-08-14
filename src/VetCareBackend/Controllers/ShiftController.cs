@@ -124,28 +124,5 @@ namespace VetCareBackend.Presentation.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// This endpoint allows the update of a shift's status by its unique identifier (id) for an admin.
-        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
-        /// </summary>
-        [Authorize(policy: Policies.Admins)]
-        [HttpPut("/api/admins/shift/status/{id}")]
-        public async Task<IActionResult> UpdateStatusAdmin(Guid id, [FromBody] ShiftStatusRequest request)
-        {
-            await _shiftService.UpdateStatusAdmin(id, request);
-            return NoContent();
-        }
-
-        /// <summary>
-        /// This endpoint allows the deletion of a shift by its unique identifier (id).
-        /// It requires the user to be authenticated and authorized as Admins(administrator or sysadmin).
-        /// </summary>
-        [Authorize(policy: Policies.Admins)]
-        [HttpDelete("/api/admins/shift/delete/{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            await _shiftService.Delete(id);
-            return NoContent();
-        }
     }
 }

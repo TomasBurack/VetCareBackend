@@ -295,49 +295,5 @@ namespace VetCareBackend.Application.Services
             await _shiftRepository.Update(shift);
         }
 
-        public async Task UpdateStatusAdmin(Guid id, ShiftStatusRequest request)
-        {
-            var shift = await _shiftRepository.Get(id);
-            if (shift == null)
-            {
-                throw new NotFoundException($"No se encontró ningún turno con el id '{id}'.");
-            }
-
-            ShiftStatusRequestValidation validations = new ShiftStatusRequestValidation();
-
-            if (!validations.Validate(request).IsValid)
-            {
-                throw new ValidationException(validations.Validate(request).ToString("-"));
-            }
-
-            if (shift.Status != Status.Pendant)
-            {
-                throw new ValidationException("Solo se pueden actualizar los turnos con estado 'Pendant'.");
-            }
-
-            if (request.Status == Status.Served && shift.DateShift > DateTimeOffset.Now)
-            {
-                throw new ValidationException("No se puede marcar como 'Served' un turno cuya fecha aún no llegó.");
-            }
-
-            shift.Status = request.Status;
-            await _shiftRepository.Update(shift);
-        }
-
-        public async Task Delete(Guid id)
-        {
-            var shift = await _shiftRepository.Get(id);
-            if (shift == null)
-            {
-                throw new NotFoundException($"No se encontró ningún turno con el id '{id}'.");
-            }
-
-            if (shift.Status != Status.Pendant)
-            {
-                throw new ValidationException("Solo se pueden eliminar los turnos con estado 'Pendant'.");
-            }
-
-            await _shiftRepository.Delete(id);
-        }
     }
 }

@@ -161,16 +161,4 @@ public class ShiftControllerTests
         Assert.IsType<NoContentResult>(result);
         _shiftServiceMock.Verify(s => s.UpdateStatusVeterinarian(shiftId, request, UserId), Times.Once);
     }
-
-    [Fact]
-    public async Task Delete_ReturnsNoContent()
-    {
-        var shiftId = Guid.NewGuid();
-        _shiftServiceMock.Setup(s => s.Delete(shiftId)).Returns(Task.CompletedTask);
-
-        var result = await _controller.Delete(shiftId);
-
-        Assert.IsType<NoContentResult>(result);
-        _shiftServiceMock.Verify(s => s.Delete(shiftId), Times.Once);
-    }
 }
