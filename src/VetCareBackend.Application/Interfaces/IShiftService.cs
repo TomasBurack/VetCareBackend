@@ -17,7 +17,5 @@ namespace VetCareBackend.Application.Interfaces
         Task CancelStatusClient(Guid id, string sub);
         Task UpdateStatusVeterinarian(Guid id, ShiftStatusRequest request, string sub);
         Task UpdateObservationsVeterinarian(Guid id, ShiftObservationsRequest request, string sub);
-        Task UpdateStatusAdmin(Guid id, ShiftStatusRequest request);
-        Task Delete(Guid id);
     }
 }
