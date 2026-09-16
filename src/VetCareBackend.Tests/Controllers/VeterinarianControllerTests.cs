@@ -31,7 +31,7 @@ public class VeterinarianControllerTests
             LastName = "Vet",
             Email = "vet@test.com",
             Enrollment = "VET001",
-            Speciality = Speciality.Common
+            Speciality = Speciality.Clinical
         };
         var expected = new VeterinarianResponse { Id = Guid.NewGuid(), FirstName = "Dr. Juan", Enrollment = "VET001" };
         _vetServiceMock.Setup(s => s.Create(request)).ReturnsAsync(expected);

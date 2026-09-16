@@ -61,12 +61,12 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new ValidationException("Invalid ID format");
+                throw new ValidationException("El formato del ID no es válido");
             }
             var Sysadmin = await _repository.Get(Id);
             if (Sysadmin == null)
             {
-                throw new NotFoundException("Sysadmin not found");
+                throw new NotFoundException("No se encontró el sysadmin");
             }
             return UserMapper.ToDto<UserResponse>(Sysadmin);
         }
@@ -76,19 +76,19 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new ValidationException("Invalid ID format");
+                throw new ValidationException("El formato del ID no es válido");
             }
 
             var Sysadmin = await _repository.Get(Id);
             if (Sysadmin == null)
             {
-                throw new NotFoundException("Sysadmin not found");
+                throw new NotFoundException("No se encontró el sysadmin");
             }
 
             bool emailChanged = !string.IsNullOrWhiteSpace(request.Email) && request.Email != Sysadmin.Email;
             if (emailChanged && (await _repository.FindEmail(request.Email) || await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email)))
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
 
             UserRequestValidation validation = new UserRequestValidation();
@@ -105,13 +105,13 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new ValidationException("Invalid ID format");
+                throw new ValidationException("El formato del ID no es válido");
             }
 
             var Sysadmin = await _repository.Get(Id);
             if (Sysadmin == null)
             {
-                throw new NotFoundException("Sysadmin not found");
+                throw new NotFoundException("No se encontró el sysadmin");
             }
 
             await _repository.Delete(Id);

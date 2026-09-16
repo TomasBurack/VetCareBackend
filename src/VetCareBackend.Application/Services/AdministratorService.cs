@@ -32,7 +32,7 @@ namespace VetCareBackend.Application.Services
         {
             if (await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
             SignUpValidator validation = new SignUpValidator();
             if (!validation.Validate(request).IsValid)
@@ -52,12 +52,12 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new ValidationException("Invalid ID format");
+                throw new ValidationException("El formato del ID no es válido");
             }
             var admin = await _AdminRep.Get(Id);
             if (admin == null)
             {
-                throw new NotFoundException("Administrator not found");
+                throw new NotFoundException("No se encontró el administrador");
             }
             return UserMapper.ToDto<UserResponse>(admin);
         }
@@ -67,19 +67,19 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new ValidationException("Invalid ID format");
+                throw new ValidationException("El formato del ID no es válido");
             }
 
             var admin = await _AdminRep.Get(Id);
             if (admin == null)
             {
-                throw new NotFoundException("Administrator not found");
+                throw new NotFoundException("No se encontró el administrador");
             }
 
             bool emailChanged = !string.IsNullOrWhiteSpace(request.Email) && request.Email != admin.Email;
             if (emailChanged && (await _AdminRep.FindEmail(request.Email) || await _ClientRep.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email)))
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
 
             UserRequestValidation validation = new UserRequestValidation();
@@ -96,12 +96,12 @@ namespace VetCareBackend.Application.Services
             bool isGuid = Guid.TryParse(id, out Guid Id);
             if (!isGuid)
             {
-                throw new ValidationException("Invalid ID format");
+                throw new ValidationException("El formato del ID no es válido");
             }
             var admin = await _AdminRep.Get(Id);
             if(admin == null)
             {
-                throw new NotFoundException("Administrator not found");
+                throw new NotFoundException("No se encontró el administrador");
             }
 
             await _AdminRep.Delete(Id);

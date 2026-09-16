@@ -5,6 +5,7 @@ using System.Text;
 using VetCareBackend.Application.dtos.Requests;
 using VetCareBackend.Application.dtos.Responses;
 using VetCareBackend.Application.Exceptions;
+using VetCareBackend.Application.Infrastructure;
 using VetCareBackend.Application.Interfaces;
 using VetCareBackend.Application.Mapper;
 using VetCareBackend.Application.Validations;
@@ -20,20 +21,22 @@ namespace VetCareBackend.Application.Services
         private readonly IVeterinarianRepository _VetRep;
         private readonly IPasswordHash _hash;
         private readonly ISysadminRepository _SysadminRep;
-        public ClientService(IAdministratorRepository AdminRep, IClientRepository repository, IVeterinarianRepository VetRep, IPasswordHash hash, ISysadminRepository sysadmin)
+        private readonly IPetRepository _petRepository;
+        public ClientService(IAdministratorRepository AdminRep, IClientRepository repository, IVeterinarianRepository VetRep, IPasswordHash hash, ISysadminRepository sysadmin, IPetRepository petRepository)
         {
             _SysadminRep = sysadmin;
             _AdminRep = AdminRep;
             _repository = repository;
             _VetRep = VetRep;
             _hash = hash;
+            _petRepository = petRepository;
         }
 
         public async Task<UserResponse> Create(SignUpRequest request)
         {
             if (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email))
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
             
             Guid id = Guid.NewGuid();
@@ -54,18 +57,25 @@ namespace VetCareBackend.Application.Services
             
             if(!Guid.TryParse(Sub, out Guid id))
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var client = await _repository.Get(id);
             if(client == null)
             {
-                throw new NotFoundException("The user was not found.");
+                throw new NotFoundException("No se encontró el usuario.");
             }
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
+
+            var pets = await _petRepository.GetAll();
+            foreach (var pet in pets.Where(p => p.IdClient == Id))
+            {
+                await _petRepository.Delete(pet.Id);
+            }
+
             await _repository.Delete(Id);
         }
 
@@ -74,12 +84,12 @@ namespace VetCareBackend.Application.Services
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
             var client = await _repository.Get(Id);
             if (client == null)
             {
-                throw new NotFoundException("The user was not found.");
+                throw new NotFoundException("No se encontró el usuario.");
             }
             return UserMapper.ToDto<ClientResponse>(client);
         }
@@ -89,19 +99,19 @@ namespace VetCareBackend.Application.Services
             bool Parse = Guid.TryParse(Sub, out Guid Id);
             if (Parse == false)
             {
-                throw new ValidationException("The ID sent is invalid");
+                throw new ValidationException("El ID enviado no es válido");
             }
 
             var client = await _repository.Get(Id);
             if (client == null)
             {
-                throw new NotFoundException("The user was not found.");
+                throw new NotFoundException("No se encontró el usuario.");
             }
 
             bool emailChanged = !string.IsNullOrWhiteSpace(request.Email) && request.Email != client.Email;
             if (emailChanged && (await _AdminRep.FindEmail(request.Email) || await _repository.FindEmail(request.Email) || await _VetRep.FindEmail(request.Email) || await _SysadminRep.FindEmail(request.Email)))
             {
-                throw new ConflictException($"The email {request.Email} is already in use");
+                throw new ConflictException($"El email {request.Email} ya está en uso");
             }
 
             UserRequestValidation validation = new UserRequestValidation();

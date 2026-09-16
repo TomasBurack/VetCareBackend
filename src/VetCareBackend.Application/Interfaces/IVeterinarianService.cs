@@ -13,6 +13,7 @@ namespace VetCareBackend.Application.Interfaces
     {
        Task<VeterinarianResponse> Create(VeterinarianRequest request);
        Task<List<VeterinarianResponse>> GetAll();
+       Task<List<VeterinarianSummaryResponse>> GetAllSummary();
        Task<VeterinarianResponse> GetById(string Sub);
        Task Update(string Sub, VeterinarianUpdateRequest request);
        Task Delete(string Sub);

@@ -6,7 +6,7 @@ namespace VetCareBackend.Domain.Enums
 {
     public enum Speciality
     {
-        Common = 1,
+        Clinical = 1,
         Guard = 2,
         Surgery = 3,
         Dermatology = 4,

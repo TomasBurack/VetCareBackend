@@ -12,8 +12,8 @@ namespace VetCareBackend.Application.Validations
         public ShiftStatusRequestValidation() 
         {
             RuleFor(r => r.Status)
-                .NotEmpty().WithMessage("Status is required.")
-                .IsInEnum<ShiftStatusRequest, Status>().WithMessage("Status must be a valid enum value.");
+                .NotEmpty().WithMessage("El estado es obligatorio.")
+                .IsInEnum<ShiftStatusRequest, Status>().WithMessage("El estado debe ser un valor válido.");
         }
     }
 }

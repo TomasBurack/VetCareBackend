@@ -18,13 +18,15 @@ namespace VetCareBackend.Application.Mapper
         {
             return new ShiftResponse
             {
+                Id = shift.Id,
                 DateShift = TimeZoneInfo.ConvertTime(shift.DateShift, ArgentinaTimeZone),
                 Description = shift.Description,
                 Status = shift.Status.ToString(),
                 Enrollment = shift.Enrollment,
                 VeterinarianName = shift.Veterinarian?.FirstName + " " + shift.Veterinarian?.LastName,
                 PetId = shift.PetId,
-                PetName = shift.Pet?.Name ?? string.Empty
+                PetName = shift.Pet?.Name ?? string.Empty,
+                Observations = shift.Observations
             };
 
         }

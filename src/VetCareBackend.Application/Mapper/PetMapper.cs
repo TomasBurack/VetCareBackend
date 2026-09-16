@@ -23,6 +23,20 @@ namespace VetCareBackend.Application.Mapper
                 Breed = pet.Breed
             };
         }
+        public static PetAdminResponse ToPetAdminResponse(this Pet pet)
+        {
+            return new PetAdminResponse
+            {
+                IdPet = pet.Id,
+                Name = pet.Name,
+                Age = pet.Age,
+                TypePet = pet.TypePet,
+                Breed = pet.Breed,
+                IdClient = pet.IdClient,
+                OwnerName = pet.Client != null ? $"{pet.Client.FirstName} {pet.Client.LastName}" : string.Empty,
+                OwnerEmail = pet.Client?.Email ?? string.Empty
+            };
+        }
         public static Pet ToPet(this PetRequest petReq, Client client)
         {
 
