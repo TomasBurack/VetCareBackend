@@ -21,13 +21,15 @@ namespace VetCareBackend.Application.Services
         private readonly IClientRepository _ClientRep;
         private readonly IAdministratorRepository _AdminRep;
         private readonly ISysadminRepository _SysadminRep;
-        public VeterinarianService(IVeterinarianRepository repository, IPasswordHash hash, IClientRepository ClientRep, IAdministratorRepository AdminRep, ISysadminRepository SysadminRep)
+        private readonly IShiftRepository _ShiftRep;
+        public VeterinarianService(IVeterinarianRepository repository, IPasswordHash hash, IClientRepository ClientRep, IAdministratorRepository AdminRep, ISysadminRepository SysadminRep, IShiftRepository ShiftRep)
         {
             _ClientRep = ClientRep;
             _AdminRep = AdminRep;
             _SysadminRep = SysadminRep;
             _repository = repository;
             _hash = hash;
+            _ShiftRep = ShiftRep;
         }
 
         public async Task<VeterinarianResponse> Create(VeterinarianRequest request)
@@ -112,9 +114,22 @@ namespace VetCareBackend.Application.Services
             {
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
+
+            var oldEnrollment = veterinarian.Enrollment;
             var UpdVet = VeterinarianMapper.ToEntityUpdate(veterinarian, request);
 
             await _repository.Update(UpdVet);
+
+            if (UpdVet.Enrollment != oldEnrollment)
+            {
+                var shifts = await _ShiftRep.GetAll();
+                var affectedShifts = shifts.Where(s => s.Enrollment == oldEnrollment).ToList();
+                foreach (var shift in affectedShifts)
+                {
+                    shift.Enrollment = UpdVet.Enrollment;
+                    await _ShiftRep.Update(shift);
+                }
+            }
         }
 
         public async Task Delete(string Sub)
