@@ -187,15 +187,19 @@ app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-
-app.UseRouting();
-
 app.UseCors(x => x
-    .WithOrigins(builder.Configuration["Cors:AllowedOrigin"]!)
+    .WithOrigins("http://localhost:5173", "https://localhost:5173")
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials());
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseRouting();
+
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
