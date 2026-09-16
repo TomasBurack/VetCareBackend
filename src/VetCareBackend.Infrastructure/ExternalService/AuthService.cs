@@ -90,10 +90,6 @@ namespace VetCareBackend.Infrastructure.ExternalService
                 throw new ValidationException(validation.Validate(request).ToString("~"));
             }
 
-            if(BCrypt.Net.BCrypt.Verify(request.NewPassword, user.Password))
-            {
-                throw new ValidationException("The new password cannot be the same as the previous one.");
-            }
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword); ;
             resetToken.isUsed = true;
